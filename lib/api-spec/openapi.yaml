@@ -3,13 +3,27 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Loudthotz Poetry Portal API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: poems
+    description: Poem operations
+  - name: submissions
+    description: Poem submission operations
+  - name: ratings
+    description: Poem rating operations
+  - name: livestream
+    description: Livestream session operations
+  - name: books
+    description: Published book operations
+  - name: donations
+    description: Donation operations
+  - name: stats
+    description: Site statistics
 paths:
   /healthz:
     get:
@@ -24,6 +38,246 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /poems:
+    get:
+      operationId: listPoems
+      tags: [poems]
+      summary: List all published poems
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [latest, popular, alphabetical]
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: List of published poems
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Poem"
+
+  /poems/featured:
+    get:
+      operationId: getFeaturedPoems
+      tags: [poems]
+      summary: Get featured/highlighted poems for the hero section
+      responses:
+        "200":
+          description: Featured poems
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Poem"
+
+  /poems/{id}:
+    get:
+      operationId: getPoem
+      tags: [poems]
+      summary: Get a single poem by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Poem details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Poem"
+        "404":
+          description: Not found
+
+  /submissions:
+    get:
+      operationId: listSubmissions
+      tags: [submissions]
+      summary: List all pending submissions (admin)
+      responses:
+        "200":
+          description: List of submissions pending review
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Submission"
+    post:
+      operationId: createSubmission
+      tags: [submissions]
+      summary: Submit a poem for review
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmissionInput"
+      responses:
+        "201":
+          description: Submission received
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+
+  /submissions/{id}/approve:
+    post:
+      operationId: approveSubmission
+      tags: [submissions]
+      summary: Approve a submission and publish it
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Submission approved and published
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Poem"
+
+  /submissions/{id}/reject:
+    post:
+      operationId: rejectSubmission
+      tags: [submissions]
+      summary: Reject a submission
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Submission rejected
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Submission"
+
+  /poems/{id}/rate:
+    post:
+      operationId: ratePoem
+      tags: [ratings]
+      summary: Rate a published poem (1-5 stars)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RatingInput"
+      responses:
+        "200":
+          description: Rating recorded
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Poem"
+
+  /livestream:
+    get:
+      operationId: getLivestreamStatus
+      tags: [livestream]
+      summary: Get the current livestream status and session info
+      responses:
+        "200":
+          description: Livestream status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LivestreamStatus"
+
+  /livestream/sessions:
+    get:
+      operationId: listLivestreamSessions
+      tags: [livestream]
+      summary: List past livestream/event sessions
+      responses:
+        "200":
+          description: Past sessions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LivestreamSession"
+
+  /books:
+    get:
+      operationId: listBooks
+      tags: [books]
+      summary: List published books/anthologies with Amazon links
+      responses:
+        "200":
+          description: List of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+
+  /donations/initiate:
+    post:
+      operationId: initiateDonation
+      tags: [donations]
+      summary: Initiate a donation (returns payment link or confirmation)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DonationInput"
+      responses:
+        "200":
+          description: Donation initiated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DonationResult"
+
+  /stats:
+    get:
+      operationId: getSiteStats
+      tags: [stats]
+      summary: Get site-wide statistics for the hero/dashboard
+      responses:
+        "200":
+          description: Site statistics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SiteStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +288,184 @@ components:
       required:
         - status
 
+    Poem:
+      type: object
+      required: [id, title, author, country, content, publishedAt, averageRating, ratingCount]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        author:
+          type: string
+        country:
+          type: string
+        content:
+          type: string
+        publishedAt:
+          type: string
+          format: date-time
+        averageRating:
+          type: number
+        ratingCount:
+          type: integer
+        isFeatured:
+          type: boolean
+        season:
+          type: ["string", "null"]
+        theme:
+          type: ["string", "null"]
+
+    Submission:
+      type: object
+      required: [id, title, author, country, content, submittedAt, status]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        author:
+          type: string
+        country:
+          type: string
+        content:
+          type: string
+        submittedAt:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [pending, approved, rejected]
+        adminNote:
+          type: ["string", "null"]
+
+    SubmissionInput:
+      type: object
+      required: [title, author, country, content]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        author:
+          type: string
+          minLength: 1
+        country:
+          type: string
+          minLength: 1
+        content:
+          type: string
+          minLength: 10
+
+    RatingInput:
+      type: object
+      required: [stars]
+      properties:
+        stars:
+          type: integer
+          minimum: 1
+          maximum: 5
+
+    LivestreamStatus:
+      type: object
+      required: [isLive, viewerCount, title, description, season, episode, streamUrl]
+      properties:
+        isLive:
+          type: boolean
+        viewerCount:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        season:
+          type: string
+        episode:
+          type: integer
+        streamUrl:
+          type: ["string", "null"]
+        embedUrl:
+          type: ["string", "null"]
+        scheduledAt:
+          type: ["string", "null"]
+
+    LivestreamSession:
+      type: object
+      required: [id, title, description, date, season, episode, recordingUrl, theme]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: string
+        date:
+          type: string
+          format: date-time
+        season:
+          type: string
+        episode:
+          type: integer
+        recordingUrl:
+          type: ["string", "null"]
+        theme:
+          type: string
+
+    Book:
+      type: object
+      required: [id, title, subtitle, description, price, amazonUrl, accentColor]
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        subtitle:
+          type: string
+        description:
+          type: string
+        price:
+          type: string
+        amazonUrl:
+          type: string
+        accentColor:
+          type: string
+        coverTagline:
+          type: ["string", "null"]
+
+    DonationInput:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+        name:
+          type: ["string", "null"]
+        message:
+          type: ["string", "null"]
+
+    DonationResult:
+      type: object
+      required: [success, message]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        reference:
+          type: ["string", "null"]
+
+    SiteStats:
+      type: object
+      required: [totalPoems, totalPoets, totalCountries, totalSessions, upcomingEventTitle, upcomingEventDate]
+      properties:
+        totalPoems:
+          type: integer
+        totalPoets:
+          type: integer
+        totalCountries:
+          type: integer
+        totalSessions:
+          type: integer
+        upcomingEventTitle:
+          type: string
+        upcomingEventDate:
+          type: ["string", "null"]

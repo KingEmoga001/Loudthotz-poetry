@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Loudthotz Poetry Portal"
+version = "1.0.0"
+id = "artifacts/loudthotz"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 25822
+
+[services.development]
+run = "pnpm --filter @workspace/loudthotz run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/loudthotz", "run", "build" ]
+publicDir = "artifacts/loudthotz/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "25822"
+BASE_PATH = "/"

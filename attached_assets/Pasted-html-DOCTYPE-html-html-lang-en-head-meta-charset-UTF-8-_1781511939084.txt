@@ -1,0 +1,1283 @@
+html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loudthotz Poetry Portal - Naija Art Initiative</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandLime: '#b5e61d',
+                        brandLimeHover: '#c5f72d',
+                        brandBlue: '#00a2e8',
+                        brandBlueHover: '#1eb5f9',
+                        brandDarkBg: '#090b06',
+                        brandCardBg: '#12160d',
+                        brandBorder: '#1f2516',
+                        brandBorderLight: '#2f3922',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                        serif: ['Cormorant Garamond', 'Playfair Display', 'Georgia', 'serif'],
+                        display: ['Cinzel', 'Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts for Editorial Elegance and UI Precision -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;800;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        /* Modern CSS Customizations */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #090b06;
+            color: #f4f5f6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        .serif-text {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        .display-title {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.05em;
+        }
+
+        /* Custom premium scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090b06;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1f2516;
+            border: 2px solid #090b06;
+            border-radius: 99px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b5e61d;
+        }
+
+        /* Smooth glass hover effects */
+        .glass-card {
+            background: rgba(18, 22, 13, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            background: rgba(18, 22, 13, 0.85);
+            box-shadow: 0 12px 30px -10px rgba(181, 230, 29, 0.08);
+        }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen selection:bg-brandLime selection:text-black">
+
+    <!-- Brand Header -->
+    <header class="sticky top-0 z-50 bg-brandDarkBg/80 backdrop-blur-xl border-b border-brandBorder px-4 py-3.5">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            
+            <!-- Logo Section & transition information -->
+            <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
+                <div class="flex items-center gap-3">
+                    <!-- SVG Loudthotz Bells -->
+                    <div class="bg-brandCardBg p-2.5 rounded-2xl border border-brandBorder shadow-lg flex items-center justify-center">
+                        <svg class="w-10 h-10 text-brandLime" viewBox="0 0 100 100" fill="currentColor">
+                            <path d="M40,30 C30,30 25,45 20,60 L20,70 C20,72 22,74 25,74 L45,74 C48,74 50,72 50,70 L50,60 C45,45 40,30 40,30 Z" opacity="0.8" fill="url(#bellGrad)"/>
+                            <path d="M60,30 C50,30 45,45 40,60 L40,70 C40,72 42,74 45,74 L65,74 C68,74 70,72 70,70 L70,60 C65,45 60,30 60,30 Z" fill="url(#bellGrad)"/>
+                            <circle cx="34" cy="76" r="3.5" fill="#fff" />
+                            <circle cx="56" cy="76" r="3.5" fill="#fff" />
+                            <path d="M43,30 C43,23 57,23 57,30" fill="none" stroke="#b5e61d" stroke-width="3" stroke-linecap="round" />
+                            <defs>
+                                <linearGradient id="bellGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffffff" />
+                                    <stop offset="50%" stop-color="#b5e61d" />
+                                    <stop offset="100%" stop-color="#3d4f07" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="display-title text-xl font-extrabold tracking-wider text-brandLime">LOUDTHOTZ</span>
+                            <span class="text-[9px] font-semibold uppercase tracking-widest bg-brandBorder text-gray-400 px-2 py-0.5 rounded border border-brandBorderLight">Poetry Event</span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs text-gray-400 mt-0.5">
+                            <span class="text-[11px]">hosted under</span>
+                            <!-- SVG Naija Art Logo Mini -->
+                            <svg class="w-3.5 h-3.5 text-brandBlue" viewBox="0 0 100 100" fill="currentColor">
+                                <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="7"/>
+                                <circle cx="50" cy="28" r="8"/>
+                                <circle cx="28" cy="50" r="8"/>
+                                <circle cx="72" cy="50" r="8"/>
+                                <circle cx="50" cy="72" r="8"/>
+                                <path d="M35,35 Q50,50 65,35" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+                            </svg>
+                            <span class="font-medium text-brandBlue hover:text-brandBlueHover transition-colors cursor-pointer" onclick="showNaijaInfo()">Naija Art Initiative</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mobile Menu Button -->
+                <button onclick="toggleMobileMenu()" class="md:hidden p-2 text-gray-400 hover:text-brandLime transition-colors">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <!-- Modern Navigation Links -->
+            <nav id="navbar" class="hidden md:flex flex-col md:flex-row items-center gap-1.5 lg:gap-2.5 w-full md:w-auto mt-4 md:mt-0 border-t border-brandBorder md:border-none pt-4 md:pt-0">
+                <button onclick="navigateTo('home')" class="nav-btn w-full md:w-auto px-4 py-2 rounded-xl text-sm font-medium transition-all text-brandLime bg-brandLime/10 border border-brandLime/25">
+                    <span class="flex items-center gap-2 justify-center"><i data-lucide="book-open" class="w-4 h-4"></i>Read Poems</span>
+                </button>
+                <button onclick="navigateTo('submit')" class="nav-btn w-full md:w-auto px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-brandCardBg border border-transparent hover:border-brandBorder transition-all">
+                    <span class="flex items-center gap-2 justify-center"><i data-lucide="pen-tool" class="w-4 h-4"></i>Submit Poem</span>
+                </button>
+                <button onclick="navigateTo('livestream')" class="nav-btn w-full md:w-auto px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-brandCardBg border border-transparent hover:border-brandBorder transition-all relative">
+                    <span class="flex items-center gap-2 justify-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span>
+                        <i data-lucide="tv" class="w-4 h-4"></i>Live Readings
+                    </span>
+                </button>
+                <button onclick="navigateTo('books')" class="nav-btn w-full md:w-auto px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-brandCardBg border border-transparent hover:border-brandBorder transition-all">
+                    <span class="flex items-center gap-2 justify-center"><i data-lucide="shopping-bag" class="w-4 h-4"></i>Anthologies</span>
+                </button>
+                <button onclick="navigateTo('donate')" class="nav-btn w-full md:w-auto px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-brandCardBg border border-transparent hover:border-brandBorder transition-all">
+                    <span class="flex items-center gap-2 justify-center"><i data-lucide="heart" class="w-4 h-4 text-red-400"></i>Donate</span>
+                </button>
+                
+                <div class="h-6 w-[1px] bg-brandBorder hidden md:block mx-1"></div>
+                
+                <button onclick="navigateTo('admin')" class="nav-btn w-full md:w-auto px-4 py-2 rounded-xl text-xs font-semibold uppercase tracking-wider text-amber-400 border border-amber-500/10 bg-amber-950/10 hover:bg-amber-900/20 hover:border-amber-500/30 transition-all">
+                    <span class="flex items-center gap-1.5 justify-center">
+                        <i data-lucide="shield-check" class="w-4 h-4"></i>Review Room 
+                        <span class="bg-amber-500 text-black px-1.5 py-0.5 rounded-full text-[10px] font-bold" id="nav-pending-badge">0</span>
+                    </span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Interactive Toast Notification Center -->
+    <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none"></div>
+
+    <!-- Main Workspace -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8">
+        
+        <!-- Welcome Hero Info Card -->
+        <div id="brand-transition-banner" class="mb-10 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-brandCardBg via-brandCardBg to-brandDarkBg border border-brandBorder relative overflow-hidden shadow-2xl">
+            <!-- Smooth background ambient glows -->
+            <div class="absolute -right-20 -top-20 w-80 h-80 bg-brandLime/5 rounded-full filter blur-3xl"></div>
+            <div class="absolute -left-20 -bottom-20 w-80 h-80 bg-brandBlue/5 rounded-full filter blur-3xl"></div>
+            
+            <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8">
+                <div class="max-w-3xl text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 bg-brandBorder border border-brandBorderLight/50 px-3.5 py-1.5 rounded-full text-xs font-medium text-gray-300 mb-5">
+                        <i data-lucide="info" class="w-3.5 h-3.5 text-brandBlue"></i>
+                        <span>Institutional Alignment Notice</span>
+                    </div>
+                    <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4 leading-[1.1] display-title">
+                        Where Words Ignite <br class="hidden sm:inline" />
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-brandLime to-[#d2ff34]">Loud Thoughts</span>
+                    </h2>
+                    <p class="text-gray-400 text-sm md:text-base leading-relaxed mb-6 font-light">
+                        Formerly managed under the <span class="text-gray-200 font-semibold">Independent Poets Concerns</span>, Loudthotz Poetry is now proudly hosted as an official event and literary vehicle under the <span class="text-brandBlue font-semibold hover:underline cursor-pointer" onclick="showNaijaInfo()">Naija Art Initiative</span>. We continue to elevate literary culture across the continent.
+                    </p>
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-2.5 text-xs font-medium">
+                        <span class="bg-brandLime/10 text-brandLime border border-brandLime/15 px-3 py-2 rounded-xl flex items-center gap-1.5">
+                            <i data-lucide="calendar" class="w-3.5 h-3.5"></i> Monthly Open Readings
+                        </span>
+                        <span class="bg-brandBlue/10 text-brandBlue border border-brandBlue/15 px-3 py-2 rounded-xl flex items-center gap-1.5">
+                            <i data-lucide="users" class="w-3.5 h-3.5"></i> 5,000+ Community Voices
+                        </span>
+                        <span class="bg-brandBorder text-gray-300 border border-brandBorderLight px-3 py-2 rounded-xl flex items-center gap-1.5">
+                            <i data-lucide="globe" class="w-3.5 h-3.5"></i> Global Distribution
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Next Event Callout -->
+                <div class="bg-[#0f120b] border border-brandBorder p-6 rounded-2xl w-full lg:w-80 flex flex-col gap-4 text-center">
+                    <div class="text-xs text-brandLime uppercase font-bold tracking-widest">Next Live Reading</div>
+                    <div class="text-xl font-bold text-white leading-snug font-serif">"Brothers - Spotlights on Kinship"</div>
+                    <div class="flex items-center justify-center gap-4 text-xs text-gray-400">
+                        <span class="flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5"></i> 18:30 GMT+1</span>
+                        <span class="flex items-center gap-1.5"><i data-lucide="radio" class="w-3.5 h-3.5 text-red-400 animate-pulse"></i> Live Reading</span>
+                    </div>
+                    <button onclick="navigateTo('livestream')" class="w-full bg-brandLime text-black py-3 rounded-xl text-sm font-semibold hover:bg-brandLimeHover transition-all flex items-center justify-center gap-2 shadow-lg shadow-brandLime/10">
+                        <i data-lucide="play-circle" class="w-4 h-4"></i> Enter Stream Room
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 1: Poetry feed & community ratings -->
+        <section id="view-home" class="view-section">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+                <div>
+                    <h3 class="text-2xl font-bold text-white display-title">The Curated Gallery</h3>
+                    <p class="text-gray-400 text-sm mt-1">Poetry approved for showcase by the Loudthotz editorial committee.</p>
+                </div>
+                
+                <!-- Modern Search & Filter components -->
+                <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                    <div class="relative w-full sm:w-64">
+                        <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-gray-400"></i>
+                        <input id="search-input" onkeyup="filterPoems()" type="text" placeholder="Search by title, poet..." class="w-full pl-9 pr-4 py-2 bg-brandCardBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all">
+                    </div>
+                    <select id="sort-select" onchange="sortPoems()" class="w-full sm:w-auto px-3.5 py-2 bg-brandCardBg border border-brandBorder rounded-xl text-sm text-gray-300 focus:outline-none focus:border-brandLime transition-all cursor-pointer">
+                        <option value="latest">Newest First</option>
+                        <option value="popular">Highest Rated</option>
+                        <option value="alphabetical">Poet Name (A-Z)</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Poem Grid -->
+            <div id="poems-feed" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Programmatically populated -->
+            </div>
+        </section>
+
+        <!-- VIEW 2: Submissions Form -->
+        <section id="view-submit" class="view-section hidden">
+            <div class="max-w-2xl mx-auto bg-brandCardBg border border-brandBorder p-6 md:p-8 rounded-3xl relative">
+                <div class="absolute top-6 right-6 text-brandLime/5 pointer-events-none">
+                    <i data-lucide="pen-tool" class="w-24 h-24"></i>
+                </div>
+                <h3 class="text-2xl font-bold text-white mb-2 display-title">Submit Draft</h3>
+                <p class="text-gray-400 text-sm mb-6 leading-relaxed">
+                    Submit your writing for editorial evaluation. If our panel approves your work, it will be added directly to the official feed for rating and reviews.
+                </p>
+
+                <form id="submission-form" onsubmit="handlePoemSubmission(event)" class="space-y-5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Pen Name</label>
+                            <input required type="text" id="sub-author" placeholder="e.g. Cl_Mayende" class="w-full px-4 py-2.5 bg-brandDarkBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Country</label>
+                            <input required type="text" id="sub-country" placeholder="e.g. Uganda, Nigeria" class="w-full px-4 py-2.5 bg-brandDarkBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Title of Poem</label>
+                        <input required type="text" id="sub-title" placeholder="e.g. BETRAYED" class="w-full px-4 py-2.5 bg-brandDarkBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Poem Body</label>
+                        <textarea required id="sub-content" rows="10" placeholder="Type or paste your verses..." class="w-full px-4 py-3 bg-brandDarkBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all font-serif leading-relaxed text-base"></textarea>
+                    </div>
+
+                    <div class="pt-3">
+                        <button type="submit" class="w-full bg-brandLime text-black font-semibold py-3 rounded-xl hover:bg-brandLimeHover transition-all flex items-center justify-center gap-2 text-sm shadow-lg shadow-brandLime/5">
+                            <i data-lucide="send" class="w-4 h-4"></i> Submit to Board
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- VIEW 3: Interactive Zoom & Audio-Stage Simulator -->
+        <section id="view-livestream" class="view-section hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- Simulated player stage (Left and Center) -->
+                <div class="lg:col-span-2 flex flex-col gap-4">
+                    <div class="bg-black rounded-3xl border border-brandBorder overflow-hidden relative group shadow-2xl">
+                        <!-- Playback Stage screen area -->
+                        <div class="aspect-video bg-gradient-to-tr from-gray-950 via-brandCardBg to-zinc-900 flex flex-col items-center justify-center relative p-6">
+                            
+                            <!-- Overlay meta information -->
+                            <div class="absolute top-4 left-4 z-10 flex items-center gap-2">
+                                <span class="bg-red-600 text-white font-bold text-[10px] px-2.5 py-1 rounded-full tracking-widest uppercase animate-pulse flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-white"></span> LIVE STREAMING
+                                </span>
+                                <span class="bg-black/60 backdrop-blur-md text-gray-300 text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-white/5">
+                                    <i data-lucide="users" class="w-3.5 h-3.5 text-brandBlue"></i>
+                                    <span id="live-viewer-count" class="font-bold">142</span> listeners
+                                </span>
+                            </div>
+
+                            <div class="flex flex-col items-center justify-center text-center space-y-6 max-w-lg">
+                                <!-- Sound Mic Pulsing stage indicator -->
+                                <div class="w-20 h-20 rounded-full bg-brandLime/10 border border-brandLime flex items-center justify-center relative animate-pulse">
+                                    <div class="absolute inset-0 rounded-full bg-brandLime/15 filter blur-lg animate-ping"></div>
+                                    <i data-lucide="mic-vocal" class="w-8 h-8 text-brandLime animate-bounce"></i>
+                                </div>
+                                
+                                <div>
+                                    <p class="text-brandLime font-semibold text-xs tracking-widest uppercase">Naija Art Broadcaster</p>
+                                    <h4 class="text-2xl font-bold text-white mt-2 font-serif leading-normal">Loudthotz virtual open readings</h4>
+                                    <p class="text-xs text-gray-400 mt-1.5 font-light">Season 14, Ep. 9 — Kinship & Poetry Readings</p>
+                                </div>
+
+                                <!-- Soundwave Visualizer Bars -->
+                                <div class="flex items-end justify-center gap-1.5 h-8">
+                                    <div class="w-1 bg-brandLime rounded-full animate-pulse h-6"></div>
+                                    <div class="w-1 bg-brandLime rounded-full animate-pulse h-4" style="animation-delay: 0.1s;"></div>
+                                    <div class="w-1 bg-brandLime rounded-full animate-pulse h-8" style="animation-delay: 0.2s;"></div>
+                                    <div class="w-1 bg-brandLime rounded-full animate-pulse h-5" style="animation-delay: 0.3s;"></div>
+                                    <div class="w-1 bg-brandLime rounded-full animate-pulse h-7" style="animation-delay: 0.4s;"></div>
+                                    <div class="w-1 bg-brandLime rounded-full animate-pulse h-3" style="animation-delay: 0.5s;"></div>
+                                </div>
+                            </div>
+
+                            <!-- Overlaid player UI -->
+                            <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between bg-black/60 backdrop-blur-md p-3.5 rounded-2xl border border-white/5">
+                                <div class="flex items-center gap-3">
+                                    <button onclick="toggleStreamPlay()" class="p-2.5 rounded-xl bg-brandLime text-black hover:bg-brandLimeHover transition-all" id="btn-stream-play">
+                                        <i data-lucide="pause" class="w-4 h-4"></i>
+                                    </button>
+                                    <div class="text-xs text-left">
+                                        <p class="text-white font-medium">Loudthotz Stage Net</p>
+                                        <p class="text-gray-400 font-light">Broadcasting audio poetry live</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <button onclick="toggleStreamMute()" class="p-2 rounded-xl bg-brandBorder hover:bg-brandBorderLight text-gray-300 transition-all border border-brandBorderLight/50" id="btn-stream-mute">
+                                        <i data-lucide="volume-2" class="w-4 h-4"></i>
+                                    </button>
+                                    <button onclick="simulateViewerEngagement()" class="p-2 px-3.5 rounded-xl bg-brandBorder hover:bg-brandBorderLight text-brandLime font-semibold text-xs transition-all border border-brandLime/20 flex items-center gap-1">
+                                        👏 <span class="hidden sm:inline">Applaud</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Stage highlight card -->
+                    <div class="bg-brandCardBg border border-brandBorder p-5 rounded-2xl">
+                        <h4 class="text-sm font-semibold text-white uppercase tracking-wider mb-3">Live Session spotlight</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-sm">
+                            <div class="bg-brandDarkBg p-4 rounded-xl border border-brandBorder">
+                                <span class="text-brandLime font-semibold text-xs tracking-wider uppercase">Active Speaker</span>
+                                <p class="text-white font-serif text-base mt-1">Cl_Mayende (Uganda)</p>
+                                <p class="text-xs text-gray-500 mt-0.5">Reciting: "BETRAYED"</p>
+                            </div>
+                            <div class="bg-brandDarkBg p-4 rounded-xl border border-brandBorder">
+                                <span class="text-brandBlue font-semibold text-xs tracking-wider uppercase">Moderator</span>
+                                <p class="text-white font-serif text-base mt-1">Naija Art Collective</p>
+                                <p class="text-xs text-gray-500 mt-0.5">Loudthotz Stream Manager</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat room container (Right sidebar) -->
+                <div class="bg-brandCardBg border border-brandBorder rounded-3xl flex flex-col h-[450px] lg:h-full min-h-[450px] overflow-hidden">
+                    <div class="p-4 border-b border-brandBorder bg-[#0f120b] flex items-center justify-between">
+                        <span class="font-bold text-white flex items-center gap-2 text-sm display-title">
+                            <i data-lucide="message-square" class="w-4 h-4 text-brandLime"></i>
+                            Stage Chat Room
+                        </span>
+                        <span class="text-[9px] font-bold uppercase bg-green-950/40 text-green-400 px-2.5 py-0.5 rounded border border-green-500/20 tracking-wider">Active</span>
+                    </div>
+
+                    <!-- Chat contents -->
+                    <div id="live-chat-messages" class="flex-grow overflow-y-auto p-4 space-y-3.5 text-sm">
+                        <!-- Filled by script -->
+                    </div>
+
+                    <!-- Message entry -->
+                    <form onsubmit="handleLiveChatSubmit(event)" class="p-3 border-t border-brandBorder bg-[#0c0e08]">
+                        <div class="relative">
+                            <input required type="text" id="chat-input" placeholder="Type a message to the poet..." class="w-full pl-4 pr-12 py-2.5 bg-brandCardBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all font-light">
+                            <button type="submit" class="absolute right-1.5 top-1.5 p-1.5 bg-brandLime text-black rounded-lg hover:bg-brandLimeHover transition-all">
+                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- VIEW 4: Published Books & Anthologies -->
+        <section id="view-books" class="view-section hidden">
+            <div class="text-center max-w-2xl mx-auto mb-10">
+                <h3 class="text-2xl font-bold text-white mb-2 display-title">Official Publications</h3>
+                <p class="text-gray-400 text-sm font-light">
+                    Support our writer groups. Read and experience collective works from Loudthotz and Naija Art Initiative poets, distributed globally on Amazon.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Book Card 1 -->
+                <div class="bg-brandCardBg border border-brandBorder rounded-3xl p-5 flex flex-col gap-4 hover:border-brandLime/20 transition-all group">
+                    <div class="aspect-[3/4] rounded-2xl bg-gradient-to-b from-brandDarkBg to-[#0b0e07] border border-brandBorder flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-radial-gradient from-brandLime/5 to-transparent"></div>
+                        <div class="relative z-10 text-center space-y-4">
+                            <i data-lucide="book" class="w-10 h-10 text-brandLime mx-auto"></i>
+                            <h4 class="display-title text-2xl font-extrabold text-white">FIRST GONG</h4>
+                            <p class="text-[9px] uppercase tracking-widest text-brandLime font-bold">Anthology Vol. I</p>
+                            <div class="w-12 h-[1px] bg-brandLime/20 mx-auto"></div>
+                            <p class="serif-text text-sm text-gray-400 italic">"The debut collective voice of Loudthotz Independent Poets"</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-bold text-white font-serif">First Gong Anthology</span>
+                            <span class="text-xs bg-brandBorder text-brandLime px-2 py-0.5 rounded border border-brandLime/10 font-mono">$12.99</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-4 font-light leading-relaxed">
+                            A showcase print containing poetry submitted by foundation members of the Loudthotz Independent Poets project.
+                        </p>
+                        <a href="https://www.amazon.com" target="_blank" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-black py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                            <i data-lucide="external-link" class="w-4 h-4"></i> Buy on Amazon
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Book Card 2 -->
+                <div class="bg-brandCardBg border border-brandBorder rounded-3xl p-5 flex flex-col gap-4 hover:border-brandLime/20 transition-all group">
+                    <div class="aspect-[3/4] rounded-2xl bg-gradient-to-b from-brandDarkBg to-[#070b0e] border border-brandBorder flex flex-col items-center justify-center p-6 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-radial-gradient from-brandBlue/5 to-transparent"></div>
+                        <div class="relative z-10 text-center space-y-4">
+                            <i data-lucide="book-open-check" class="w-10 h-10 text-brandBlue mx-auto"></i>
+                            <h4 class="display-title text-2xl font-extrabold text-white">BROTHERS</h4>
+                            <p class="text-[9px] uppercase tracking-widest text-brandBlue font-bold">Season Booklet</p>
+                            <div class="w-12 h-[1px] bg-brandBlue/20 mx-auto"></div>
+                            <p class="serif-text text-sm text-gray-400 italic">"Musings on loyalty, betrayal, and African brotherhood"</p>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-bold text-white font-serif">Brothers Anthology Booklet</span>
+                            <span class="text-xs bg-brandBorder text-brandBlue px-2 py-0.5 rounded border border-brandBlue/10 font-mono">$8.50</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-4 font-light leading-relaxed">
+                            Poignant works focusing on tribal lineage, local histories, and the complex structures of modern kinship.
+                        </p>
+                        <a href="https://www.amazon.com" target="_blank" class="w-full bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-black py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                            <i data-lucide="external-link" class="w-4 h-4"></i> Buy on Amazon
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Submission status poster card -->
+                <div class="bg-brandCardBg border border-brandBorder rounded-3xl p-5 flex flex-col justify-between hover:border-brandLime/10 transition-all">
+                    <div class="space-y-4">
+                        <div class="bg-brandDarkBg p-4 rounded-2xl border border-brandBorder text-center">
+                            <i data-lucide="notebook" class="w-10 h-10 text-brandLime mx-auto mb-2"></i>
+                            <h5 class="text-sm font-semibold text-white font-serif">Submit to Next Edition</h5>
+                            <p class="text-xs text-gray-400 mt-1 font-light">The editorial board is actively curating Volume III. Approve poetry works via review board to secure a slot.</p>
+                        </div>
+                        <div class="space-y-2 text-xs">
+                            <div class="flex justify-between text-gray-400 border-b border-brandBorder/50 pb-1.5">
+                                <span class="font-light">Editorial Press</span>
+                                <span class="text-white font-medium">Naija Art Press</span>
+                            </div>
+                            <div class="flex justify-between text-gray-400 border-b border-brandBorder/50 pb-1.5">
+                                <span class="font-light">Royalty Split</span>
+                                <span class="text-white font-medium">50% to Writers</span>
+                            </div>
+                            <div class="flex justify-between text-gray-400">
+                                <span class="font-light">Cover Formats</span>
+                                <span class="text-white font-medium">Kindle & Print</span>
+                            </div>
+                        </div>
+                    </div>
+                    <button onclick="navigateTo('submit')" class="w-full mt-4 bg-brandBorder hover:bg-brandBorderLight text-white py-2.5 rounded-xl text-xs font-bold transition-all border border-brandBorderLight flex items-center justify-center gap-1.5">
+                        <i data-lucide="quill" class="w-4 h-4 text-brandLime"></i> Submit Your Work
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- VIEW 5: Donation and Fundraising Support center -->
+        <section id="view-donate" class="view-section hidden">
+            <div class="max-w-3xl mx-auto bg-brandCardBg border border-brandBorder p-6 md:p-8 rounded-3xl relative overflow-hidden">
+                <div class="absolute -right-16 -top-16 w-48 h-48 bg-brandBlue/5 rounded-full filter blur-3xl"></div>
+                
+                <div class="text-center max-w-xl mx-auto mb-8">
+                    <h3 class="text-2xl font-bold text-white mb-2 display-title">Fund Creative Arts</h3>
+                    <p class="text-gray-400 text-sm font-light leading-relaxed">
+                        Loudthotz operates completely on community-led volunteering under the **Naija Art Initiative**. Help us cover web hosting, streaming infrastructure, and small artist honorariums.
+                    </p>
+                </div>
+
+                <!-- Custom tier amounts -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <button onclick="selectDonateTier(10)" class="donate-tier-btn p-4 rounded-2xl bg-brandDarkBg border border-brandBorder hover:border-brandLime/30 transition-all text-center flex flex-col items-center justify-center gap-1 group">
+                        <span class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Patron Associate</span>
+                        <span class="text-3xl font-black text-brandLime mt-1">$10</span>
+                        <span class="text-[10px] text-gray-500 mt-1">Maintains streaming node</span>
+                    </button>
+                    <button onclick="selectDonateTier(25)" class="donate-tier-btn p-4 rounded-2xl bg-brandDarkBg border border-brandBorder hover:border-brandLime/30 transition-all text-center flex flex-col items-center justify-center gap-1 group">
+                        <span class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Poetic Ambassador</span>
+                        <span class="text-3xl font-black text-brandLime mt-1">$25</span>
+                        <span class="text-[10px] text-gray-500 mt-1">Sponsors 1 poet feature</span>
+                    </button>
+                    <button onclick="selectDonateTier(100)" class="donate-tier-btn p-4 rounded-2xl bg-brandDarkBg border border-brandBorder hover:border-brandLime/30 transition-all text-center flex flex-col items-center justify-center gap-1 group">
+                        <span class="text-[9px] text-gray-400 uppercase font-bold tracking-wider">Arts Vanguard</span>
+                        <span class="text-3xl font-black text-brandLime mt-1">$100</span>
+                        <span class="text-[10px] text-gray-500 mt-1">Funds anthology runs</span>
+                    </button>
+                </div>
+
+                <form onsubmit="handleDonationSubmit(event)" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Enter Custom Contribution (USD)</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-2.5 text-brandLime font-bold">$</span>
+                            <input required type="number" id="donate-amount" min="1" placeholder="Custom amount" class="w-full pl-8 pr-4 py-2.5 bg-brandDarkBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Name (Optional)</label>
+                            <input type="text" id="donate-name" placeholder="Anonymous Partner" class="w-full px-4 py-2.5 bg-brandDarkBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all font-light">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Email Address</label>
+                            <input required type="email" id="donate-email" placeholder="you@example.com" class="w-full px-4 py-2.5 bg-brandDarkBg border border-brandBorder rounded-xl text-sm text-white focus:outline-none focus:border-brandLime transition-all font-light">
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button type="submit" class="w-full bg-brandBlue hover:bg-brandBlueHover text-black font-semibold py-3.5 rounded-xl transition-all flex items-center justify-center gap-1.5 text-sm shadow-lg shadow-brandBlue/10">
+                            <i data-lucide="heart" class="w-4 h-4"></i> Finalize Support Donation
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- VIEW 6: Simulated Editorial Panel review room -->
+        <section id="view-admin" class="view-section hidden">
+            <div class="bg-brandCardBg border border-brandBorder p-6 rounded-3xl mb-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4 border-b border-brandBorder pb-4">
+                    <div>
+                        <span class="text-xs text-amber-400 font-bold uppercase tracking-wider">Editorial Suite</span>
+                        <h3 class="text-2xl font-bold text-white display-title mt-1">Pending Draft Appraisals</h3>
+                    </div>
+                    <span class="text-xs bg-amber-500/10 text-amber-400 px-3.5 py-1.5 rounded-full border border-amber-500/10 flex items-center gap-1.5">
+                        <i data-lucide="shield-alert" class="w-3.5 h-3.5"></i> Admin Sandbox Room
+                    </span>
+                </div>
+                <p class="text-gray-400 text-sm mb-6 leading-relaxed font-light">
+                    This sandbox environment demonstrates the entire publication workflow! Submit a draft from the **Submit Poem** menu, then return here to review, approve, or discard submissions in real-time. Approved drafts will instantly update the public feed.
+                </p>
+
+                <!-- Sandbox Pipeline entries queue -->
+                <div id="admin-queue" class="space-y-6">
+                    <!-- Loaded dynamically -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Initiative Meta modal -->
+    <div id="naija-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-brandCardBg border border-brandBorder p-6 rounded-3xl max-w-md w-full relative shadow-2xl">
+            <button onclick="closeNaijaModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="text-center space-y-4">
+                <div class="mx-auto w-16 h-16 bg-white/5 rounded-full p-2.5 border border-white/10 flex items-center justify-center">
+                    <svg class="w-12 h-12 text-brandBlue" viewBox="0 0 100 100" fill="currentColor">
+                        <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="6"/>
+                        <circle cx="50" cy="28" r="8"/>
+                        <circle cx="28" cy="50" r="8"/>
+                        <circle cx="72" cy="50" r="8"/>
+                        <circle cx="50" cy="72" r="8"/>
+                        <path d="M35,35 Q50,50 65,35" fill="none" stroke="currentColor" stroke-width="4"/>
+                    </svg>
+                </div>
+                <h4 class="text-xl font-bold text-white display-title">Naija Art Initiative</h4>
+                <p class="text-sm text-gray-400 leading-relaxed font-light">
+                    The **Naija Art Initiative** is an African artistic developmental platform dedicated to the preservation, funding, and evolution of modern literature networks and open microphone events across local creative spaces.
+                </p>
+                <div class="bg-brandDarkBg p-4 rounded-xl border border-brandBorder text-xs text-left text-gray-400 space-y-2 font-light">
+                    <p>🔥 <strong>Scope:</strong> Modern Performance Stages, Zoom Broadcasts</p>
+                    <p>📍 <strong>HQ:</strong> Lagos, Nigeria</p>
+                    <p>🤝 <strong>Alliances:</strong> Independent Poets Concerns network</p>
+                </div>
+                <button onclick="closeNaijaModal()" class="w-full bg-brandBlue text-black font-semibold py-2.5 rounded-xl text-sm hover:bg-brandBlueHover transition-all">
+                    Dismiss
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Poetry Detailed Reader and Evaluation Panel Modal -->
+    <div id="poem-detail-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-brandCardBg border border-brandBorder p-6 md:p-8 rounded-3xl max-w-2xl w-full max-h-[85vh] overflow-y-auto relative shadow-2xl">
+            <button onclick="closePoemDetailModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div id="modal-poem-content" class="space-y-6">
+                <!-- Loaded dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-brandDarkBg border-t border-brandBorder py-8 px-4 text-center text-sm text-gray-500">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <svg class="w-4 h-4 text-brandLime" viewBox="0 0 100 100" fill="currentColor">
+                    <circle cx="50" cy="50" r="40" fill="none" stroke="currentColor" stroke-width="6"/>
+                    <circle cx="50" cy="28" r="8"/>
+                    <circle cx="28" cy="50" r="8"/>
+                    <circle cx="72" cy="50" r="8"/>
+                    <circle cx="50" cy="72" r="8"/>
+                </svg>
+                <span class="text-xs text-gray-400">© 2026 Loudthotz Poetry Event. Managed under <strong>Naija Art Initiative</strong>.</span>
+            </div>
+            <div class="flex items-center gap-4 text-xs">
+                <span class="hover:text-brandLime cursor-pointer" onclick="showNaijaInfo()">About Initiative</span>
+                <span>•</span>
+                <span class="hover:text-brandLime cursor-pointer" onclick="navigateTo('donate')">Support Funds</span>
+                <span>•</span>
+                <span class="hover:text-brandLime cursor-pointer" onclick="navigateTo('submit')">Submit Draft</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive script and pipeline setup -->
+    <script>
+        // State engine setup
+        const state = {
+            view: 'home',
+            poems: [
+                {
+                    id: '1',
+                    title: 'BETRAYED',
+                    author: 'Cl_Mayende',
+                    country: 'Uganda',
+                    content: `Once bound by blood, a trust did thrive,\nIn darkness, trust was torn apart, a friend deceived.\nRobbers' greed, a friendship marred,\nBetrayal's sting, forever scarred.`,
+                    date: '2023-09-14',
+                    ratings: [5, 4, 5, 5, 4],
+                    reviews: [
+                        { user: 'Chinedu O.', text: 'The compression is incredible. Every single line cuts to the core.', rating: 5 },
+                        { user: 'Sonia Lagos', text: 'Stunning expression. Truly captures African storytelling.', rating: 4 }
+                    ],
+                    category: 'Kinship'
+                },
+                {
+                    id: '2',
+                    title: 'WHY I CAME',
+                    author: 'Loudthotz Veteran',
+                    country: 'Nigeria',
+                    content: `I came here to float on the plains where anchors are not seen\nHere within ear shots of loud whispers and singed egos\nI came here to land punches where bruises count as prep\nI came here for the envy of friends\nWho are reluctant to learn speaking in tongues,\notherwise defined as french\n\nI came here to ignore your stares\nTo fight fears,\nBack to sources, where pure springs won't spring from\nSublime less on cold truths and gaping faults\n\nI came here to open vaults, where treasures spread\nbeyond exclusive blood cults\nI came here to show up\nSo that caretakers will own up\nI came here to spread the message of fighting clans\nOffsprings off the mark in mass exodus to foreign lands\n\nWe will be third abroad and second at home,\nSince number one seems an exclusive preserve of foreigners\nI came here to gloat about what was achieved and what is glaringly possible\nA work that was left undone, no matter the hours devoted\nWe could not have our way, no matter how many of us voted.`,
+                    date: '2023-09-14',
+                    ratings: [5, 5, 4, 5],
+                    reviews: [
+                        { user: 'Fatima Z.', text: 'Expertly structured. A powerful look at diaspora experiences.', rating: 5 }
+                    ],
+                    category: 'Identity'
+                }
+            ],
+            submissions: [
+                {
+                    id: 'sub_1',
+                    title: 'ECHOES OF THE GONG',
+                    author: 'Adewale Kehinde',
+                    country: 'Nigeria',
+                    content: `We beat the metal till it learns to sing,\nAn ancient vibration in the heart of dawn.\nListen close, standard bearers,\nThe dawn is ours to claim.`,
+                    date: '2026-06-12'
+                }
+            ],
+            chatMessages: [
+                { user: 'Tunde_Naija', message: 'Betrayed is absolutely chilling to read!' },
+                { user: 'Ken_Poet', message: 'Loving the connection from Uganda.' },
+                { user: 'Amara_Writes', message: 'Naija Art Initiative is raising the bar on stream quality.' }
+            ],
+            stream: {
+                isLive: true,
+                isPlaying: true,
+                isMuted: false,
+                viewerCount: 142
+            }
+        };
+
+        // DOM Initializer
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            renderPoems();
+            renderAdminQueue();
+            renderChat();
+            updatePendingBadges();
+
+            // Setup audio visualization stream ticker simulation
+            setInterval(() => {
+                if (state.stream.isPlaying) {
+                    simulateIncomingChat();
+                    state.stream.viewerCount += Math.floor(Math.random() * 5) - 2;
+                    if(state.stream.viewerCount < 100) state.stream.viewerCount = 100;
+                    document.getElementById('live-viewer-count').innerText = state.stream.viewerCount;
+                }
+            }, 7000);
+        });
+
+        // Toggle mobile nav screen
+        function toggleMobileMenu() {
+            const nav = document.getElementById('navbar');
+            nav.classList.toggle('hidden');
+        }
+
+        // Router
+        function navigateTo(viewName) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn w-full md:w-auto px-4 py-2 rounded-xl text-sm font-medium text-gray-300 hover:text-white hover:bg-brandCardBg border border-transparent hover:border-brandBorder transition-all";
+            });
+
+            event.currentTarget.className = "nav-btn w-full md:w-auto px-4 py-2 rounded-xl text-sm font-medium transition-all text-brandLime bg-brandLime/10 border border-brandLime/25";
+            
+            state.view = viewName;
+
+            const nav = document.getElementById('navbar');
+            if (!nav.classList.contains('hidden')) {
+                nav.classList.add('hidden');
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Display Curated poetry pieces
+        function renderPoems() {
+            const feed = document.getElementById('poems-feed');
+            feed.innerHTML = '';
+
+            state.poems.forEach(poem => {
+                const avgRating = calculateAverageRating(poem.ratings);
+                const count = poem.ratings.length;
+
+                const element = document.createElement('div');
+                element.className = "glass-card border border-brandBorder p-6 rounded-3xl flex flex-col justify-between";
+                element.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span class="text-[9px] uppercase font-bold tracking-widest text-brandLime bg-brandLime/10 border border-brandLime/10 px-2 py-0.5 rounded">${poem.category || 'Contemporary'}</span>
+                                <h4 class="text-2xl font-bold text-white group-hover:text-brandLime mt-2 font-serif">${poem.title}</h4>
+                            </div>
+                            <div class="flex items-center gap-1 bg-brandDarkBg border border-brandBorder px-2.5 py-1 rounded-xl text-xs text-yellow-400">
+                                <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                <span class="font-bold">${avgRating}</span>
+                                <span class="text-gray-500 text-[10px]">(${count})</span>
+                            </div>
+                        </div>
+
+                        <p class="text-gray-300 italic text-base font-serif leading-relaxed line-clamp-4 whitespace-pre-line">${poem.content}</p>
+
+                        <div class="flex items-center justify-between text-xs border-t border-brandBorder/60 pt-4">
+                            <span class="text-gray-400">Poet: <strong class="text-white font-medium">${poem.author}</strong> (${poem.country})</span>
+                            <span class="text-gray-500">${poem.date}</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-5 pt-1">
+                        <button onclick="openPoemDetailModal('${poem.id}')" class="w-full bg-brandDarkBg hover:bg-brandBorder hover:text-white text-gray-300 py-3 rounded-xl text-xs font-semibold border border-brandBorder transition-all flex items-center justify-center gap-1.5">
+                            <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Expand & Evaluate (${poem.reviews.length})
+                        </button>
+                    </div>
+                `;
+                feed.appendChild(element);
+            });
+            lucide.createIcons();
+        }
+
+        // Calculate average ratings
+        function calculateAverageRating(ratings) {
+            if (!ratings || ratings.length === 0) return '0.0';
+            const sum = ratings.reduce((acc, curr) => acc + curr, 0);
+            return (sum / ratings.length).toFixed(1);
+        }
+
+        // Live Filter search
+        function filterPoems() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = state.poems.filter(p => {
+                return p.title.toLowerCase().includes(query) || 
+                       p.author.toLowerCase().includes(query) || 
+                       p.content.toLowerCase().includes(query);
+            });
+
+            const feed = document.getElementById('poems-feed');
+            feed.innerHTML = '';
+            
+            if (filtered.length === 0) {
+                feed.innerHTML = `
+                    <div class="col-span-full py-16 text-center text-gray-500 bg-brandCardBg border border-brandBorder rounded-3xl">
+                        <i data-lucide="search-code" class="w-12 h-12 mx-auto mb-3 text-gray-600"></i>
+                        <p class="text-md font-semibold text-white">No poetry drafts match your search</p>
+                        <p class="text-xs text-gray-400 mt-1">Try spelling your keywords differently</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            filtered.forEach(poem => {
+                const avgRating = calculateAverageRating(poem.ratings);
+                const element = document.createElement('div');
+                element.className = "glass-card border border-brandBorder p-6 rounded-3xl flex flex-col justify-between";
+                element.innerHTML = `
+                    <div class="space-y-4">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span class="text-[9px] uppercase font-bold tracking-widest text-brandLime bg-brandLime/10 border border-brandLime/10 px-2 py-0.5 rounded">${poem.category || 'Contemporary'}</span>
+                                <h4 class="text-2xl font-bold text-white group-hover:text-brandLime mt-2 font-serif">${poem.title}</h4>
+                            </div>
+                            <div class="flex items-center gap-1 bg-brandDarkBg border border-brandBorder px-2.5 py-1 rounded-xl text-xs text-yellow-400">
+                                <i data-lucide="star" class="w-3.5 h-3.5 fill-current"></i>
+                                <span class="font-bold">${avgRating}</span>
+                            </div>
+                        </div>
+                        <p class="text-gray-300 italic text-base font-serif leading-relaxed line-clamp-4 whitespace-pre-line">${poem.content}</p>
+                        <div class="flex items-center justify-between text-xs border-t border-brandBorder/60 pt-4">
+                            <span class="text-gray-400">Poet: <strong class="text-white font-medium">${poem.author}</strong> (${poem.country})</span>
+                            <span class="text-gray-500">${poem.date}</span>
+                        </div>
+                    </div>
+                    <div class="mt-5 pt-1">
+                        <button onclick="openPoemDetailModal('${poem.id}')" class="w-full bg-brandDarkBg hover:bg-brandBorder text-gray-300 py-3 rounded-xl text-xs font-semibold border border-brandBorder transition-all flex items-center justify-center gap-1.5">
+                            <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Expand & Evaluate
+                        </button>
+                    </div>
+                `;
+                feed.appendChild(element);
+            });
+            lucide.createIcons();
+        }
+
+        // Live sort list options
+        function sortPoems() {
+            const method = document.getElementById('sort-select').value;
+            if (method === 'latest') {
+                state.poems.sort((a, b) => new Date(b.date) - new Date(a.date));
+            } else if (method === 'popular') {
+                state.poems.sort((a, b) => parseFloat(calculateAverageRating(b.ratings)) - parseFloat(calculateAverageRating(a.ratings)));
+            } else if (method === 'alphabetical') {
+                state.poems.sort((a, b) => a.author.localeCompare(b.author));
+            }
+            renderPoems();
+        }
+
+        // Submit new poetry piece
+        function handlePoemSubmission(event) {
+            event.preventDefault();
+            
+            const author = document.getElementById('sub-author').value.trim();
+            const country = document.getElementById('sub-country').value.trim();
+            const title = document.getElementById('sub-title').value.trim();
+            const content = document.getElementById('sub-content').value.trim();
+
+            const draft = {
+                id: 'sub_' + Date.now(),
+                title: title,
+                author: author,
+                country: country,
+                content: content,
+                date: new Date().toISOString().split('T')[0]
+            };
+
+            state.submissions.push(draft);
+            document.getElementById('submission-form').reset();
+            
+            showToast("Draft Registered!", "Your draft was submitted to the Loudthotz editorial pool successfully.");
+            updatePendingBadges();
+            renderAdminQueue();
+            navigateTo('admin');
+        }
+
+        // Render Editorial Sandbox Pipeline Panel
+        function renderAdminQueue() {
+            const container = document.getElementById('admin-queue');
+            container.innerHTML = '';
+
+            if (state.submissions.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 text-gray-500 bg-brandDarkBg rounded-3xl border border-brandBorder">
+                        <i data-lucide="check-square" class="w-12 h-12 mx-auto mb-3 text-gray-600"></i>
+                        <p class="text-md font-semibold text-white">No drafts waiting for evaluation</p>
+                        <p class="text-xs text-gray-400 mt-1">Submit a new poetry piece under the "Submit Poem" page.</p>
+                    </div>
+                `;
+                lucide.createIcons();
+                return;
+            }
+
+            state.submissions.forEach(sub => {
+                const subCard = document.createElement('div');
+                subCard.className = "bg-brandDarkBg border border-brandBorder p-5 rounded-2xl space-y-4 hover:border-amber-500/20 transition-all";
+                subCard.innerHTML = `
+                    <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+                        <div>
+                            <span class="text-[10px] uppercase tracking-wider font-extrabold text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded border border-amber-500/20">Awaiting Panel Action</span>
+                            <h4 class="text-xl font-bold text-white mt-2 font-serif">${sub.title}</h4>
+                            <p class="text-xs text-gray-400">By <strong>${sub.author}</strong> (${sub.country}) • Submitted ${sub.date}</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="approveSubmission('${sub.id}')" class="bg-brandLime hover:bg-brandLimeHover text-black font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 shadow-lg shadow-brandLime/5">
+                                <i data-lucide="check" class="w-3.5 h-3.5"></i> Publish
+                            </button>
+                            <button onclick="declineSubmission('${sub.id}')" class="bg-red-950/40 hover:bg-red-950 text-red-400 font-bold text-xs px-4 py-2.5 rounded-xl border border-red-500/15 transition-all flex items-center gap-1.5">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Discard
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bg-brandCardBg p-4 rounded-xl border border-brandBorder">
+                        <p class="text-sm text-gray-300 font-serif leading-relaxed whitespace-pre-line">${sub.content}</p>
+                    </div>
+                `;
+                container.appendChild(subCard);
+            });
+            lucide.createIcons();
+        }
+
+        // Approve Submission Action
+        function approveSubmission(subId) {
+            const index = state.submissions.findIndex(s => s.id === subId);
+            if (index !== -1) {
+                const sub = state.submissions[index];
+                
+                state.poems.unshift({
+                    id: 'poem_' + Date.now(),
+                    title: sub.title,
+                    author: sub.author,
+                    country: sub.country,
+                    content: sub.content,
+                    date: sub.date,
+                    ratings: [5],
+                    reviews: [],
+                    category: 'Loudthotz Selection'
+                });
+
+                state.submissions.splice(index, 1);
+                
+                showToast("Piece Approved!", `"${sub.title}" is now available in the Curated Gallery.`);
+                updatePendingBadges();
+                renderAdminQueue();
+                renderPoems();
+            }
+        }
+
+        // Discard draft action
+        function declineSubmission(subId) {
+            const index = state.submissions.findIndex(s => s.id === subId);
+            if (index !== -1) {
+                state.submissions.splice(index, 1);
+                showToast("Submission Discarded", "The draft was removed from the review console.");
+                updatePendingBadges();
+                renderAdminQueue();
+            }
+        }
+
+        // Update pending items notification counters
+        function updatePendingBadges() {
+            const count = state.submissions.length;
+            const badge = document.getElementById('nav-pending-badge');
+            badge.innerText = count;
+            if (count === 0) {
+                badge.className = "bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded-full text-[10px]";
+            } else {
+                badge.className = "bg-amber-500 text-black px-1.5 py-0.5 rounded-full text-[10px] font-bold";
+            }
+        }
+
+        // Deep review & Evaluation rating modal actions
+        let activePoemDetailId = null;
+        function openPoemDetailModal(poemId) {
+            const poem = state.poems.find(p => p.id === poemId);
+            if (!poem) return;
+            
+            activePoemDetailId = poemId;
+            const modal = document.getElementById('poem-detail-modal');
+            const content = document.getElementById('modal-poem-content');
+
+            const avgRating = calculateAverageRating(poem.ratings);
+
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-start justify-between border-b border-brandBorder pb-4">
+                        <div>
+                            <span class="text-[9px] uppercase font-bold tracking-widest text-brandLime bg-brandLime/10 px-2 py-0.5 rounded border border-brandLime/20">${poem.category || 'Contemporary'}</span>
+                            <h3 class="text-3xl font-extrabold text-white font-serif mt-2">${poem.title}</h3>
+                            <p class="text-xs text-gray-400 mt-0.5">Written by <strong>${poem.author}</strong> — ${poem.country}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="flex items-center gap-1.5 text-yellow-400 font-extrabold justify-end text-lg">
+                                <i data-lucide="star" class="w-5 h-5 fill-current"></i>
+                                <span>${avgRating}</span>
+                            </div>
+                            <span class="text-[10px] text-gray-500">${poem.ratings.length} community scores</span>
+                        </div>
+                    </div>
+
+                    <!-- Poetry view frame -->
+                    <div class="p-6 md:p-8 bg-brandDarkBg border border-brandBorder rounded-2xl max-h-[380px] overflow-y-auto">
+                        <p class="text-base md:text-lg text-gray-100 italic leading-relaxed font-serif whitespace-pre-line text-center">${poem.content}</p>
+                    </div>
+
+                    <!-- Quick star ratings -->
+                    <div class="bg-brandDarkBg p-4 rounded-2xl border border-brandBorder text-center">
+                        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2.5">Rate this Composition</p>
+                        <div class="flex items-center justify-center gap-2">
+                            <button onclick="ratePoem(1)" class="p-1.5 text-gray-600 hover:text-yellow-400 transition-all"><i data-lucide="star" class="w-6 h-6"></i></button>
+                            <button onclick="ratePoem(2)" class="p-1.5 text-gray-600 hover:text-yellow-400 transition-all"><i data-lucide="star" class="w-6 h-6"></i></button>
+                            <button onclick="ratePoem(3)" class="p-1.5 text-gray-600 hover:text-yellow-400 transition-all"><i data-lucide="star" class="w-6 h-6"></i></button>
+                            <button onclick="ratePoem(4)" class="p-1.5 text-gray-600 hover:text-yellow-400 transition-all"><i data-lucide="star" class="w-6 h-6"></i></button>
+                            <button onclick="ratePoem(5)" class="p-1.5 text-gray-600 hover:text-yellow-400 transition-all"><i data-lucide="star" class="w-6 h-6"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- Comments and analysis reviews list -->
+                    <div class="space-y-4">
+                        <h4 class="text-xs font-bold uppercase tracking-wider text-gray-400">Panel Reviews & Critique (${poem.reviews.length})</h4>
+                        <div id="modal-reviews-list" class="space-y-3 max-h-48 overflow-y-auto pr-1">
+                            ${poem.reviews.length === 0 ? '<p class="text-xs text-gray-500 italic">No reviews published yet. Be the first to share your analysis below!</p>' : ''}
+                            ${poem.reviews.map(rev => `
+                                <div class="bg-brandDarkBg p-3 rounded-xl border border-brandBorder/60 text-xs">
+                                    <div class="flex items-center justify-between mb-1.5">
+                                        <span class="font-bold text-white">${rev.user}</span>
+                                        <div class="flex text-yellow-400 gap-0.5">
+                                            ${Array(rev.rating).fill('<i data-lucide="star" class="w-3 h-3 fill-current"></i>').join('')}
+                                        </div>
+                                    </div>
+                                    <p class="text-gray-300 leading-relaxed font-light">${rev.text}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <!-- Feedback contribution form -->
+                        <form onsubmit="handleReviewSubmit(event)" class="space-y-3 pt-3 border-t border-brandBorder">
+                            <div class="grid grid-cols-2 gap-3">
+                                <input id="rev-username" required type="text" placeholder="Your Critic Name" class="px-3.5 py-2 bg-brandDarkBg border border-brandBorder rounded-xl text-xs text-white focus:outline-none focus:border-brandLime font-light">
+                                <select id="rev-stars" class="px-3.5 py-2 bg-brandDarkBg border border-brandBorder rounded-xl text-xs text-gray-300 focus:outline-none focus:border-brandLime cursor-pointer">
+                                    <option value="5">⭐⭐⭐⭐⭐ (Masterpiece)</option>
+                                    <option value="4">⭐⭐⭐⭐ (Recommended)</option>
+                                    <option value="3">⭐⭐⭐ (Average)</option>
+                                    <option value="2">⭐⭐ (Needs Work)</option>
+                                    <option value="1">⭐ (Unsatisfying)</option>
+                                </select>
+                            </div>
+                            <div class="relative">
+                                <input id="rev-text" required type="text" placeholder="Write your literary critique..." class="w-full pl-4 pr-24 py-2.5 bg-brandDarkBg border border-brandBorder rounded-xl text-xs text-white focus:outline-none focus:border-brandLime font-light">
+                                <button type="submit" class="absolute right-1.5 top-1.5 px-4 py-1.5 bg-brandLime text-black font-semibold rounded-lg text-[10px] hover:bg-brandLimeHover transition-all uppercase tracking-wider">
+                                    Publish
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        // Publish review action
+        function handleReviewSubmit(event) {
+            event.preventDefault();
+            const username = document.getElementById('rev-username').value.trim();
+            const stars = parseInt(document.getElementById('rev-stars').value);
+            const text = document.getElementById('rev-text').value.trim();
+
+            const poem = state.poems.find(p => p.id === activePoemDetailId);
+            if (poem) {
+                poem.reviews.unshift({
+                    user: username,
+                    rating: stars,
+                    text: text
+                });
+                poem.ratings.push(stars);
+                showToast("Critique Published", "Your review has been cataloged under the community panels.");
+                openPoemDetailModal(activePoemDetailId);
+                renderPoems();
+            }
+        }
+
+        // Star rating click action
+        function ratePoem(score) {
+            const poem = state.poems.find(p => p.id === activePoemDetailId);
+            if (poem) {
+                poem.ratings.push(score);
+                showToast("Rating Lodged", `You registered a ${score} star score for "${poem.title}".`);
+                openPoemDetailModal(activePoemDetailId);
+                renderPoems();
+            }
+        }
+
+        function closePoemDetailModal() {
+            document.getElementById('poem-detail-modal').classList.add('hidden');
+            activePoemDetailId = null;
+        }
+
+        // Live Chat simulation logic
+        function renderChat() {
+            const container = document.getElementById('live-chat-messages');
+            container.innerHTML = '';
+            
+            state.chatMessages.forEach(msg => {
+                const element = document.createElement('div');
+                element.className = "p-2.5 bg-brandDarkBg border border-brandBorder/60 rounded-xl";
+                element.innerHTML = `
+                    <p class="text-xs font-light"><strong class="text-brandLime font-semibold">${msg.user}</strong>: <span class="text-gray-300">${msg.message}</span></p>
+                `;
+                container.appendChild(element);
+            });
+            
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleLiveChatSubmit(event) {
+            event.preventDefault();
+            const input = document.getElementById('chat-input');
+            const text = input.value.trim();
+            if (text === '') return;
+
+            state.chatMessages.push({
+                user: 'You',
+                message: text
+            });
+
+            input.value = '';
+            renderChat();
+        }
+
+        // Stream chat automatic simulator responses
+        const chatUsers = ['Ngozi_Writer', 'Amadi', 'Ezenwa_Classic', 'Tayo_P', 'Lydia_A', 'Musa_Naija', 'Scribbler_Lover'];
+        const chatLines = [
+            'This recitation of BETRAYED is incredibly deep.',
+            'Is Volume 2 available to pre-order yet?',
+            'Proud to see Loudthotz flourishing under the Naija Art Initiative.',
+            'Incredible performance tonight!',
+            'True classic African voice.',
+            'Cl_Mayende captures East African kinship beautifully.',
+            'This live stage audio is exceptionally crisp!'
+        ];
+
+        function simulateIncomingChat() {
+            const user = chatUsers[Math.floor(Math.random() * chatUsers.length)];
+            const text = chatLines[Math.floor(Math.random() * chatLines.length)];
+            state.chatMessages.push({ user: user, message: text });
+            
+            if (state.chatMessages.length > 25) {
+                state.chatMessages.shift();
+            }
+            renderChat();
+        }
+
+        // Audio Stream toggle states
+        function toggleStreamPlay() {
+            state.stream.isPlaying = !state.stream.isPlaying;
+            const btn = document.getElementById('btn-stream-play');
+            if (state.stream.isPlaying) {
+                btn.innerHTML = `<i data-lucide="pause" class="w-4 h-4"></i>`;
+                showToast("Stream Playing", "Connected to live stage channel.");
+            } else {
+                btn.innerHTML = `<i data-lucide="play" class="w-4 h-4"></i>`;
+                showToast("Stream Paused", "Broadcast stream was paused.");
+            }
+            lucide.createIcons();
+        }
+
+        function toggleStreamMute() {
+            state.stream.isMuted = !state.stream.isMuted;
+            const btn = document.getElementById('btn-stream-mute');
+            if (state.stream.isMuted) {
+                btn.innerHTML = `<i data-lucide="volume-x" class="w-4 h-4"></i>`;
+                showToast("Broadcast Muted", "Audio feed was muted.");
+            } else {
+                btn.innerHTML = `<i data-lucide="volume-2" class="w-4 h-4"></i>`;
+                showToast("Broadcast Unmuted", "Audio feed unmuted.");
+            }
+            lucide.createIcons();
+        }
+
+        function simulateViewerEngagement() {
+            showToast("Stage Clapped!", "You sent custom stage applause.");
+            state.chatMessages.push({
+                user: 'You',
+                message: '👏👏 Applauded stage!'
+            });
+            renderChat();
+        }
+
+        // Donate support selection
+        function selectDonateTier(amount) {
+            document.getElementById('donate-amount').value = amount;
+            document.querySelectorAll('.donate-tier-btn').forEach(b => {
+                b.classList.remove('border-brandLime');
+                b.classList.add('border-brandBorder');
+            });
+            event.currentTarget.classList.remove('border-brandBorder');
+            event.currentTarget.classList.add('border-brandLime');
+        }
+
+        function handleDonationSubmit(event) {
+            event.preventDefault();
+            const amount = document.getElementById('donate-amount').value;
+            const name = document.getElementById('donate-name').value.trim() || 'Anonymous Sponsor';
+
+            document.getElementById('donate-amount').value = '';
+            document.getElementById('donate-name').value = '';
+            document.getElementById('donate-email').value = '';
+
+            showToast("Support Registered!", `Thank you, ${name}! Your simulated contribution of $${amount} to Naija Art Initiative has been cataloged.`);
+        }
+
+        // Custom Toast center alert
+        function showToast(title, body) {
+            const container = document.getElementById('toast-container');
+            const element = document.createElement('div');
+            element.className = "bg-brandCardBg border border-brandBorder p-4 rounded-2xl flex items-start gap-3 shadow-2xl pointer-events-auto transition-all animate-slide-in duration-300";
+            element.innerHTML = `
+                <div class="bg-brandLime/15 p-1.5 rounded-lg border border-brandLime/25 text-brandLime mt-0.5">
+                    <i data-lucide="bell" class="w-4 h-4"></i>
+                </div>
+                <div class="flex-grow">
+                    <h5 class="text-xs font-bold text-white">${title}</h5>
+                    <p class="text-[11px] text-gray-400 mt-0.5 font-light">${body}</p>
+                </div>
+                <button onclick="this.parentElement.remove()" class="text-gray-500 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                </button>
+            `;
+            container.appendChild(element);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                element.remove();
+            }, 6000);
+        }
+
+        function showNaijaInfo() {
+            document.getElementById('naija-modal').classList.remove('hidden');
+        }
+
+        function closeNaijaModal() {
+            document.getElementById('naija-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
+
