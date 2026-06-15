@@ -1,11 +1,11 @@
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import {
-  useGetSiteStats,
-  useGetFeaturedPoems,
-  useGetLivestreamStatus,
-  useListLivestreamSessions,
-} from "@workspace/api-client-react";
+  useFeaturedPoems,
+  useLivestreamStatus,
+  useLivestreamSessions,
+  useSiteStats,
+} from "@/lib/firestore";
 import {
   Info, Calendar, Users, Globe2, ArrowRight, Star,
   Mic2, PlayCircle, ChevronRight, BookOpen,
@@ -39,12 +39,13 @@ function StarRating({ value }: { value: number }) {
 
 /* ---------- page ---------- */
 export default function Home() {
-  const { data: stats, isLoading: statsLoading } = useGetSiteStats();
-  const { data: featuredPoems, isLoading: poemsLoading } = useGetFeaturedPoems();
-  const { data: liveStatus } = useGetLivestreamStatus();
-  const { data: sessions } = useListLivestreamSessions();
+  const stats = useSiteStats();
+  const statsLoading = false;
+  const { data: featuredPoems, loading: poemsLoading } = useFeaturedPoems();
+  const { data: liveStatus } = useLivestreamStatus();
+  const { data: sessions } = useLivestreamSessions();
 
-  const pastSessions = sessions?.slice(0, 3) ?? [];
+  const pastSessions = sessions.slice(0, 3);
 
   return (
     <div className="min-h-screen">
@@ -98,7 +99,7 @@ export default function Home() {
               </span>
               <span className="flex items-center gap-2 bg-secondary/10 text-secondary border border-secondary/20 px-4 py-2 rounded-xl text-sm font-medium">
                 <Users className="h-4 w-4" />
-                {statsLoading ? "—" : `${(stats?.totalPoets ?? 0).toLocaleString()}+`} Community Voices
+                {`${(stats?.totalCommunityVoices ?? stats?.totalPoets ?? 0).toLocaleString()}+`} Community Voices
               </span>
               <span className="flex items-center gap-2 bg-white/5 text-gray-300 border border-white/10 px-4 py-2 rounded-xl text-sm font-medium">
                 <Globe2 className="h-4 w-4" />
@@ -124,16 +125,16 @@ export default function Home() {
           </motion.div>
 
           {/* Stats row */}
-          {!statsLoading && stats && (
+          {!statsLoading && (
             <motion.div
               {...fadeUp(0.36)}
               className="grid grid-cols-2 md:grid-cols-4 gap-px mt-16 bg-white/5 rounded-2xl overflow-hidden border border-white/5"
             >
               {[
-                { label: "Poems Published", value: stats.totalPoems },
-                { label: "Featured Poets", value: stats.totalPoets },
-                { label: "Countries", value: stats.totalCountries },
-                { label: "Live Sessions", value: stats.totalSessions },
+                { label: "Poems Published", value: stats?.totalPoems ?? 0 },
+                { label: "Featured Poets", value: stats?.totalPoets ?? 0 },
+                { label: "Countries", value: stats?.totalCountries ?? 0 },
+                { label: "Live Sessions", value: stats?.totalSessions ?? 0 },
               ].map(({ label, value }) => (
                 <div key={label} className="bg-[#090b06] px-6 py-5 text-center">
                   <p className="font-display text-2xl md:text-3xl font-bold text-foreground">{value}</p>
@@ -241,7 +242,7 @@ export default function Home() {
               {pastSessions.length === 0 ? (
                 <p className="text-gray-500 text-sm font-serif italic">No past sessions yet.</p>
               ) : (
-                pastSessions.map((session, i) => (
+                pastSessions.map((session: import("@/lib/firestore").FireLivestreamSession, i: number) => (
                   <motion.div
                     key={session.id}
                     initial={{ opacity: 0, x: 16 }}
@@ -309,7 +310,7 @@ export default function Home() {
               initial="initial"
               animate="animate"
             >
-              {featuredPoems?.map((poem, i) => (
+              {featuredPoems?.map((poem: import("@/lib/firestore").FirePoem, i: number) => (
                 <motion.div key={poem.id} variants={fadeUp(i * 0.05)}>
                   <Link href={`/poem/${poem.id}`} className="group block h-full">
                     <div className="h-full flex flex-col bg-white/[0.02] border border-white/5 rounded-2xl p-6 hover:bg-white/[0.04] hover:border-primary/20 hover:-translate-y-0.5 transition-all duration-300 cursor-pointer">

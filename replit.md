@@ -1,6 +1,6 @@
-# [Project name]
+# Loudthotz Poetry Portal
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A full-featured poetry portal for the Loudthotz Poetry event (under the Naija Art Initiative) — poem submissions, editorial review, star ratings, live stream stage, past sessions archive, anthology/book listings, donations, and a complete Firebase-powered admin CMS.
 
 ## Run & Operate
 

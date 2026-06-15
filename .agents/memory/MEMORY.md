@@ -1,0 +1,1 @@
+- [Firebase Architecture](firebase-architecture.md) — Loudthotz uses Firebase (Firestore + Auth) for all data; Express API is kept but unused for public data

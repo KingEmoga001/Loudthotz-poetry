@@ -1,42 +1,35 @@
 import { useParams } from "wouter";
-import { useGetPoem, useRatePoem, getGetPoemQueryKey } from "@workspace/api-client-react";
+import { usePoem, ratePoem } from "@/lib/firestore";
 import { Loader2, Star, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
 
 export default function PoemReader() {
-  const { id } = useParams();
-  const poemId = id ? parseInt(id, 10) : 0;
-  const { data: poem, isLoading } = useGetPoem(poemId, { query: { enabled: !!poemId, queryKey: getGetPoemQueryKey(poemId) } });
-  
+  const { id } = useParams<{ id: string }>();
+  const { data: poem, loading } = usePoem(id ?? "");
+
   const [hoverRating, setHoverRating] = useState(0);
   const [hasRated, setHasRated] = useState(false);
-  const rateMutation = useRatePoem();
+  const [ratingPending, setRatingPending] = useState(false);
   const { toast } = useToast();
-  const queryClient = useQueryClient();
 
-  const handleRate = (stars: number) => {
-    if (hasRated) return;
-    
-    rateMutation.mutate(
-      { id: poemId, data: { stars } },
-      {
-        onSuccess: (updatedPoem) => {
-          setHasRated(true);
-          toast({ title: "Rating submitted", description: "Thank you for your feedback." });
-          queryClient.setQueryData(getGetPoemQueryKey(poemId), updatedPoem);
-        },
-        onError: () => {
-          toast({ title: "Error", description: "Failed to submit rating.", variant: "destructive" });
-        }
-      }
-    );
+  const handleRate = async (stars: number) => {
+    if (hasRated || !id) return;
+    setRatingPending(true);
+    try {
+      await ratePoem(id, stars);
+      setHasRated(true);
+      toast({ title: "Rating submitted", description: "Thank you for your feedback." });
+    } catch {
+      toast({ title: "Error", description: "Failed to submit rating.", variant: "destructive" });
+    } finally {
+      setRatingPending(false);
+    }
   };
 
-  if (isLoading) {
+  if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -70,9 +63,9 @@ export default function PoemReader() {
           <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground pt-4">
             <span className="uppercase tracking-widest">{poem.country}</span>
             <span className="w-1 h-1 rounded-full bg-white/20" />
-            <span>{new Date(poem.publishedAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}</span>
+            <span>{new Date(poem.publishedAt).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}</span>
           </div>
-          
+
           {(poem.theme || poem.season) && (
             <div className="flex justify-center gap-2 pt-2">
               {poem.season && <span className="px-3 py-1 bg-white/5 border border-white/10 rounded-full text-xs">{poem.season}</span>}
@@ -98,24 +91,22 @@ export default function PoemReader() {
             {[1, 2, 3, 4, 5].map((star) => (
               <button
                 key={star}
-                disabled={hasRated || rateMutation.isPending}
+                disabled={hasRated || ratingPending}
                 onMouseEnter={() => !hasRated && setHoverRating(star)}
                 onMouseLeave={() => !hasRated && setHoverRating(0)}
                 onClick={() => handleRate(star)}
                 className="focus:outline-none transition-transform hover:scale-110 disabled:hover:scale-100"
               >
-                <Star 
+                <Star
                   className={`h-8 w-8 transition-colors ${
-                    (hoverRating || poem.averageRating) >= star 
-                      ? "text-amber-500 fill-amber-500" 
-                      : "text-white/20"
-                  } ${hasRated ? "opacity-50" : ""}`} 
+                    (hoverRating || poem.averageRating) >= star ? "text-amber-500 fill-amber-500" : "text-white/20"
+                  } ${hasRated ? "opacity-50" : ""}`}
                 />
               </button>
             ))}
           </div>
           <div className="text-xs text-muted-foreground">
-            {poem.averageRating.toFixed(1)} average from {poem.ratingCount} {poem.ratingCount === 1 ? 'rating' : 'ratings'}
+            {poem.averageRating.toFixed(1)} average from {poem.ratingCount} {poem.ratingCount === 1 ? "rating" : "ratings"}
           </div>
         </div>
       </article>

@@ -2,15 +2,14 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, PenTool, Mic2, Library, Heart, Shield, Menu, X } from "lucide-react";
-import { useListSubmissions } from "@workspace/api-client-react";
+import { usePendingCount } from "@/lib/firestore";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
 
 export function Navbar() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { data: submissions } = useListSubmissions({ query: { enabled: true, queryKey: ["listSubmissions"] } });
-  const pendingCount = submissions?.filter((s) => s.status === "pending").length || 0;
+  const pendingCount = usePendingCount();
 
   const navLinks = [
     { href: "/poems", label: "Gallery", icon: BookOpen },
@@ -53,9 +52,7 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all ${
-                  active
-                    ? "text-primary bg-primary/10"
-                    : "text-gray-400 hover:text-white hover:bg-white/5"
+                  active ? "text-primary bg-primary/10" : "text-gray-400 hover:text-white hover:bg-white/5"
                 }`}
               >
                 <link.icon className="h-4 w-4" />
@@ -75,7 +72,7 @@ export function Navbar() {
           <Link href="/admin">
             <div className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-semibold text-amber-400 hover:bg-amber-500/10 transition-all ${location === "/admin" ? "bg-amber-500/10" : ""}`}>
               <Shield className="h-4 w-4" />
-              Review Room
+              Admin
               {pendingCount > 0 && (
                 <span className="bg-amber-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                   {pendingCount}
@@ -120,7 +117,7 @@ export function Navbar() {
                     <link.icon className="h-5 w-5" />
                     {link.label}
                     {link.isLive && (
-                      <span className="ml-auto flex h-2 w-2">
+                      <span className="ml-auto flex h-2 w-2 relative">
                         <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-red-500 opacity-75" />
                         <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500" />
                       </span>
@@ -132,7 +129,7 @@ export function Navbar() {
               <Link href="/admin" onClick={closeMobile}>
                 <div className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-amber-400 ${location === "/admin" ? "bg-amber-500/10" : "hover:bg-amber-500/10"} transition-colors`}>
                   <Shield className="h-5 w-5" />
-                  Review Room
+                  Admin CMS
                   {pendingCount > 0 && (
                     <span className="ml-auto bg-amber-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">
                       {pendingCount} pending
