@@ -1,14 +1,16 @@
 import { Link } from "wouter";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
   useFeaturedPoems,
   useLivestreamStatus,
   useLivestreamSessions,
   useSiteStats,
+  useHeroImages,
 } from "@/lib/firestore";
 import {
   Info, Calendar, Users, Globe2, ArrowRight, Star,
-  Mic2, PlayCircle, ChevronRight, BookOpen,
+  Mic2, PlayCircle, ChevronRight, BookOpen, ChevronLeft,
 } from "lucide-react";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
 
@@ -37,6 +39,91 @@ function StarRating({ value }: { value: number }) {
   );
 }
 
+/* ---------- Hero Carousel ---------- */
+function HeroCarousel() {
+  const { data: images } = useHeroImages();
+  const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+
+  useEffect(() => {
+    if (images.length < 2 || paused) return;
+    const t = setInterval(() => setCurrent((c) => (c + 1) % images.length), 5000);
+    return () => clearInterval(t);
+  }, [images.length, paused]);
+
+  if (images.length === 0) return null;
+
+  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
+  const next = () => setCurrent((c) => (c + 1) % images.length);
+
+  return (
+    <div
+      className="absolute inset-0 z-0"
+      onMouseEnter={() => setPaused(true)}
+      onMouseLeave={() => setPaused(false)}
+    >
+      <AnimatePresence mode="sync">
+        <motion.div
+          key={images[current]?.id}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8 }}
+          className="absolute inset-0"
+        >
+          <img
+            src={images[current]?.url}
+            alt={images[current]?.caption}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Caption */}
+      {images[current]?.caption && (
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 text-center px-4">
+          <p className="text-xs text-white/60 font-medium tracking-wide">{images[current].caption}</p>
+          {images[current].credit && (
+            <p className="text-[10px] text-white/40 mt-0.5">📷 {images[current].credit}</p>
+          )}
+        </div>
+      )}
+
+      {/* Arrows */}
+      {images.length > 1 && (
+        <>
+          <button
+            onClick={prev}
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/30 hover:bg-black/60 text-white/70 hover:text-white transition-all backdrop-blur-sm"
+            aria-label="Previous image"
+          >
+            <ChevronLeft className="h-5 w-5" />
+          </button>
+          <button
+            onClick={next}
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/30 hover:bg-black/60 text-white/70 hover:text-white transition-all backdrop-blur-sm"
+            aria-label="Next image"
+          >
+            <ChevronRight className="h-5 w-5" />
+          </button>
+
+          {/* Dots */}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
+            {images.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                className={`rounded-full transition-all ${i === current ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-white/30 hover:bg-white/60"}`}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 /* ---------- page ---------- */
 export default function Home() {
   const stats = useSiteStats();
@@ -53,12 +140,14 @@ export default function Home() {
       {/* ═══════════════════════════════════════════════
           HERO SECTION
       ═══════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden">
-        {/* ambient background */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(181,230,29,0.07),transparent)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_60%,rgba(0,162,232,0.04),transparent)]" />
+      <section className="relative overflow-hidden min-h-[70vh] flex flex-col">
+        {/* Hero image carousel (hidden when no images) */}
+        <HeroCarousel />
+        {/* ambient background — always rendered, visible when no carousel images */}
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(181,230,29,0.07),transparent)]" />
+        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_60%,rgba(0,162,232,0.04),transparent)]" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
           <motion.div
             className="max-w-3xl mx-auto text-center"
             variants={stagger}
@@ -109,17 +198,19 @@ export default function Home() {
 
             {/* CTAs */}
             <motion.div {...fadeUp(0.28)} className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link href="/poems">
-                <button className="flex items-center gap-2 bg-primary text-black font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 text-sm">
-                  <BookOpen className="h-4 w-4" />
-                  Read the Gallery
-                </button>
+              <Link
+                href="/poems"
+                className="flex items-center gap-2 bg-primary text-black font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 text-sm"
+              >
+                <BookOpen className="h-4 w-4" />
+                Read the Gallery
               </Link>
-              <Link href="/submit">
-                <button className="flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 font-medium px-6 py-3 rounded-xl transition-all text-sm">
-                  Submit a Poem
-                  <ArrowRight className="h-4 w-4" />
-                </button>
+              <Link
+                href="/submit"
+                className="flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 font-medium px-6 py-3 rounded-xl transition-all text-sm"
+              >
+                Submit a Poem
+                <ArrowRight className="h-4 w-4" />
               </Link>
             </motion.div>
           </motion.div>

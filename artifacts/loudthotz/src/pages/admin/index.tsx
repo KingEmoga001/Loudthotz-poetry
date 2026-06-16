@@ -6,7 +6,8 @@ import {
   Settings, LogOut, CheckCircle, XCircle, Clock, Star, Trash2,
   Edit3, Plus, Save, Eye, EyeOff, Mic2, Calendar, Link2,
   Users, Globe2, BarChart3, RefreshCw, ChevronDown, ChevronUp,
-  AlertCircle, BookMarked, Play, X, Database,
+  AlertCircle, BookMarked, Play, X, Database, Image, GripVertical,
+  ToggleLeft, ToggleRight,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -16,13 +17,15 @@ import {
   createBook, updateBook, deleteBook, updateLivestreamStatus,
   addLivestreamSession, updateLivestreamSession, deleteLivestreamSession,
   updateSiteSettings, seedDatabase,
+  useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
+  type FireHeroImage,
 } from "@/lib/firestore";
 import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
 
 /* ──────────────────────────── types ──────────────────────────── */
-type Tab = "dashboard" | "submissions" | "poems" | "livestream" | "books" | "settings";
+type Tab = "dashboard" | "submissions" | "poems" | "livestream" | "books" | "hero" | "settings";
 
 /* ──────────────────────────── helpers ──────────────────────────── */
 function Toast({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) {
@@ -615,6 +618,177 @@ function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => 
   );
 }
 
+/* ──────────────────────────── Hero Images ──────────────────────────── */
+function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
+  const { data: images, loading } = useAllHeroImages();
+  const [form, setForm] = useState({ url: "", caption: "", credit: "", order: "" });
+  const [saving, setSaving] = useState(false);
+  const [previewing, setPreviewing] = useState<string | null>(null);
+
+  const handleAdd = async () => {
+    if (!form.url) { show("Image URL is required.", "error"); return; }
+    setSaving(true);
+    try {
+      await addHeroImage({
+        url: form.url.trim(),
+        caption: form.caption.trim(),
+        credit: form.credit.trim() || undefined,
+        order: form.order ? parseInt(form.order) : images.length,
+        active: true,
+      });
+      setForm({ url: "", caption: "", credit: "", order: "" });
+      show("Image added to carousel!");
+    } catch { show("Failed to add image.", "error"); }
+    finally { setSaving(false); }
+  };
+
+  const handleToggle = async (img: FireHeroImage) => {
+    try {
+      await updateHeroImage(img.id, { active: !img.active });
+      show(img.active ? "Image hidden from carousel." : "Image shown in carousel.");
+    } catch { show("Update failed.", "error"); }
+  };
+
+  const handleDelete = async (img: FireHeroImage) => {
+    if (!confirm("Remove this image from the carousel?")) return;
+    try { await deleteHeroImage(img.id); show("Image removed."); }
+    catch { show("Delete failed.", "error"); }
+  };
+
+  const handleOrderChange = async (img: FireHeroImage, newOrder: number) => {
+    try { await updateHeroImage(img.id, { order: newOrder }); }
+    catch { show("Order update failed.", "error"); }
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-white mb-1">Hero Carousel</h2>
+        <p className="text-gray-500 text-sm">Add images that auto-rotate in the homepage hero section. Paste any public image URL.</p>
+      </div>
+
+      {/* Current images */}
+      {!loading && images.length > 0 && (
+        <div className="space-y-3">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Current Images ({images.length})</h3>
+          {images.map((img) => (
+            <div key={img.id} className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${img.active ? "border-white/10 bg-white/[0.02]" : "border-white/5 bg-white/[0.01] opacity-60"}`}>
+              {/* Thumb */}
+              <div
+                className="h-14 w-20 rounded-lg overflow-hidden bg-white/5 border border-white/10 shrink-0 cursor-pointer"
+                onClick={() => setPreviewing(previewing === img.id ? null : img.id)}
+              >
+                <img src={img.url} alt={img.caption} className="h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
+              </div>
+
+              {/* Info */}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-white font-medium truncate">{img.caption || <span className="text-gray-500 italic">No caption</span>}</p>
+                {img.credit && <p className="text-xs text-gray-500 truncate">📷 {img.credit}</p>}
+                <p className="text-[10px] text-gray-600 truncate mt-0.5">{img.url}</p>
+              </div>
+
+              {/* Order input */}
+              <div className="shrink-0 flex items-center gap-1">
+                <GripVertical className="h-3.5 w-3.5 text-gray-600" />
+                <input
+                  type="number"
+                  value={img.order}
+                  onChange={e => handleOrderChange(img, parseInt(e.target.value) || 0)}
+                  className="w-12 px-2 py-1 bg-white/[0.04] border border-white/10 rounded-lg text-xs text-white text-center focus:outline-none focus:border-primary/40"
+                  title="Display order"
+                />
+              </div>
+
+              {/* Toggle */}
+              <button
+                onClick={() => handleToggle(img)}
+                className={`shrink-0 transition-colors ${img.active ? "text-primary" : "text-gray-600"}`}
+                title={img.active ? "Hide from carousel" : "Show in carousel"}
+              >
+                {img.active ? <ToggleRight className="h-6 w-6" /> : <ToggleLeft className="h-6 w-6" />}
+              </button>
+
+              {/* Delete */}
+              <button onClick={() => handleDelete(img)} className="shrink-0 p-1.5 text-gray-500 hover:text-red-400 transition-colors">
+                <Trash2 className="h-4 w-4" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!loading && images.length === 0 && (
+        <div className="text-center py-12 border border-dashed border-white/10 rounded-xl">
+          <Image className="h-8 w-8 text-gray-600 mx-auto mb-3" />
+          <p className="text-gray-500 text-sm">No carousel images yet. Add one below.</p>
+          <p className="text-gray-600 text-xs mt-1">When empty, the hero shows the ambient gradient background.</p>
+        </div>
+      )}
+
+      {/* Add image */}
+      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6 space-y-4">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add New Image</h3>
+        <div className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Image URL <span className="text-red-400">*</span></label>
+            <input
+              value={form.url}
+              onChange={e => setForm({ ...form, url: e.target.value })}
+              placeholder="https://example.com/image.jpg"
+              className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+            />
+            <p className="text-[11px] text-gray-600 mt-1">Use a direct link to any publicly accessible image (JPG, PNG, WebP). Google Photos, Imgur, Unsplash, or your own CDN work well.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Caption</label>
+              <input
+                value={form.caption}
+                onChange={e => setForm({ ...form, caption: e.target.value })}
+                placeholder="e.g. Loudthotz Season 14 — Brothers"
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Photo Credit</label>
+              <input
+                value={form.credit}
+                onChange={e => setForm({ ...form, credit: e.target.value })}
+                placeholder="e.g. Emeka Obi Photography"
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Display Order</label>
+              <input
+                type="number"
+                value={form.order}
+                onChange={e => setForm({ ...form, order: e.target.value })}
+                placeholder="0"
+                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+              />
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={handleAdd}
+          disabled={saving || !form.url}
+          className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
+        >
+          <Plus className="h-4 w-4" /> {saving ? "Adding…" : "Add to Carousel"}
+        </button>
+      </div>
+
+      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5">
+        <p className="text-xs text-gray-500 leading-relaxed">
+          <span className="text-gray-300 font-semibold">Tips:</span> Images auto-advance every 5 seconds. Hovering pauses the carousel. The order field controls which image appears first (lower number = earlier). Toggle the switch to show/hide individual images without deleting them.
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /* ──────────────────────────── Site Settings ──────────────────────────── */
 function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error") => void }) {
   const { data: settings } = useSiteSettings();
@@ -733,6 +907,7 @@ export default function AdminPanel() {
     { id: "poems", label: "Poems", icon: BookOpen },
     { id: "livestream", label: "Livestream", icon: Radio },
     { id: "books", label: "Books", icon: Library },
+    { id: "hero", label: "Hero Carousel", icon: Image },
     { id: "settings", label: "Settings", icon: Settings },
   ];
 
@@ -796,6 +971,7 @@ export default function AdminPanel() {
               {activeTab === "poems" && <PoemsManager show={show} />}
               {activeTab === "livestream" && <LivestreamControl show={show} />}
               {activeTab === "books" && <BooksManager show={show} />}
+              {activeTab === "hero" && <HeroImagesManager show={show} />}
               {activeTab === "settings" && <SiteSettingsPanel show={show} />}
             </motion.div>
           </AnimatePresence>

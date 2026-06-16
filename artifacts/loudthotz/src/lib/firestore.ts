@@ -403,6 +403,78 @@ export function useSiteStats() {
   };
 }
 
+/* ─────────────────── Hero Images ─────────────────── */
+export interface FireHeroImage {
+  id: string;
+  url: string;
+  caption: string;
+  credit?: string;
+  order: number;
+  active: boolean;
+}
+
+export function useHeroImages(): { data: FireHeroImage[]; loading: boolean } {
+  const [data, setData] = useState<FireHeroImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const ref = collection(db, "hero_images");
+    const unsub = onSnapshot(ref, (snap) => {
+      const imgs: FireHeroImage[] = snap.docs.map((d) => ({
+        id: d.id,
+        url: d.data().url ?? "",
+        caption: d.data().caption ?? "",
+        credit: d.data().credit,
+        order: d.data().order ?? 0,
+        active: d.data().active ?? true,
+      }));
+      imgs.sort((a, b) => a.order - b.order);
+      setData(imgs.filter((i) => i.active));
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  return { data, loading };
+}
+
+export function useAllHeroImages(): { data: FireHeroImage[]; loading: boolean } {
+  const [data, setData] = useState<FireHeroImage[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const ref = collection(db, "hero_images");
+    const unsub = onSnapshot(ref, (snap) => {
+      const imgs: FireHeroImage[] = snap.docs.map((d) => ({
+        id: d.id,
+        url: d.data().url ?? "",
+        caption: d.data().caption ?? "",
+        credit: d.data().credit,
+        order: d.data().order ?? 0,
+        active: d.data().active ?? true,
+      }));
+      imgs.sort((a, b) => a.order - b.order);
+      setData(imgs);
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  return { data, loading };
+}
+
+export async function addHeroImage(data: Omit<FireHeroImage, "id">) {
+  await addDoc(collection(db, "hero_images"), data);
+}
+
+export async function updateHeroImage(id: string, data: Partial<Omit<FireHeroImage, "id">>) {
+  await updateDoc(doc(db, "hero_images", id), data as Record<string, unknown>);
+}
+
+export async function deleteHeroImage(id: string) {
+  await deleteDoc(doc(db, "hero_images", id));
+}
+
 /* ─────────────────── Seed Data ─────────────────── */
 export async function seedDatabase() {
   const poems = [
