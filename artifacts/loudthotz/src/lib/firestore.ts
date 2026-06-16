@@ -524,8 +524,7 @@ export async function seedDatabase() {
   ];
 
   const books = [
-    { title: "FIRST GONG", subtitle: "Anthology Vol. I", description: "The debut collective voice of the Loudthotz community — a showcase print containing poetry submitted by foundation members.", price: "$12.99", amazonUrl: "https://www.amazon.com", accentColor: "lime", coverTagline: "The debut collective voice of Loudthotz Independent Poets" },
-    { title: "BROTHERS", subtitle: "Season Booklet", description: "Poignant works focusing on tribal lineage, local histories, and the complex structures of modern kinship across Africa.", price: "$8.50", amazonUrl: "https://www.amazon.com", accentColor: "blue", coverTagline: "Musings on loyalty, betrayal, and African brotherhood" },
+    { title: "FIRST GONG", subtitle: "Anthology Vol. I", description: "The debut collective voice of the Loudthotz community — a showcase print containing poetry submitted by foundation members.", price: "", amazonUrl: "https://www.amazon.com/FIRST-GONG-VOL-3-NIGERIAN-STANDING/dp/1300751797/ref=sr_1_2?crid=2JBU0QIQB6963&dib=eyJ2IjoiMSJ9.S2WYsTYY5irJpKyttk8ZwYOFNDYSeqiNVBm4HDn8SKFwvDZS5q3f8WsYBanlT3IZzc6kXGr2t_RAQ6x6Bkf_yyI_C_jj7MjE3C1xZp1d1NY.kKdHOfm4T9zKKj0B1jh42sR-AYGlvptPffmY56NrW3g&dib_tag=se&keywords=Chisom+Ohuaka&qid=1781643803&sprefix=chisom+ohuaka+%2Caps%2C438&sr=8-2", accentColor: "lime", coverTagline: "The debut collective voice of Loudthotz Independent Poets" },
   ];
 
   const sessions = [
