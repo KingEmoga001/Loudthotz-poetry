@@ -682,7 +682,7 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
         addHeroImage({
           url,
           caption: form.caption.trim(),
-          credit: form.credit.trim() || undefined,
+          credit: form.credit.trim() || "",
           order: form.order ? parseInt(form.order) : images.length,
           active: true,
         }),
