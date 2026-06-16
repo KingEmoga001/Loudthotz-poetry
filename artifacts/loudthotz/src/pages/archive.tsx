@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Archive, Calendar, Mic2, ExternalLink, Play } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
-import { useLivestreamSessions } from "@/lib/firestore";
+import { useLivestreamSessions, useEvents } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -91,13 +91,33 @@ type DisplaySession = {
   recordingUrl?: string;
   blogUrl?: string;
   description?: string;
+  source?: "event" | "session" | "static";
 };
 
 export default function ArchivePage() {
-  const { data: firestoreSessions, loading } = useLivestreamSessions();
+  const { data: firestoreSessions, loading: sessionsLoading } = useLivestreamSessions();
+  const { data: allEvents, loading: eventsLoading } = useEvents();
   const [selectedSeason, setSelectedSeason] = useState("All");
 
-  const firestoreDisplayed: DisplaySession[] = firestoreSessions.map((s) => ({
+  const loading = sessionsLoading || eventsLoading;
+  const now = new Date();
+
+  /* Past events from the events collection (date already passed) */
+  const pastEvents = allEvents.filter((e) => new Date(e.date) <= now);
+
+  const eventDisplayed: DisplaySession[] = pastEvents.map((e) => ({
+    key: `event-${e.id}`,
+    date: e.date,
+    title: e.title,
+    season: e.season ?? "",
+    theme: e.theme ?? "",
+    recordingUrl: e.youtubeUrl,
+    blogUrl: e.blogUrl,
+    description: e.description,
+    source: "event",
+  }));
+
+  const sessionDisplayed: DisplaySession[] = firestoreSessions.map((s) => ({
     key: s.id,
     date: s.date,
     title: s.title,
@@ -106,6 +126,7 @@ export default function ArchivePage() {
     recordingUrl: s.recordingUrl,
     blogUrl: s.blogUrl,
     description: s.description,
+    source: "session",
   }));
 
   const staticDisplayed: DisplaySession[] = staticSessions.map((s) => ({
@@ -114,13 +135,27 @@ export default function ArchivePage() {
     title: s.title,
     season: s.season,
     theme: s.theme,
+    source: "static",
   }));
 
-  const allSessions: DisplaySession[] = firestoreDisplayed.length > 0
-    ? [...firestoreDisplayed, ...staticDisplayed].sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-      )
-    : staticDisplayed;
+  /* Merge: if Firestore has any data, use Firestore + events; always append static as historical base */
+  const hasFirestoreData = firestoreSessions.length > 0 || pastEvents.length > 0;
+
+  /* Deduplicate by normalised title+date in case event and session overlap */
+  const seen = new Set<string>();
+  const allSessions: DisplaySession[] = [
+    ...eventDisplayed,
+    ...sessionDisplayed,
+    ...staticDisplayed,
+  ]
+    .filter((s) => {
+      if (!hasFirestoreData && s.source !== "static") return false;
+      const key = `${s.date.slice(0, 10)}-${s.title.toLowerCase().trim()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const allSeasons = ["All", ...Array.from(new Set(allSessions.map((s) => s.season).filter(Boolean)))];
 
@@ -255,6 +290,13 @@ export default function ArchivePage() {
                   <div key={session.key}>{inner}</div>
                 );
               })}
+
+              {filtered.length === 0 && (
+                <div className="text-center py-16 text-gray-600">
+                  <Archive className="h-8 w-8 mx-auto mb-3 opacity-40" />
+                  <p className="text-sm">No sessions found for this season.</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -270,7 +312,7 @@ export default function ArchivePage() {
               className="inline-flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all"
             >
               <Mic2 className="h-4 w-4" />
-              Go to Live Stage & Sessions
+              Go to Live Stage &amp; Sessions
             </Link>
           </motion.div>
         </div>
