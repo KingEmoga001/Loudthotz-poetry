@@ -4,7 +4,8 @@ import {
   onSnapshot, query, where, orderBy, limit, setDoc, increment,
   serverTimestamp, type Timestamp,
 } from "firebase/firestore";
-import { db } from "./firebase";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db, storage } from "./firebase";
 
 /* ───────────────────────────── Types ───────────────────────────── */
 export interface FirePoem {
@@ -549,18 +550,10 @@ export async function deleteHeroImage(id: string) {
 }
 
 export async function uploadHeroImage(file: File): Promise<string> {
-  const formData = new FormData();
-  formData.append("file", file);
-  const res = await fetch("/api/uploads/hero-image", {
-    method: "POST",
-    body: formData,
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Upload failed" }));
-    throw new Error(err.error ?? "Upload failed");
-  }
-  const { url } = await res.json();
-  return url;
+  const safeFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storageRef = ref(storage, `hero_images/${Date.now()}_${safeFilename}`);
+  await uploadBytes(storageRef, file, { contentType: file.type });
+  return await getDownloadURL(storageRef);
 }
 
 /* ─────────────────── Seed Data ─────────────────── */

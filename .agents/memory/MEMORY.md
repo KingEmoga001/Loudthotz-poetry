@@ -1,2 +1,2 @@
-- [Firebase Architecture](firebase-architecture.md) — Loudthotz uses Firebase (Firestore + Auth) for all data; Express API is kept but unused for public data
-- [Hero Image Upload Storage](upload-storage.md) — Firebase Storage CORS blocks browser uploads from Replit; images now route through Express + Replit Object Storage
+- [Firebase Architecture](firebase-architecture.md) — Loudthotz uses Firebase (Firestore + Auth + Storage) for all data; Express API is kept for other routes but no longer used for uploads
+- [Hero Image Upload Storage](upload-storage.md) — Hero images upload directly browser→Firebase Storage (firebase/storage SDK); Express route kept but unused on Hostinger
