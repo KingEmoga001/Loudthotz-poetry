@@ -475,6 +475,14 @@ export async function deleteHeroImage(id: string) {
   await deleteDoc(doc(db, "hero_images", id));
 }
 
+export async function uploadHeroImage(file: File): Promise<string> {
+  const { storage } = await import("./firebase");
+  const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
+  const storageRef = ref(storage, `hero_images/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`);
+  const snapshot = await uploadBytes(storageRef, file);
+  return getDownloadURL(snapshot.ref);
+}
+
 /* ─────────────────── Seed Data ─────────────────── */
 export async function seedDatabase() {
   const poems = [

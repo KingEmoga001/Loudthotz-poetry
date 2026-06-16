@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
 
+const DEMO_HERO_IMAGE = `${import.meta.env.BASE_URL}opengraph.jpg`;
+
 /* ---------- helpers ---------- */
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -51,10 +53,14 @@ function HeroCarousel() {
     return () => clearInterval(t);
   }, [images.length, paused]);
 
-  if (images.length === 0) return null;
+  const allSlides = images.length > 0
+    ? images
+    : [{ id: "__demo__", url: DEMO_HERO_IMAGE, caption: "Loudthotz Poetry Open Reading", credit: undefined, order: 0, active: true }];
 
-  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
-  const next = () => setCurrent((c) => (c + 1) % images.length);
+  const prev = () => setCurrent((c) => (c - 1 + allSlides.length) % allSlides.length);
+  const next = () => setCurrent((c) => (c + 1) % allSlides.length);
+
+  const safeCurrent = Math.min(current, allSlides.length - 1);
 
   return (
     <div
@@ -64,7 +70,7 @@ function HeroCarousel() {
     >
       <AnimatePresence mode="sync">
         <motion.div
-          key={images[current]?.id}
+          key={allSlides[safeCurrent]?.id}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -72,8 +78,8 @@ function HeroCarousel() {
           className="absolute inset-0"
         >
           <img
-            src={images[current]?.url}
-            alt={images[current]?.caption}
+            src={allSlides[safeCurrent]?.url}
+            alt={allSlides[safeCurrent]?.caption}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
@@ -81,17 +87,17 @@ function HeroCarousel() {
       </AnimatePresence>
 
       {/* Caption */}
-      {images[current]?.caption && (
+      {allSlides[safeCurrent]?.caption && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 text-center px-4">
-          <p className="text-xs text-white/60 font-medium tracking-wide">{images[current].caption}</p>
-          {images[current].credit && (
-            <p className="text-[10px] text-white/40 mt-0.5">📷 {images[current].credit}</p>
+          <p className="text-xs text-white/60 font-medium tracking-wide">{allSlides[safeCurrent].caption}</p>
+          {allSlides[safeCurrent].credit && (
+            <p className="text-[10px] text-white/40 mt-0.5">📷 {allSlides[safeCurrent].credit}</p>
           )}
         </div>
       )}
 
-      {/* Arrows */}
-      {images.length > 1 && (
+      {/* Arrows — only when multiple real slides */}
+      {allSlides.length > 1 && (
         <>
           <button
             onClick={prev}
@@ -110,11 +116,11 @@ function HeroCarousel() {
 
           {/* Dots */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
-            {images.map((_, i) => (
+            {allSlides.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
-                className={`rounded-full transition-all ${i === current ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-white/30 hover:bg-white/60"}`}
+                className={`rounded-full transition-all ${i === safeCurrent ? "w-5 h-1.5 bg-primary" : "w-1.5 h-1.5 bg-white/30 hover:bg-white/60"}`}
               />
             ))}
           </div>

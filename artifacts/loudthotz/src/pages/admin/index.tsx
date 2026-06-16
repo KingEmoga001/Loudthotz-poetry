@@ -17,7 +17,7 @@ import {
   createBook, updateBook, deleteBook, updateLivestreamStatus,
   addLivestreamSession, updateLivestreamSession, deleteLivestreamSession,
   updateSiteSettings, seedDatabase,
-  useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage,
+  useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage, uploadHeroImage,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
   type FireHeroImage,
 } from "@/lib/firestore";
@@ -621,24 +621,40 @@ function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => 
 /* ──────────────────────────── Hero Images ──────────────────────────── */
 function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
   const { data: images, loading } = useAllHeroImages();
-  const [form, setForm] = useState({ url: "", caption: "", credit: "", order: "" });
+  const [form, setForm] = useState({ caption: "", credit: "", order: "" });
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [previewing, setPreviewing] = useState<string | null>(null);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { show("Please select an image file (JPG, PNG, WebP).", "error"); return; }
+    if (f.size > 10 * 1024 * 1024) { show("Image must be under 10 MB.", "error"); return; }
+    setFile(f);
+    const reader = new FileReader();
+    reader.onload = (ev) => setPreview(ev.target?.result as string);
+    reader.readAsDataURL(f);
+  };
+
   const handleAdd = async () => {
-    if (!form.url) { show("Image URL is required.", "error"); return; }
+    if (!file) { show("Please choose an image to upload.", "error"); return; }
     setSaving(true);
     try {
+      const url = await uploadHeroImage(file);
       await addHeroImage({
-        url: form.url.trim(),
+        url,
         caption: form.caption.trim(),
         credit: form.credit.trim() || undefined,
         order: form.order ? parseInt(form.order) : images.length,
         active: true,
       });
-      setForm({ url: "", caption: "", credit: "", order: "" });
-      show("Image added to carousel!");
-    } catch { show("Failed to add image.", "error"); }
+      setFile(null);
+      setPreview(null);
+      setForm({ caption: "", credit: "", order: "" });
+      show("Image uploaded and added to carousel!");
+    } catch (e: unknown) { show("Upload failed: " + (e as Error).message, "error"); }
     finally { setSaving(false); }
   };
 
@@ -721,62 +737,91 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
       {!loading && images.length === 0 && (
         <div className="text-center py-12 border border-dashed border-white/10 rounded-xl">
           <Image className="h-8 w-8 text-gray-600 mx-auto mb-3" />
-          <p className="text-gray-500 text-sm">No carousel images yet. Add one below.</p>
-          <p className="text-gray-600 text-xs mt-1">When empty, the hero shows the ambient gradient background.</p>
+          <p className="text-gray-500 text-sm">No images uploaded yet. Add one below.</p>
+          <p className="text-gray-600 text-xs mt-1">A demo image shows on the homepage until you add your own.</p>
         </div>
       )}
 
-      {/* Add image */}
-      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6 space-y-4">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add New Image</h3>
-        <div className="space-y-4">
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Image URL <span className="text-red-400">*</span></label>
+      {/* Upload form */}
+      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6 space-y-5">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Upload New Image</h3>
+
+        {/* Drop zone / file picker */}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
+            Image File <span className="text-red-400">*</span>
+          </label>
+          <label className={`flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed cursor-pointer transition-all ${preview ? "border-primary/30 bg-primary/5" : "border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.04]"}`}>
+            {preview ? (
+              <div className="relative w-full">
+                <img src={preview} alt="Preview" className="w-full max-h-52 object-cover rounded-xl" />
+                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-xl opacity-0 hover:opacity-100 transition-opacity">
+                  <p className="text-white text-xs font-semibold">Click to change image</p>
+                </div>
+              </div>
+            ) : (
+              <div className="py-10 text-center px-4">
+                <Image className="h-8 w-8 text-gray-600 mx-auto mb-3" />
+                <p className="text-sm text-gray-400 font-medium">Click to choose a photo</p>
+                <p className="text-xs text-gray-600 mt-1">JPG, PNG or WebP · max 10 MB</p>
+              </div>
+            )}
             <input
-              value={form.url}
-              onChange={e => setForm({ ...form, url: e.target.value })}
-              placeholder="https://example.com/image.jpg"
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+          </label>
+          {file && (
+            <p className="text-[11px] text-gray-500 mt-1.5 flex items-center gap-1.5">
+              <CheckCircle className="h-3 w-3 text-primary" />
+              {file.name} · {(file.size / 1024).toFixed(0)} KB
+            </p>
+          )}
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Caption</label>
+            <input
+              value={form.caption}
+              onChange={e => setForm({ ...form, caption: e.target.value })}
+              placeholder="e.g. Loudthotz Season 14 — Brothers"
               className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
             />
-            <p className="text-[11px] text-gray-600 mt-1">Use a direct link to any publicly accessible image (JPG, PNG, WebP). Google Photos, Imgur, Unsplash, or your own CDN work well.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Caption</label>
-              <input
-                value={form.caption}
-                onChange={e => setForm({ ...form, caption: e.target.value })}
-                placeholder="e.g. Loudthotz Season 14 — Brothers"
-                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Photo Credit</label>
-              <input
-                value={form.credit}
-                onChange={e => setForm({ ...form, credit: e.target.value })}
-                placeholder="e.g. Emeka Obi Photography"
-                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Display Order</label>
-              <input
-                type="number"
-                value={form.order}
-                onChange={e => setForm({ ...form, order: e.target.value })}
-                placeholder="0"
-                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
-              />
-            </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Photo Credit</label>
+            <input
+              value={form.credit}
+              onChange={e => setForm({ ...form, credit: e.target.value })}
+              placeholder="e.g. Emeka Obi Photography"
+              className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Display Order</label>
+            <input
+              type="number"
+              value={form.order}
+              onChange={e => setForm({ ...form, order: e.target.value })}
+              placeholder="0"
+              className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+            />
           </div>
         </div>
+
         <button
           onClick={handleAdd}
-          disabled={saving || !form.url}
+          disabled={saving || !file}
           className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
         >
-          <Plus className="h-4 w-4" /> {saving ? "Adding…" : "Add to Carousel"}
+          {saving ? (
+            <><RefreshCw className="h-4 w-4 animate-spin" /> Uploading…</>
+          ) : (
+            <><Plus className="h-4 w-4" /> Upload &amp; Add to Carousel</>
+          )}
         </button>
       </div>
 
