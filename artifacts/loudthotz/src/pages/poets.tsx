@@ -153,19 +153,22 @@ export default function Poets() {
               {staticPoets.map((name, i) => {
                 const color = avatarColors[i % avatarColors.length];
                 return (
-                  <motion.div
+                  <motion.a
                     key={name}
+                    href="https://loudthotzpoetry.blogspot.com/p/poets.html?m=0"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     {...fadeUp(Math.min(i * 0.03, 0.4))}
-                    className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl"
+                    className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl hover:border-primary/20 hover:bg-white/[0.04] transition-all group cursor-pointer"
                   >
                     <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${color} border flex items-center justify-center`}>
                       <span className="font-display text-sm font-bold text-white">{getInitials(name)}</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-200 truncate">{name}</p>
-                      <p className="text-xs text-gray-600 mt-0.5">Loudthotz poet</p>
+                      <p className="text-sm font-medium text-gray-200 truncate group-hover:text-primary transition-colors">{name}</p>
+                      <p className="text-xs text-gray-600 mt-0.5">View profile →</p>
                     </div>
-                  </motion.div>
+                  </motion.a>
                 );
               })}
             </div>
