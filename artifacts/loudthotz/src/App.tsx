@@ -45,6 +45,7 @@ function Router() {
             <Route path="/" component={Home} />
             <Route path="/poems" component={PoemsGallery} />
             <Route path="/poem/:id" component={PoemReader} />
+            <Route path="/poems/:id" component={PoemReader} />
             <Route path="/submit" component={SubmitPoem} />
             <Route path="/live" component={LiveReadings} />
             <Route path="/books" component={Books} />

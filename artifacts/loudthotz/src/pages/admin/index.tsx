@@ -643,18 +643,37 @@ function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => 
 /* ──────────────────────────── Poet Poems Modal ──────────────────────────── */
 function PoetPoemsModal({ poet, show, onClose }: { poet: FirePoet; show: (m: string, t?: "success" | "error") => void; onClose: () => void }) {
   const { data: poems, loading } = usePoetPoems(poet.name);
-  const [form, setForm] = useState({ title: "", content: "", season: "", theme: "" });
+  const [form, setForm] = useState({ title: "", content: "", country: "", season: "", theme: "" });
   const [saving, setSaving] = useState(false);
+  const [editingPoem, setEditingPoem] = useState<FirePoem | null>(null);
+  const [editSaving, setEditSaving] = useState(false);
 
   const handleAdd = async () => {
     if (!form.title.trim() || !form.content.trim()) { show("Title and content are required.", "error"); return; }
     setSaving(true);
     try {
       await createPoetPoem(poet.id, poet.name, form);
-      setForm({ title: "", content: "", season: "", theme: "" });
+      setForm({ title: "", content: "", country: "", season: "", theme: "" });
       show(`Poem added for ${poet.name}!`);
     } catch { show("Failed to add poem.", "error"); }
     finally { setSaving(false); }
+  };
+
+  const handleEditSave = async () => {
+    if (!editingPoem) return;
+    setEditSaving(true);
+    try {
+      await updatePoem(editingPoem.id, {
+        title: editingPoem.title,
+        content: editingPoem.content,
+        country: editingPoem.country,
+        season: editingPoem.season,
+        theme: editingPoem.theme,
+      });
+      setEditingPoem(null);
+      show("Poem updated.");
+    } catch { show("Update failed.", "error"); }
+    finally { setEditSaving(false); }
   };
 
   return (
@@ -697,18 +716,72 @@ function PoetPoemsModal({ poet, show, onClose }: { poet: FirePoet; show: (m: str
               <p className="text-sm text-gray-600 py-4 text-center">No poems yet — add one below.</p>
             )}
             {!loading && poems.length > 0 && (
-              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
                 {poems.map((poem) => (
-                  <div key={poem.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
-                    <BookOpen className="h-3.5 w-3.5 text-primary/50 mt-0.5 shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold text-white truncate">{poem.title}</p>
-                      {poem.season && <p className="text-[10px] text-gray-600">{poem.season}</p>}
-                      <p className="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed font-serif">
-                        {poem.content.split("\n").slice(0, 2).join(" · ")}
-                      </p>
-                    </div>
-                    <button onClick={async () => { if (!confirm(`Delete "${poem.title}"?`)) return; try { await deletePoem(poem.id); show("Poem deleted."); } catch { show("Delete failed.", "error"); } }} className="p-1 text-gray-600 hover:text-red-400 transition-colors shrink-0"><Trash2 className="h-3 w-3" /></button>
+                  <div key={poem.id}>
+                    {editingPoem?.id === poem.id ? (
+                      /* ── Inline edit form ── */
+                      <div className="p-3 rounded-xl bg-primary/5 border border-primary/20 space-y-2">
+                        <input
+                          value={editingPoem.title}
+                          onChange={e => setEditingPoem({ ...editingPoem, title: e.target.value })}
+                          placeholder="Title"
+                          className="w-full px-3 py-2 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40"
+                        />
+                        <textarea
+                          value={editingPoem.content}
+                          onChange={e => setEditingPoem({ ...editingPoem, content: e.target.value })}
+                          rows={6}
+                          className="w-full px-3 py-2 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 resize-none font-serif leading-relaxed"
+                        />
+                        <div className="grid grid-cols-3 gap-2">
+                          <input
+                            value={editingPoem.country ?? ""}
+                            onChange={e => setEditingPoem({ ...editingPoem, country: e.target.value })}
+                            placeholder="Country"
+                            className="px-3 py-2 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40"
+                          />
+                          <input
+                            value={editingPoem.season ?? ""}
+                            onChange={e => setEditingPoem({ ...editingPoem, season: e.target.value })}
+                            placeholder="Season"
+                            className="px-3 py-2 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40"
+                          />
+                          <input
+                            value={editingPoem.theme ?? ""}
+                            onChange={e => setEditingPoem({ ...editingPoem, theme: e.target.value })}
+                            placeholder="Theme"
+                            className="px-3 py-2 bg-white/[0.04] border border-white/10 rounded-lg text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40"
+                          />
+                        </div>
+                        <div className="flex gap-2">
+                          <button onClick={() => setEditingPoem(null)} className="flex-1 py-2 rounded-lg border border-white/10 text-gray-400 text-xs hover:bg-white/5 transition-colors">Cancel</button>
+                          <button onClick={handleEditSave} disabled={editSaving} className="flex-1 py-2 rounded-lg bg-primary text-black font-bold text-xs hover:bg-primary/90 transition-colors disabled:opacity-60 flex items-center justify-center gap-1">
+                            <Save className="h-3 w-3" />{editSaving ? "Saving…" : "Save"}
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      /* ── Read view ── */
+                      <div className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                        <BookOpen className="h-3.5 w-3.5 text-primary/50 mt-0.5 shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-semibold text-white truncate">{poem.title}</p>
+                          <div className="flex gap-2 flex-wrap mt-0.5">
+                            {poem.country && <span className="text-[10px] text-gray-600">{poem.country}</span>}
+                            {poem.season && <span className="text-[10px] text-gray-600">{poem.season}</span>}
+                            {poem.theme && <span className="text-[10px] text-gray-600">{poem.theme}</span>}
+                          </div>
+                          <p className="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed font-serif">
+                            {poem.content.split("\n").slice(0, 2).join(" · ")}
+                          </p>
+                        </div>
+                        <div className="flex gap-1 shrink-0">
+                          <button onClick={() => setEditingPoem(poem)} className="p-1 text-gray-600 hover:text-primary transition-colors"><Edit3 className="h-3 w-3" /></button>
+                          <button onClick={async () => { if (!confirm(`Delete "${poem.title}"?`)) return; try { await deletePoem(poem.id); show("Poem deleted."); } catch { show("Delete failed.", "error"); } }} className="p-1 text-gray-600 hover:text-red-400 transition-colors"><Trash2 className="h-3 w-3" /></button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
