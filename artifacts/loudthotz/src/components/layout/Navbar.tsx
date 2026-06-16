@@ -3,7 +3,7 @@ import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, PenTool, Mic2, Library, Heart, Shield, Menu, X, Trophy, Users, Feather, Archive, Info } from "lucide-react";
 import { usePendingCount } from "@/lib/firestore";
-import loudthotzLogo from "@assets/correct_1781632949414.png";
+import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781641089854.jpeg";
 
 export function Navbar() {
   const [location] = useLocation();
@@ -34,7 +34,7 @@ export function Navbar() {
           <img
             src={loudthotzLogo}
             alt="Loudthotz Poetry Open Reading"
-            className="h-11 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity"
+            className="h-11 w-auto object-contain rounded-lg opacity-95 group-hover:opacity-100 transition-opacity"
           />
         </Link>
 
