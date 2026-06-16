@@ -1064,8 +1064,13 @@ function ImportStaticPoets({ show, compact }: { show: (m: string, t?: "success" 
 
 /* ──────────────────────────── Events ──────────────────────────── */
 function EventsManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
-  const { data: events, loading } = useEvents();
-  const [editing, setEditing] = useState<FireEvent | null>(null);
+  const { data: events, loading: eventsLoading } = useEvents();
+  const { data: sessions, loading: sessionsLoading } = useLivestreamSessions();
+  const loading = eventsLoading || sessionsLoading;
+
+  /* editing discriminated union: event or session */
+  const [editingEvent, setEditingEvent] = useState<FireEvent | null>(null);
+  const [editingSession, setEditingSession] = useState<FireLivestreamSession | null>(null);
   const [saving, setSaving] = useState(false);
 
   const emptyForm: Omit<FireEvent, "id"> = {
@@ -1076,7 +1081,13 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
 
   const now = new Date();
   const upcoming = events.filter((e) => new Date(e.date) > now);
-  const past = events.filter((e) => new Date(e.date) <= now);
+  const pastEvents = events.filter((e) => new Date(e.date) <= now);
+
+  /* All sessions from livestream_sessions are past events */
+  const pastAll = [
+    ...pastEvents.map((e) => ({ kind: "event" as const, id: e.id, title: e.title, date: e.date, season: e.season, theme: e.theme, description: e.description, recordingUrl: e.youtubeUrl, blogUrl: e.blogUrl, raw: e })),
+    ...sessions.map((s) => ({ kind: "session" as const, id: s.id, title: s.title, date: s.date, season: s.season, theme: s.theme, description: s.description, recordingUrl: s.recordingUrl, blogUrl: s.blogUrl, raw: s })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   const handleCreate = async () => {
     if (!form.title.trim()) { show("Title is required.", "error"); return; }
@@ -1090,21 +1101,26 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
     finally { setSaving(false); }
   };
 
-  const handleSave = async () => {
-    if (!editing) return;
+  const handleSaveEvent = async () => {
+    if (!editingEvent) return;
     setSaving(true);
     try {
-      await updateEvent(editing.id, editing);
-      setEditing(null);
+      await updateEvent(editingEvent.id, editingEvent);
+      setEditingEvent(null);
       show("Event updated.");
     } catch { show("Update failed.", "error"); }
     finally { setSaving(false); }
   };
 
-  const handleDelete = async (e: FireEvent) => {
-    if (!confirm(`Delete "${e.title}"?`)) return;
-    try { await deleteEvent(e.id); show("Event deleted."); }
-    catch { show("Delete failed.", "error"); }
+  const handleSaveSession = async () => {
+    if (!editingSession) return;
+    setSaving(true);
+    try {
+      await updateLivestreamSession(editingSession.id, editingSession);
+      setEditingSession(null);
+      show("Session updated.");
+    } catch { show("Update failed.", "error"); }
+    finally { setSaving(false); }
   };
 
   const eventFields: { key: keyof Omit<FireEvent, "id">; label: string; placeholder: string; hint?: string; type?: string; span?: boolean }[] = [
@@ -1120,47 +1136,91 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
     { key: "description", label: "Description", placeholder: "Brief description of this event", span: true },
   ];
 
-  const EventCard = ({ ev }: { ev: FireEvent }) => {
-    const isPast = new Date(ev.date) <= now;
-    return (
-      <div className={`flex items-start gap-4 p-4 rounded-xl border transition-all ${isPast ? "border-white/5 bg-white/[0.01]" : "border-primary/20 bg-primary/5"}`}>
-        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${isPast ? "bg-white/5" : "bg-primary/10"}`}>
-          <Calendar className={`h-4 w-4 ${isPast ? "text-gray-500" : "text-primary"}`} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap mb-0.5">
-            <p className="text-sm font-semibold text-white truncate">{ev.title}</p>
-            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${isPast ? "bg-gray-500/10 text-gray-500 border-gray-500/20" : "bg-primary/10 text-primary border-primary/20"}`}>
-              {isPast ? "Past" : "Upcoming"}
-            </span>
-          </div>
-          <p className="text-xs text-gray-500">
-            {new Date(ev.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-            {ev.season && ` · ${ev.season}`}
-            {ev.theme && ` · ${ev.theme}`}
-          </p>
-          {ev.venue && <p className="text-[10px] text-gray-600 mt-0.5">{ev.venue}</p>}
-          {ev.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{ev.description}</p>}
-          {(ev.youtubeUrl || ev.blogUrl) && (
-            <div className="flex gap-3 mt-1.5">
-              {ev.youtubeUrl && <a href={ev.youtubeUrl} target="_blank" rel="noreferrer" className="text-[10px] text-secondary hover:underline font-semibold">▶ Recording</a>}
-              {ev.blogUrl && <a href={ev.blogUrl} target="_blank" rel="noreferrer" className="text-[10px] text-secondary hover:underline font-semibold">Blog Post</a>}
-            </div>
-          )}
-        </div>
-        <div className="flex gap-1.5 shrink-0">
-          <button onClick={() => setEditing(ev)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
-          <button onClick={() => handleDelete(ev)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
-        </div>
+  const sessionFields: { key: keyof Omit<FireLivestreamSession, "id">; label: string; placeholder: string; type?: string; span?: boolean }[] = [
+    { key: "title", label: "Session Title", placeholder: "e.g. Brothers — Spotlights on Kinship" },
+    { key: "date", label: "Date", placeholder: "", type: "datetime-local" },
+    { key: "season", label: "Season", placeholder: "e.g. Season 14" },
+    { key: "episode", label: "Episode #", placeholder: "e.g. 9", type: "number" },
+    { key: "theme", label: "Theme", placeholder: "e.g. Kinship & Brotherhood" },
+    { key: "recordingUrl", label: "Recording / YouTube URL", placeholder: "https://youtube.com/..." },
+    { key: "blogUrl", label: "Blog Post URL", placeholder: "https://loudthotzpoetry.blogspot.com/..." },
+    { key: "description", label: "Description", placeholder: "Brief description", span: true },
+  ];
+
+  const UpcomingCard = ({ ev }: { ev: FireEvent }) => (
+    <div className="flex items-start gap-4 p-4 rounded-xl border border-primary/20 bg-primary/5 transition-all">
+      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <Calendar className="h-4 w-4 text-primary" />
       </div>
-    );
-  };
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+          <p className="text-sm font-semibold text-white truncate">{ev.title}</p>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-primary/10 text-primary border-primary/20">Upcoming</span>
+        </div>
+        <p className="text-xs text-gray-500">
+          {new Date(ev.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+          {ev.season && ` · ${ev.season}`}
+          {ev.theme && ` · ${ev.theme}`}
+        </p>
+        {ev.venue && <p className="text-[10px] text-gray-600 mt-0.5">{ev.venue}</p>}
+        {ev.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{ev.description}</p>}
+      </div>
+      <div className="flex gap-1.5 shrink-0">
+        <button onClick={() => setEditingEvent(ev)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
+        <button onClick={async () => { if (!confirm(`Delete "${ev.title}"?`)) return; try { await deleteEvent(ev.id); show("Deleted."); } catch { show("Delete failed.", "error"); } }} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+      </div>
+    </div>
+  );
+
+  const PastCard = ({ item }: { item: typeof pastAll[number] }) => (
+    <div className="flex items-start gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.01] transition-all">
+      <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0">
+        <Calendar className="h-4 w-4 text-gray-500" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+          <p className="text-sm font-semibold text-white truncate">{item.title}</p>
+          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-gray-500/10 text-gray-500 border-gray-500/20">Past</span>
+          {item.kind === "session" && <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-blue-500/10 text-blue-400 border-blue-500/20">Session</span>}
+        </div>
+        <p className="text-xs text-gray-500">
+          {new Date(item.date).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}
+          {item.season && ` · ${item.season}`}
+          {item.theme && ` · ${item.theme}`}
+        </p>
+        {item.description && <p className="text-xs text-gray-600 mt-1 line-clamp-1">{item.description}</p>}
+        {(item.recordingUrl || item.blogUrl) && (
+          <div className="flex gap-3 mt-1.5">
+            {item.recordingUrl && <a href={item.recordingUrl} target="_blank" rel="noreferrer" className="text-[10px] text-secondary hover:underline font-semibold">▶ Recording</a>}
+            {item.blogUrl && <a href={item.blogUrl} target="_blank" rel="noreferrer" className="text-[10px] text-secondary hover:underline font-semibold">Blog Post</a>}
+          </div>
+        )}
+      </div>
+      <div className="flex gap-1.5 shrink-0">
+        <button
+          onClick={() => item.kind === "event" ? setEditingEvent(item.raw as FireEvent) : setEditingSession(item.raw as FireLivestreamSession)}
+          className="p-1.5 text-gray-500 hover:text-primary transition-colors"
+        ><Edit3 className="h-3.5 w-3.5" /></button>
+        <button
+          onClick={async () => {
+            if (!confirm(`Delete "${item.title}"?`)) return;
+            try {
+              if (item.kind === "event") await deleteEvent(item.id);
+              else await deleteLivestreamSession(item.id);
+              show("Deleted.");
+            } catch { show("Delete failed.", "error"); }
+          }}
+          className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"
+        ><Trash2 className="h-3.5 w-3.5" /></button>
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-8">
       <div>
         <h2 className="font-display text-2xl font-bold text-white mb-1">Events</h2>
-        <p className="text-gray-500 text-sm">Manage preview and past events. Events automatically move to Past once their date passes.</p>
+        <p className="text-gray-500 text-sm">Manage upcoming events and edit past sessions. Once a date passes, events move to the Past section and appear on the Archive page automatically.</p>
       </div>
 
       {loading ? (
@@ -1182,30 +1242,34 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
               </div>
             ) : (
               <div className="space-y-3">
-                {upcoming.map((ev) => <EventCard key={ev.id} ev={ev} />)}
+                {upcoming.map((ev) => <UpcomingCard key={ev.id} ev={ev} />)}
               </div>
             )}
           </div>
 
-          {/* Past events */}
-          {past.length > 0 && (
-            <div className="space-y-3">
-              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Past Events ({past.length})</h3>
-              <div className="space-y-3">
-                {past.map((ev) => <EventCard key={ev.id} ev={ev} />)}
+          {/* Past events + sessions */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">
+              Past Events &amp; Sessions ({pastAll.length})
+            </h3>
+            {pastAll.length === 0 ? (
+              <p className="text-sm text-gray-600 py-4 text-center">No past events yet.</p>
+            ) : (
+              <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1">
+                {pastAll.map((item) => <PastCard key={`${item.kind}-${item.id}`} item={item} />)}
               </div>
-            </div>
-          )}
+            )}
+          </div>
         </>
       )}
 
-      {/* Edit modal overlay */}
+      {/* Edit event modal */}
       <AnimatePresence>
-        {editing && (
+        {editingEvent && (
           <motion.div
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-            onClick={() => setEditing(null)}
+            onClick={() => setEditingEvent(null)}
           >
             <motion.div
               initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95 }}
@@ -1215,9 +1279,9 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
               <div className="flex items-center justify-between p-5 border-b border-white/5">
                 <div>
                   <h3 className="font-display text-base font-bold text-white">Edit Event</h3>
-                  <p className="text-xs text-gray-500 mt-0.5 truncate max-w-sm">{editing.title}</p>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate max-w-sm">{editingEvent.title}</p>
                 </div>
-                <button onClick={() => setEditing(null)} className="text-gray-500 hover:text-white transition-colors shrink-0 ml-4"><X className="h-4 w-4" /></button>
+                <button onClick={() => setEditingEvent(null)} className="text-gray-500 hover:text-white transition-colors shrink-0 ml-4"><X className="h-4 w-4" /></button>
               </div>
               <div className="p-5 space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1225,27 +1289,62 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
                     <div key={key} className={span ? "sm:col-span-2" : ""}>
                       <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
                       {span ? (
-                        <textarea
-                          value={(editing[key] as string) ?? ""}
-                          onChange={e => setEditing({ ...editing, [key]: e.target.value })}
-                          placeholder={placeholder} rows={2}
-                          className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 resize-none" />
+                        <textarea value={(editingEvent[key] as string) ?? ""} onChange={e => setEditingEvent({ ...editingEvent, [key]: e.target.value })} placeholder={placeholder} rows={2} className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 resize-none" />
                       ) : (
-                        <input
-                          type={type ?? "text"}
-                          value={type === "datetime-local" && editing[key] ? (editing[key] as string).slice(0, 16) : ((editing[key] as string | number) ?? "")}
-                          onChange={e => setEditing({ ...editing, [key]: type === "number" ? (e.target.value ? Number(e.target.value) : undefined) : e.target.value })}
-                          placeholder={placeholder}
-                          className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors" />
+                        <input type={type ?? "text"} value={type === "datetime-local" && editingEvent[key] ? (editingEvent[key] as string).slice(0, 16) : ((editingEvent[key] as string | number) ?? "")} onChange={e => setEditingEvent({ ...editingEvent, [key]: type === "number" ? (e.target.value ? Number(e.target.value) : undefined) : e.target.value })} placeholder={placeholder} className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors" />
                       )}
                       {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
                     </div>
                   ))}
                 </div>
                 <div className="flex gap-3 pt-1">
-                  <button onClick={() => setEditing(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-gray-400 text-sm hover:bg-white/5 transition-colors">Cancel</button>
-                  <button onClick={handleSave} disabled={saving}
-                    className="flex-1 py-2.5 rounded-xl bg-primary text-black font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+                  <button onClick={() => setEditingEvent(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-gray-400 text-sm hover:bg-white/5 transition-colors">Cancel</button>
+                  <button onClick={handleSaveEvent} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-primary text-black font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+                    <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Changes"}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit session modal */}
+      <AnimatePresence>
+        {editingSession && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setEditingSession(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95 }}
+              className="bg-[#0d100a] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between p-5 border-b border-white/5">
+                <div>
+                  <h3 className="font-display text-base font-bold text-white">Edit Past Session</h3>
+                  <p className="text-xs text-gray-500 mt-0.5 truncate max-w-sm">{editingSession.title}</p>
+                </div>
+                <button onClick={() => setEditingSession(null)} className="text-gray-500 hover:text-white transition-colors shrink-0 ml-4"><X className="h-4 w-4" /></button>
+              </div>
+              <div className="p-5 space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {sessionFields.map(({ key, label, placeholder, type, span }) => (
+                    <div key={key} className={span ? "sm:col-span-2" : ""}>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
+                      {span ? (
+                        <textarea value={(editingSession[key] as string) ?? ""} onChange={e => setEditingSession({ ...editingSession, [key]: e.target.value })} placeholder={placeholder} rows={2} className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 resize-none" />
+                      ) : (
+                        <input type={type ?? "text"} value={type === "datetime-local" && editingSession[key] ? (editingSession[key] as string).slice(0, 16) : ((editingSession[key] as string | number) ?? "")} onChange={e => setEditingSession({ ...editingSession, [key]: type === "number" ? (e.target.value ? Number(e.target.value) : undefined) : e.target.value })} placeholder={placeholder} className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors" />
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex gap-3 pt-1">
+                  <button onClick={() => setEditingSession(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-gray-400 text-sm hover:bg-white/5 transition-colors">Cancel</button>
+                  <button onClick={handleSaveSession} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-primary text-black font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
                     <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Changes"}
                   </button>
                 </div>
