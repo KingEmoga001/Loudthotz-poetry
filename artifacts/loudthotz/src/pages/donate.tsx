@@ -1,151 +1,135 @@
-import { useState } from "react";
-import { useInitiateDonation } from "@workspace/api-client-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { Heart, Globe, BookOpen } from "lucide-react";
+import { motion } from "framer-motion";
+import { Heart, Globe, BookOpen, ExternalLink, Mic2, Users } from "lucide-react";
+import { useSiteSettings } from "@/lib/firestore";
+
+const fadeUp = (delay = 0) => ({
+  initial: { opacity: 0, y: 24 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5, delay },
+});
 
 export default function Donate() {
-  const [amount, setAmount] = useState<number>(25);
-  const [customAmount, setCustomAmount] = useState("");
-  const [name, setName] = useState("");
-  const [message, setMessage] = useState("");
-  
-  const { toast } = useToast();
-  const donateMutation = useInitiateDonation();
+  const { data: s } = useSiteSettings();
 
-  const handleDonate = () => {
-    const finalAmount = customAmount ? parseFloat(customAmount) : amount;
-    if (isNaN(finalAmount) || finalAmount <= 0) {
-      toast({ title: "Invalid amount", description: "Please enter a valid donation amount.", variant: "destructive" });
-      return;
-    }
-
-    donateMutation.mutate(
-      { data: { amount: finalAmount, name, message } },
-      {
-        onSuccess: (res) => {
-          toast({
-            title: "Redirecting to payment...",
-            description: "Thank you for supporting Naija Art Initiative.",
-          });
-          // In a real app, window.location.href = res.paymentUrl
-        },
-        onError: () => {
-          toast({ title: "Error", description: "Could not initiate donation.", variant: "destructive" });
-        }
-      }
-    );
-  };
+  const headline = s?.donationHeadline ?? "Keep the Mic On.";
+  const message = s?.donationMessage ?? "Loudthotz Poetry is powered by the Naija Art Initiative. Your contributions directly fund our server costs, live session setups, and compensation for featured African poets.";
+  const paystackLink = s?.donationPaystackLink ?? "https://paystack.com/pay/loudthotzdonation";
 
   return (
-    <div className="container mx-auto px-4 py-24 max-w-6xl">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        {/* Left Col - Copy */}
-        <div className="space-y-8">
-          <Badge className="bg-primary/20 text-primary border-0 px-3 py-1 uppercase tracking-widest text-xs font-bold">
-            Support the Arts
-          </Badge>
-          <h1 className="font-display text-5xl font-bold leading-tight">Keep the Mic On.</h1>
-          <p className="font-serif text-2xl text-muted-foreground leading-relaxed">
-            Loudthotz Poetry is powered by the Naija Art Initiative. Your contributions 
-            directly fund our server costs, live session setups, and compensation for featured African poets.
-          </p>
-          
-          <div className="space-y-6 pt-8">
-            <div className="flex gap-4">
-              <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                <Globe className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1">Global Reach</h3>
-                <p className="text-muted-foreground">Connecting Lagos to London, bringing African voices to the world stage.</p>
-              </div>
+    <div className="min-h-screen">
+      {/* Hero */}
+      <section className="relative overflow-hidden py-20 md:py-28">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(181,230,29,0.07),transparent)]" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <motion.div {...fadeUp(0)} className="flex justify-center mb-8">
+            <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary px-5 py-2 rounded-full text-sm font-semibold tracking-wide">
+              <Heart className="h-4 w-4" />
+              Support the Arts
             </div>
-            <div className="flex gap-4">
-              <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center shrink-0">
-                <BookOpen className="h-5 w-5 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg mb-1">Print Anthologies</h3>
-                <p className="text-muted-foreground">Helping poets see their names in print through our annual publishing grants.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+          </motion.div>
 
-        {/* Right Col - Form */}
-        <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-8 md:p-10 shadow-2xl relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-          
-          <div className="relative z-10 space-y-8">
-            <div className="grid grid-cols-3 gap-4">
-              {[1000, 5000, 10000].map(tier => (
-                <Button 
-                  key={tier}
-                  variant={amount === tier && !customAmount ? "default" : "outline"}
-                  className={`h-16 text-xl font-bold ${amount === tier && !customAmount ? "bg-primary text-primary-foreground" : "border-white/10"}`}
-                  onClick={() => { setAmount(tier); setCustomAmount(""); }}
-                >
-                  ₦{tier.toLocaleString()}
-                </Button>
-              ))}
-            </div>
+          <motion.h1 {...fadeUp(0.08)} className="font-display text-5xl sm:text-6xl md:text-7xl font-bold tracking-tight leading-[1.05] mb-6">
+            {headline}
+          </motion.h1>
 
-            <div className="space-y-2">
-              <label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Or enter custom amount</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">₦</span>
-                <Input 
-                  type="number"
-                  placeholder="Other amount"
-                  className="pl-8 h-14 bg-white/5 border-white/10 text-lg font-bold"
-                  value={customAmount}
-                  onChange={(e) => { setCustomAmount(e.target.value); }}
-                />
-              </div>
-            </div>
+          <motion.p {...fadeUp(0.16)} className="font-serif text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto mb-10">
+            {message}
+          </motion.p>
 
-            <div className="space-y-4 pt-4 border-t border-white/5">
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Name (Optional)</label>
-                <Input 
-                  placeholder="How should we thank you?"
-                  className="h-12 bg-white/5 border-white/10"
-                  value={name}
-                  onChange={e => setName(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Message (Optional)</label>
-                <Textarea 
-                  placeholder="Leave a note for the poets..."
-                  className="min-h-[100px] bg-white/5 border-white/10 resize-none"
-                  value={message}
-                  onChange={e => setMessage(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <Button 
-              className="w-full h-16 text-lg font-bold bg-primary text-primary-foreground hover:bg-primary/90"
-              onClick={handleDonate}
-              disabled={donateMutation.isPending}
+          <motion.div {...fadeUp(0.22)}>
+            <a
+              href={paystackLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-primary text-black font-bold px-8 py-4 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/20 text-base"
             >
-              {donateMutation.isPending ? "Processing..." : (
-                <>
-                  <Heart className="mr-2 h-5 w-5 fill-current" />
-                  Donate ₦{((customAmount ? parseFloat(customAmount) : amount) || 0).toLocaleString()}
-                </>
-              )}
-            </Button>
-            <p className="text-center text-xs text-muted-foreground">Secure payment processed via Stripe.</p>
+              <Heart className="h-5 w-5 fill-current" />
+              Donate via Paystack
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* What your donation supports */}
+      <section className="py-16 border-t border-white/5">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div {...fadeUp(0)} className="text-center mb-12">
+            <h2 className="font-display text-3xl font-bold mb-3">What Your Donation Supports</h2>
+            <p className="text-gray-400 text-sm max-w-lg mx-auto">Every naira goes directly to keeping the Loudthotz community alive and thriving.</p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                icon: Mic2,
+                title: "Live Sessions",
+                desc: "Funding the setup, streaming tools, and production costs for every monthly open reading.",
+              },
+              {
+                icon: BookOpen,
+                title: "Annual Anthology",
+                desc: "Covering the print and publishing costs of the First Gong anthology series.",
+              },
+              {
+                icon: Globe,
+                title: "Global Reach",
+                desc: "Connecting Lagos to London — keeping our platforms online and our community growing.",
+              },
+            ].map((item, i) => (
+              <motion.div
+                key={item.title}
+                {...fadeUp(i * 0.08)}
+                className="flex flex-col items-center text-center p-6 bg-white/[0.02] border border-white/5 rounded-2xl"
+              >
+                <div className="h-12 w-12 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                  <item.icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="font-display font-bold text-white mb-2">{item.title}</h3>
+                <p className="text-gray-400 text-sm leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
           </div>
         </div>
-      </div>
+      </section>
+
+      {/* Community stats */}
+      <section className="py-16 border-t border-white/5">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/5">
+            {[
+              { value: "14+", label: "Seasons" },
+              { value: "100+", label: "Poets" },
+              { value: "30+", label: "Sessions" },
+              { value: "₦10K", label: "Monthly Prize" },
+            ].map((stat) => (
+              <div key={stat.label} className="bg-[#090b06] p-6 text-center">
+                <div className="font-display text-2xl font-bold text-primary mb-1">{stat.value}</div>
+                <div className="text-xs text-gray-500 uppercase tracking-widest">{stat.label}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-16">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div {...fadeUp(0)} className="relative rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-transparent p-10 text-center">
+            <Users className="h-10 w-10 text-primary mx-auto mb-4" />
+            <h3 className="font-display text-2xl font-bold mb-3">Become a Member Instead</h3>
+            <p className="text-gray-400 text-sm mb-6 leading-relaxed max-w-sm mx-auto">
+              Want to give ongoing support and get something back? Join as a paid member and receive the annual anthology, a T-shirt, and more.
+            </p>
+            <a
+              href="/membership"
+              className="inline-flex items-center gap-2 border border-secondary/30 text-secondary hover:bg-secondary hover:text-black font-semibold px-6 py-3 rounded-xl transition-all text-sm"
+            >
+              View Membership Tiers
+            </a>
+          </motion.div>
+        </div>
+      </section>
     </div>
   );
 }
-
-import { Badge } from "@/components/ui/badge";

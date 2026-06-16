@@ -40,6 +40,7 @@ export interface FireBook {
   description: string;
   price: string;
   amazonUrl: string;
+  imageUrl?: string;
   accentColor: string;
   coverTagline?: string;
 }
@@ -68,6 +69,7 @@ export interface FireLivestreamSession {
 }
 
 export interface FireSiteSettings {
+  // Home page
   heroHeadline: string;
   heroSubtext: string;
   upcomingEventTitle: string;
@@ -75,6 +77,26 @@ export interface FireSiteSettings {
   aboutText: string;
   donationMessage: string;
   totalCommunityVoices: number;
+
+  // Membership page
+  membershipFreeLink: string;
+  membershipBasicPrice: string;
+  membershipBasicLink: string;
+  membershipFullPrice: string;
+  membershipFullLink: string;
+  membershipGoldenPrice: string;
+  membershipGoldenLink: string;
+
+  // Prize page
+  prizeCashAmount: string;
+  prizeEntryFee: string;
+  prizePaystackLink: string;
+  prizeEmail: string;
+  prizeRules: string;
+
+  // Donate page
+  donationHeadline: string;
+  donationPaystackLink: string;
 }
 
 /* ───────────────────────── Helpers ───────────────────────── */

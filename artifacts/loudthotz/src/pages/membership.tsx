@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Users, Check, ExternalLink, Star, BookOpen, Shirt, Globe, Feather, MessageCircle } from "lucide-react";
+import { useSiteSettings } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -7,83 +8,89 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.5, delay },
 });
 
-const tiers = [
-  {
-    name: "Free",
-    price: "₦0",
-    period: "forever",
-    color: "border-white/10",
-    highlight: false,
-    payLink: null,
-    icon: MessageCircle,
-    iconColor: "text-gray-400",
-    description: "Get started with the Loudthotz community at no cost.",
-    benefits: [
-      "Added to our WhatsApp community",
-      "Access to community discussions",
-      "Monthly newsletter updates",
-    ],
-  },
-  {
-    name: "Basic",
-    price: "₦24,000",
-    period: "per year",
-    color: "border-white/10",
-    highlight: false,
-    payLink: "https://paystack.com/pay/basicmember",
-    icon: BookOpen,
-    iconColor: "text-secondary",
-    description: "Support the initiative and receive our annual anthology.",
-    benefits: [
-      "A copy of First Gong anthology at end of year",
-      "Access to our Telegram community",
-      "Recognition as a Basic Member",
-    ],
-  },
-  {
-    name: "Full",
-    price: "₦48,000",
-    period: "per year",
-    color: "border-primary/30",
-    highlight: true,
-    payLink: "https://paystack.com/pay/fullloudthotz",
-    icon: Star,
-    iconColor: "text-primary",
-    description: "The complete Loudthotz experience — merch included.",
-    benefits: [
-      "A copy of the First Gong anthology at end of year",
-      "Exclusive Loudthotz T-shirt",
-      "Access to our Telegram community",
-      "Priority event invitations",
-    ],
-  },
-  {
-    name: "Golden",
-    price: "₦60,000",
-    period: "per year",
-    color: "border-amber-500/30",
-    highlight: false,
-    payLink: "https://paystack.com/pay/goldenmember",
-    icon: Feather,
-    iconColor: "text-amber-400",
-    description: "Our most exclusive tier — your poems live in the anthology.",
-    benefits: [
-      "A copy of the First Gong anthology at end of year",
-      "Exclusive Loudthotz T-shirt",
-      "Free outings with Loudthotz team",
-      "A dedicated section of First Gong anthology for 10 of your poems",
-      "Priority recognition across all platforms",
-    ],
-  },
-];
-
-const eligibility = [
-  "All poets who write in English or translate works to English are eligible for membership.",
-  "Free membership is open to anyone worldwide.",
-  "Paid tiers support our mission to elevate literary culture across Africa.",
-];
-
 export default function Membership() {
+  const { data: s } = useSiteSettings();
+
+  const tiers = [
+    {
+      name: "Free",
+      price: "₦0",
+      period: "forever",
+      color: "border-white/10",
+      highlight: false,
+      payLink: s?.membershipFreeLink ?? "https://wa.me/loudthotz",
+      payLabel: "Join Free",
+      icon: MessageCircle,
+      iconColor: "text-gray-400",
+      description: "Get started with the Loudthotz community at no cost.",
+      benefits: [
+        "Added to our WhatsApp community",
+        "Access to community discussions",
+        "Monthly newsletter updates",
+      ],
+    },
+    {
+      name: "Basic",
+      price: s?.membershipBasicPrice ?? "₦24,000",
+      period: "per year",
+      color: "border-white/10",
+      highlight: false,
+      payLink: s?.membershipBasicLink ?? "https://paystack.com/pay/basicmember",
+      payLabel: "Join Basic",
+      icon: BookOpen,
+      iconColor: "text-secondary",
+      description: "Support the initiative and receive our annual anthology.",
+      benefits: [
+        "A copy of First Gong anthology at end of year",
+        "Access to our Telegram community",
+        "Recognition as a Basic Member",
+      ],
+    },
+    {
+      name: "Full",
+      price: s?.membershipFullPrice ?? "₦48,000",
+      period: "per year",
+      color: "border-primary/30",
+      highlight: true,
+      payLink: s?.membershipFullLink ?? "https://paystack.com/pay/fullloudthotz",
+      payLabel: "Join Full",
+      icon: Star,
+      iconColor: "text-primary",
+      description: "The complete Loudthotz experience — merch included.",
+      benefits: [
+        "A copy of the First Gong anthology at end of year",
+        "Exclusive Loudthotz T-shirt",
+        "Access to our Telegram community",
+        "Priority event invitations",
+      ],
+    },
+    {
+      name: "Golden",
+      price: s?.membershipGoldenPrice ?? "₦60,000",
+      period: "per year",
+      color: "border-amber-500/30",
+      highlight: false,
+      payLink: s?.membershipGoldenLink ?? "https://paystack.com/pay/goldenmember",
+      payLabel: "Join Golden",
+      icon: Feather,
+      iconColor: "text-amber-400",
+      description: "Our most exclusive tier — your poems live in the anthology.",
+      benefits: [
+        "A copy of the First Gong anthology at end of year",
+        "Exclusive Loudthotz T-shirt",
+        "Free outings with Loudthotz team",
+        "A dedicated section of First Gong anthology for 10 of your poems",
+        "Priority recognition across all platforms",
+      ],
+    },
+  ];
+
+  const eligibility = [
+    "All poets who write in English or translate works to English are eligible for membership.",
+    "Free membership is open to anyone worldwide.",
+    "Paid tiers support our mission to elevate literary culture across Africa.",
+  ];
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -120,9 +127,7 @@ export default function Membership() {
                 key={tier.name}
                 {...fadeUp(i * 0.08)}
                 className={`relative flex flex-col rounded-2xl border ${tier.color} ${
-                  tier.highlight
-                    ? "bg-primary/5 shadow-xl shadow-primary/5"
-                    : "bg-white/[0.02]"
+                  tier.highlight ? "bg-primary/5 shadow-xl shadow-primary/5" : "bg-white/[0.02]"
                 } p-6`}
               >
                 {tier.highlight && (
@@ -133,11 +138,16 @@ export default function Membership() {
                   </div>
                 )}
 
-                <div className={`mb-4 flex items-center gap-3`}>
-                  <div className={`p-2 rounded-lg bg-white/5`}>
+                <div className="mb-3 flex items-center gap-3">
+                  <div className="p-2 rounded-lg bg-white/5">
                     <tier.icon className={`h-5 w-5 ${tier.iconColor}`} />
                   </div>
                   <h3 className="font-display font-bold text-lg text-white">{tier.name}</h3>
+                </div>
+
+                <div className="mb-4">
+                  <span className="font-display text-2xl font-bold text-white">{tier.price}</span>
+                  <span className="text-gray-500 text-sm ml-1">/ {tier.period}</span>
                 </div>
 
                 <p className="text-sm text-gray-400 mb-5 leading-relaxed">{tier.description}</p>
@@ -151,40 +161,27 @@ export default function Membership() {
                   ))}
                 </ul>
 
-                {tier.payLink ? (
-                  <a
-                    href={tier.payLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                      tier.highlight
-                        ? "bg-primary text-black hover:bg-primary/90 shadow-lg shadow-primary/10"
-                        : tier.name === "Golden"
-                        ? "bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
-                        : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
-                    }`}
-                  >
-                    Join {tier.name}
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                ) : (
-                  <a
-                    href="https://wa.me/loudthotz"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
-                  >
-                    Join Free
-                    <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
-                )}
+                <a
+                  href={tier.payLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+                    tier.highlight
+                      ? "bg-primary text-black hover:bg-primary/90 shadow-lg shadow-primary/10"
+                      : tier.name === "Golden"
+                      ? "bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+                      : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+                  }`}
+                >
+                  {tier.payLabel}
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </a>
               </motion.div>
             ))}
           </div>
 
-          {/* Note about prices */}
           <p className="text-center text-xs text-gray-600 mt-6">
-            * Pricing for paid tiers is set on Paystack. Click "Join" to see current rates and complete your registration.
+            * Pricing for paid tiers is processed via Paystack. Click "Join" to see current rates and complete your registration.
           </p>
         </div>
       </section>
@@ -210,7 +207,7 @@ export default function Membership() {
         </div>
       </section>
 
-      {/* Membership includes anthology */}
+      {/* Wear Your Words */}
       <section className="py-16 border-t border-white/5">
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="relative rounded-2xl border border-secondary/20 bg-gradient-to-br from-secondary/5 to-transparent p-10">
@@ -220,7 +217,7 @@ export default function Membership() {
               Full and Golden members receive an exclusive Loudthotz T-shirt — a badge of belonging to Nigeria's premier poetry community.
             </p>
             <a
-              href="https://paystack.com/pay/fullloudthotz"
+              href={s?.membershipFullLink ?? "https://paystack.com/pay/fullloudthotz"}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-secondary text-black font-semibold px-8 py-3 rounded-xl hover:bg-secondary/90 transition-all text-sm"

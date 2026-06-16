@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Trophy, Calendar, FileText, DollarSign, Mail, AlertCircle, CheckCircle, Star, ExternalLink } from "lucide-react";
+import { useSiteSettings } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -7,7 +8,7 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.5, delay },
 });
 
-const rules = [
+const DEFAULT_RULES = [
   "The poem must not be more than 14 lines, a maximum of 6 words per line.",
   "On any topic.",
   "The deadline is the second Thursday of every month.",
@@ -24,6 +25,16 @@ const rules = [
 ];
 
 export default function Prize() {
+  const { data: s } = useSiteSettings();
+
+  const cashAmount = s?.prizeCashAmount ?? "₦10,000";
+  const entryFee = s?.prizeEntryFee ?? "₦1,000";
+  const paystackLink = s?.prizePaystackLink ?? "https://paystack.com/pay/lpp";
+  const email = s?.prizeEmail ?? "loudthotz@gmail.com";
+  const rules = s?.prizeRules
+    ? s.prizeRules.split("\n").filter(Boolean)
+    : DEFAULT_RULES;
+
   return (
     <div className="min-h-screen">
       {/* Hero */}
@@ -47,22 +58,22 @@ export default function Prize() {
 
           <motion.p {...fadeUp(0.16)} className="font-serif text-lg md:text-xl text-gray-400 leading-relaxed mb-8 max-w-2xl mx-auto">
             In order to promote written poetry and the culture of reading in Nigeria and for the love of words, Loudthotz Poetry awards a cash prize of{" "}
-            <span className="text-primary font-semibold">₦10,000</span> every month to the winner of the Loudthotz Poetry Prize.
+            <span className="text-primary font-semibold">{cashAmount}</span> every month to the winner of the Loudthotz Poetry Prize.
           </motion.p>
 
           <motion.div {...fadeUp(0.22)} className="flex flex-col sm:flex-row gap-3 justify-center">
             <a
-              href="https://paystack.com/pay/lpp"
+              href={paystackLink}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-primary text-black font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 text-sm"
             >
               <DollarSign className="h-4 w-4" />
-              Pay Entry Fee — ₦1,000
+              Pay Entry Fee — {entryFee}
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
             <a
-              href="mailto:loudthotz@gmail.com?subject=LPP Poem Submission"
+              href={`mailto:${email}?subject=LPP Poem Submission`}
               className="inline-flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 font-medium px-6 py-3 rounded-xl transition-all text-sm"
             >
               <Mail className="h-4 w-4" />
@@ -77,7 +88,7 @@ export default function Prize() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/5">
             {[
-              { icon: DollarSign, label: "Cash Prize", value: "₦10,000", sub: "Per winning poem" },
+              { icon: DollarSign, label: "Cash Prize", value: cashAmount, sub: "Per winning poem" },
               { icon: Calendar, label: "Deadline", value: "2nd Thursday", sub: "Of every month" },
               { icon: Star, label: "Publication", value: "Annual Anthology", sub: "Winning poems included" },
             ].map((item) => (
@@ -118,7 +129,6 @@ export default function Prize() {
             ))}
           </div>
 
-          {/* Eligibility notice */}
           <div className="mt-6 flex items-start gap-3 bg-amber-500/5 border border-amber-500/20 rounded-xl p-4">
             <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
             <p className="text-sm text-amber-200/80">
@@ -141,8 +151,8 @@ export default function Prize() {
               {
                 step: "01",
                 title: "Pay Entry Fee",
-                desc: "Pay the ₦1,000 competition fee via Paystack and keep your receipt.",
-                action: { label: "Pay on Paystack", href: "https://paystack.com/pay/lpp" },
+                desc: `Pay the ${entryFee} competition fee via Paystack and keep your receipt.`,
+                action: { label: "Pay on Paystack", href: paystackLink },
               },
               {
                 step: "02",
@@ -152,8 +162,8 @@ export default function Prize() {
               {
                 step: "03",
                 title: "Send to Us",
-                desc: 'Email everything to loudthotz@gmail.com with subject: "Month Year LPP Poem" e.g "January 2025 LPP Poem".',
-                action: { label: "Send Email", href: "mailto:loudthotz@gmail.com?subject=LPP Poem Submission" },
+                desc: `Email everything to ${email} with subject: "Month Year LPP Poem" e.g "January 2025 LPP Poem".`,
+                action: { label: "Send Email", href: `mailto:${email}?subject=LPP Poem Submission` },
               },
             ].map((s) => (
               <div key={s.step} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col gap-4">
@@ -189,7 +199,7 @@ export default function Prize() {
               Winners are announced on the last day of every month across all Loudthotz platforms.
             </p>
             <a
-              href="https://paystack.com/pay/lpp"
+              href={paystackLink}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-primary text-black font-semibold px-8 py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 text-sm"

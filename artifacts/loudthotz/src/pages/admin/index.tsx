@@ -494,12 +494,13 @@ function LivestreamControl({ show }: { show: (m: string, t?: "success" | "error"
 /* ──────────────────────────── Books ──────────────────────────── */
 function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
   const { data: books, loading } = useBooks();
-  const [form, setForm] = useState({ title: "", subtitle: "", description: "", price: "", amazonUrl: "", accentColor: "lime", coverTagline: "" });
+  const emptyForm = { title: "", subtitle: "", description: "", price: "", amazonUrl: "", imageUrl: "", accentColor: "lime", coverTagline: "" };
+  const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState<FireBook | null>(null);
 
   const handleCreate = async () => {
     if (!form.title || !form.amazonUrl) { show("Title and Amazon URL are required.", "error"); return; }
-    try { await createBook(form); setForm({ title: "", subtitle: "", description: "", price: "", amazonUrl: "", accentColor: "lime", coverTagline: "" }); show("Book added!"); }
+    try { await createBook(form); setForm(emptyForm); show("Book added!"); }
     catch { show("Failed to add book.", "error"); }
   };
 
@@ -515,39 +516,48 @@ function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => 
     catch { show("Delete failed.", "error"); }
   };
 
-  const bookFields = [
+  const bookFields: { key: keyof typeof emptyForm; label: string; placeholder: string; hint?: string }[] = [
     { key: "title", label: "Title", placeholder: "e.g. FIRST GONG" },
-    { key: "subtitle", label: "Subtitle", placeholder: "e.g. Anthology Vol. I" },
-    { key: "price", label: "Price", placeholder: "$12.99" },
-    { key: "amazonUrl", label: "Amazon URL", placeholder: "https://amazon.com/dp/..." },
-    { key: "description", label: "Description", placeholder: "Brief description of the book" },
-    { key: "coverTagline", label: "Cover Tagline", placeholder: "Short tagline shown on book cover" },
+    { key: "subtitle", label: "Subtitle / Volume", placeholder: "e.g. Anthology Vol. I" },
+    { key: "price", label: "Price (₦)", placeholder: "e.g. ₦5,000", hint: "Use the ₦ symbol, e.g. ₦5,000" },
+    { key: "amazonUrl", label: "Amazon Link", placeholder: "https://amazon.com/dp/...", hint: "Full Amazon product URL" },
+    { key: "imageUrl", label: "Cover Image URL", placeholder: "https://...", hint: "Paste a direct link to the book cover image" },
+    { key: "description", label: "Description", placeholder: "Brief description of the anthology" },
   ];
 
   return (
     <div className="space-y-8">
       <div>
         <h2 className="font-display text-2xl font-bold text-white mb-1">Books & Anthologies</h2>
-        <p className="text-gray-500 text-sm">Manage published books and Amazon links</p>
+        <p className="text-gray-500 text-sm">Add your cover image URL, price in ₦, description and Amazon link. Each card on the site links directly to Amazon.</p>
       </div>
 
       {/* Current books */}
       {!loading && books && books.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {books.map((b) => (
-            <div key={b.id} className={`p-5 rounded-xl border ${b.accentColor === "lime" ? "border-primary/20 bg-primary/5" : "border-secondary/20 bg-secondary/5"}`}>
-              <div className="flex justify-between items-start gap-3 mb-2">
-                <div>
-                  <p className={`font-display font-bold text-base ${b.accentColor === "lime" ? "text-primary" : "text-secondary"}`}>{b.title}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">{b.subtitle} · {b.price}</p>
+            <div key={b.id} className="p-4 rounded-xl border border-white/10 bg-white/[0.02] flex gap-4">
+              {b.imageUrl ? (
+                <img src={b.imageUrl} alt={b.title} className="w-16 h-20 object-cover rounded-lg shrink-0 border border-white/10" />
+              ) : (
+                <div className={`w-16 h-20 rounded-lg shrink-0 flex items-center justify-center ${b.accentColor === "lime" ? "bg-primary/10" : "bg-secondary/10"}`}>
+                  <Library className="h-5 w-5 text-gray-500" />
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => setEditing(b)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-4 w-4" /></button>
-                  <button onClick={() => handleDelete(b)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4" /></button>
+              )}
+              <div className="flex-1 min-w-0">
+                <div className="flex justify-between items-start gap-2">
+                  <div>
+                    <p className="font-display font-bold text-sm text-white truncate">{b.title}</p>
+                    <p className="text-xs text-gray-500">{b.price || "No price set"}</p>
+                  </div>
+                  <div className="flex gap-1.5 shrink-0">
+                    <button onClick={() => setEditing(b)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
+                    <button onClick={() => handleDelete(b)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+                  </div>
                 </div>
+                <p className="text-xs text-gray-500 line-clamp-2 mt-1">{b.description}</p>
+                <a href={b.amazonUrl} target="_blank" rel="noreferrer" className="mt-2 flex items-center gap-1 text-[10px] text-amber-400 hover:underline font-semibold uppercase tracking-wider"><Link2 className="h-3 w-3" /> Amazon</a>
               </div>
-              <p className="text-xs text-gray-400 line-clamp-2">{b.description}</p>
-              <a href={b.amazonUrl} target="_blank" rel="noreferrer" className="mt-3 flex items-center gap-1.5 text-[10px] text-amber-400 hover:underline font-semibold uppercase tracking-wider"><Link2 className="h-3 w-3" /> Amazon</a>
             </div>
           ))}
         </div>
@@ -557,23 +567,29 @@ function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => 
       <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6 space-y-4">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add New Book</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          {bookFields.map(({ key, label, placeholder }) => (
-            <div key={key}>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{label}</label>
-              <input value={(form as Record<string, string>)[key]}
-                onChange={e => setForm({ ...form, [key]: e.target.value })}
-                placeholder={placeholder}
-                className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors" />
+          {bookFields.map(({ key, label, placeholder, hint }) => (
+            <div key={key} className={key === "description" ? "sm:col-span-2" : ""}>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">{label}</label>
+              {hint && <p className="text-[10px] text-gray-600 mb-1.5">{hint}</p>}
+              {key === "description" ? (
+                <textarea value={form[key]}
+                  onChange={e => setForm({ ...form, [key]: e.target.value })}
+                  placeholder={placeholder} rows={2}
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 resize-none" />
+              ) : (
+                <input value={form[key]}
+                  onChange={e => setForm({ ...form, [key]: e.target.value })}
+                  placeholder={placeholder}
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors" />
+              )}
             </div>
           ))}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">Accent Color</label>
-            <select value={form.accentColor} onChange={e => setForm({ ...form, accentColor: e.target.value })}
-              className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white focus:outline-none">
-              <option value="lime">Lime (primary)</option>
-              <option value="blue">Blue (secondary)</option>
-            </select>
-          </div>
+          {form.imageUrl && (
+            <div className="sm:col-span-2">
+              <p className="text-[10px] text-gray-500 mb-1.5 uppercase tracking-wider font-semibold">Image Preview</p>
+              <img src={form.imageUrl} alt="preview" className="h-24 object-contain rounded-lg border border-white/10" onError={e => (e.currentTarget.style.display = "none")} />
+            </div>
+          )}
         </div>
         <button onClick={handleCreate}
           className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all">
@@ -587,22 +603,25 @@ function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => 
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setEditing(null)}>
             <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }} exit={{ scale: 0.95 }}
-              className="bg-[#0d100a] border border-white/10 rounded-2xl p-6 w-full max-w-md space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+              className="bg-[#0d100a] border border-white/10 rounded-2xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
               <h3 className="font-display text-lg font-bold text-white">Edit Book</h3>
-              {[...bookFields, { key: "accentColor", label: "Accent", placeholder: "" }].map(({ key, label, placeholder }) => (
+              {bookFields.map(({ key, label, placeholder, hint }) => (
                 <div key={key}>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5 capitalize">{label}</label>
-                  {key === "accentColor" ? (
-                    <select value={(editing as unknown as Record<string, string>)[key]} onChange={e => setEditing({ ...editing, [key]: e.target.value } as FireBook)}
-                      className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white focus:outline-none">
-                      <option value="lime">Lime</option>
-                      <option value="blue">Blue</option>
-                    </select>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
+                  {hint && <p className="text-[10px] text-gray-600 mb-1.5">{hint}</p>}
+                  {key === "description" ? (
+                    <textarea value={((editing as unknown as Record<string, unknown>)[key] as string) ?? ""}
+                      onChange={e => setEditing({ ...editing, [key]: e.target.value } as FireBook)}
+                      placeholder={placeholder} rows={2}
+                      className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 resize-none" />
                   ) : (
                     <input value={((editing as unknown as Record<string, unknown>)[key] as string) ?? ""}
                       onChange={e => setEditing({ ...editing, [key]: e.target.value } as FireBook)}
                       placeholder={placeholder}
                       className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40" />
+                  )}
+                  {key === "imageUrl" && editing.imageUrl && (
+                    <img src={editing.imageUrl} alt="preview" className="mt-2 h-20 object-contain rounded-lg border border-white/10" onError={e => (e.currentTarget.style.display = "none")} />
                   )}
                 </div>
               ))}
@@ -890,25 +909,64 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
 }
 
 /* ──────────────────────────── Site Settings ──────────────────────────── */
+type SettingsSection = "home" | "membership" | "prize" | "donate";
+
+function SettingsField({
+  label, hint, value, onChange, multiline, placeholder, rows,
+}: {
+  label: string; hint?: string; value: string; onChange: (v: string) => void;
+  multiline?: boolean; placeholder?: string; rows?: number;
+}) {
+  return (
+    <div>
+      <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
+      {hint && <p className="text-[10px] text-gray-600 mb-1.5">{hint}</p>}
+      {multiline ? (
+        <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={rows ?? 3}
+          className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors resize-none" />
+      ) : (
+        <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
+          className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors" />
+      )}
+    </div>
+  );
+}
+
 function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error") => void }) {
   const { data: settings } = useSiteSettings();
   const [seeding, setSeeding] = useState(false);
-  const [form, setForm] = useState({
-    heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "",
-    aboutText: "", donationMessage: "", totalCommunityVoices: "",
-  });
+  const [saving, setSaving] = useState(false);
+  const [activeSection, setActiveSection] = useState<SettingsSection>("home");
+
+  const ph = (v: string | number | undefined, fallback: string) => (v ? String(v) : fallback);
+
+  const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "" });
+  const [membership, setMembership] = useState({ membershipFreeLink: "", membershipBasicPrice: "", membershipBasicLink: "", membershipFullPrice: "", membershipFullLink: "", membershipGoldenPrice: "", membershipGoldenLink: "" });
+  const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeRules: "" });
+  const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
 
   const handleSave = async () => {
+    setSaving(true);
     const upd: Record<string, unknown> = {};
-    if (form.heroHeadline) upd.heroHeadline = form.heroHeadline;
-    if (form.heroSubtext) upd.heroSubtext = form.heroSubtext;
-    if (form.upcomingEventTitle) upd.upcomingEventTitle = form.upcomingEventTitle;
-    if (form.upcomingEventDate) upd.upcomingEventDate = form.upcomingEventDate;
-    if (form.aboutText) upd.aboutText = form.aboutText;
-    if (form.donationMessage) upd.donationMessage = form.donationMessage;
-    if (form.totalCommunityVoices) upd.totalCommunityVoices = parseInt(form.totalCommunityVoices);
-    try { await updateSiteSettings(upd as never); show("Site settings saved!"); setForm({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", donationMessage: "", totalCommunityVoices: "" }); }
+    const add = (obj: Record<string, string>, key: string) => { if (obj[key]) upd[key] = obj[key]; };
+
+    if (activeSection === "home") {
+      add(home, "heroHeadline"); add(home, "heroSubtext"); add(home, "upcomingEventTitle"); add(home, "upcomingEventDate"); add(home, "aboutText");
+      if (home.totalCommunityVoices) upd.totalCommunityVoices = parseInt(home.totalCommunityVoices);
+    }
+    if (activeSection === "membership") {
+      Object.keys(membership).forEach(k => add(membership as Record<string, string>, k));
+    }
+    if (activeSection === "prize") {
+      Object.keys(prize).forEach(k => add(prize as Record<string, string>, k));
+    }
+    if (activeSection === "donate") {
+      Object.keys(donate).forEach(k => add(donate as Record<string, string>, k));
+    }
+
+    try { await updateSiteSettings(upd as never); show("Settings saved!"); }
     catch { show("Failed to save settings.", "error"); }
+    finally { setSaving(false); }
   };
 
   const handleSeed = async () => {
@@ -919,54 +977,102 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     finally { setSeeding(false); }
   };
 
-  const fields = [
-    { key: "heroHeadline", label: "Hero Headline", placeholder: settings?.heroHeadline ?? "Where Words Ignite Loud Thoughts", multiline: false },
-    { key: "upcomingEventTitle", label: "Upcoming Event Title", placeholder: settings?.upcomingEventTitle ?? "Brothers — Spotlights on Kinship", multiline: false },
-    { key: "totalCommunityVoices", label: "Community Voices Count", placeholder: String(settings?.totalCommunityVoices ?? 5000), multiline: false },
-    { key: "heroSubtext", label: "Hero Description", placeholder: settings?.heroSubtext ?? "Formerly managed under…", multiline: true },
-    { key: "aboutText", label: "About Text", placeholder: settings?.aboutText ?? "A living literary space…", multiline: true },
-    { key: "donationMessage", label: "Donation Message", placeholder: settings?.donationMessage ?? "", multiline: true },
+  const sections: { id: SettingsSection; label: string }[] = [
+    { id: "home", label: "Home Page" },
+    { id: "membership", label: "Membership" },
+    { id: "prize", label: "Poetry Prize" },
+    { id: "donate", label: "Donate Page" },
   ];
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       <div>
         <h2 className="font-display text-2xl font-bold text-white mb-1">Site Settings</h2>
-        <p className="text-gray-500 text-sm">Control the content displayed across the website</p>
+        <p className="text-gray-500 text-sm">Edit content for every page — no code needed. Select a page section, update the fields, then click Save.</p>
       </div>
 
-      <div className="grid grid-cols-1 gap-5">
-        {fields.map(({ key, label, placeholder, multiline }) => (
-          <div key={key}>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">{label}</label>
-            {multiline ? (
-              <textarea value={(form as Record<string, string>)[key]}
-                onChange={e => setForm({ ...form, [key]: e.target.value })}
-                placeholder={placeholder} rows={3}
-                className="w-full px-4 py-3 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors resize-none" />
-            ) : (
-              <input value={(form as Record<string, string>)[key]}
-                onChange={e => setForm({ ...form, [key]: e.target.value })}
-                placeholder={placeholder}
-                className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors" />
-            )}
-          </div>
+      {/* Section tabs */}
+      <div className="flex flex-wrap gap-2 border-b border-white/5 pb-4">
+        {sections.map(s => (
+          <button key={s.id} onClick={() => setActiveSection(s.id)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === s.id ? "bg-primary text-black font-semibold" : "bg-white/5 border border-white/10 text-gray-400 hover:text-white"}`}>
+            {s.label}
+          </button>
         ))}
-
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1.5">Upcoming Event Date</label>
-          <input type="datetime-local" value={form.upcomingEventDate}
-            onChange={e => setForm({ ...form, upcomingEventDate: e.target.value })}
-            className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors" />
-        </div>
       </div>
 
-      <button onClick={handleSave}
-        className="flex items-center gap-2 bg-primary text-black font-bold px-6 py-3 rounded-xl text-sm hover:bg-primary/90 transition-all">
-        <Save className="h-4 w-4" /> Save Settings
+      {/* Home Page */}
+      {activeSection === "home" && (
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <SettingsField label="Hero Headline" placeholder={ph(settings?.heroHeadline, "Where Words Ignite Loud Thoughts")} value={home.heroHeadline} onChange={v => setHome({ ...home, heroHeadline: v })} />
+            <SettingsField label="Upcoming Event Title" placeholder={ph(settings?.upcomingEventTitle, "Season 15 Episode 01")} value={home.upcomingEventTitle} onChange={v => setHome({ ...home, upcomingEventTitle: v })} />
+            <SettingsField label="Community Voices Count" placeholder={ph(settings?.totalCommunityVoices, "5000")} hint="Number shown in the stats badge" value={home.totalCommunityVoices} onChange={v => setHome({ ...home, totalCommunityVoices: v })} />
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Upcoming Event Date &amp; Time</label>
+              <input type="datetime-local" value={home.upcomingEventDate} onChange={e => setHome({ ...home, upcomingEventDate: e.target.value })}
+                className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors" />
+            </div>
+          </div>
+          <SettingsField label="Hero Subtext" hint="Paragraph below the hero headline" placeholder={ph(settings?.heroSubtext, "Formerly managed under…")} value={home.heroSubtext} onChange={v => setHome({ ...home, heroSubtext: v })} multiline rows={3} />
+          <SettingsField label="About Text" hint="Shown on the Home page About/Mission section" placeholder={ph(settings?.aboutText, "A living literary space…")} value={home.aboutText} onChange={v => setHome({ ...home, aboutText: v })} multiline rows={4} />
+        </div>
+      )}
+
+      {/* Membership Page */}
+      {activeSection === "membership" && (
+        <div className="space-y-6">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">Update the prices and payment links for each membership tier. Leave a field blank to keep the current value.</p>
+          <div className="space-y-5">
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Free Tier</p>
+              <SettingsField label="WhatsApp Link" hint="The link visitors click to join the free community" placeholder={ph(settings?.membershipFreeLink, "https://wa.me/...")} value={membership.membershipFreeLink} onChange={v => setMembership({ ...membership, membershipFreeLink: v })} />
+            </div>
+            {(["Basic", "Full", "Golden"] as const).map((tier) => {
+              const priceKey = `membership${tier}Price` as keyof typeof membership;
+              const linkKey = `membership${tier}Link` as keyof typeof membership;
+              return (
+                <div key={tier} className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+                  <p className="text-xs font-bold uppercase tracking-widest text-gray-400">{tier} Tier</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <SettingsField label="Price" hint="e.g. ₦24,000" placeholder={ph(settings?.[priceKey as keyof typeof settings] as string, `Current: ${tier === "Basic" ? "₦24,000" : tier === "Full" ? "₦48,000" : "₦60,000"}`)} value={membership[priceKey]} onChange={v => setMembership({ ...membership, [priceKey]: v })} />
+                    <SettingsField label="Paystack Link" hint="Full https://paystack.com/pay/... URL" placeholder={ph(settings?.[linkKey as keyof typeof settings] as string, "https://paystack.com/pay/...")} value={membership[linkKey]} onChange={v => setMembership({ ...membership, [linkKey]: v })} />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Prize Page */}
+      {activeSection === "prize" && (
+        <div className="space-y-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <SettingsField label="Monthly Cash Prize" hint="e.g. ₦10,000" placeholder={ph(settings?.prizeCashAmount, "₦10,000")} value={prize.prizeCashAmount} onChange={v => setPrize({ ...prize, prizeCashAmount: v })} />
+            <SettingsField label="Entry Fee" hint="e.g. ₦1,000" placeholder={ph(settings?.prizeEntryFee, "₦1,000")} value={prize.prizeEntryFee} onChange={v => setPrize({ ...prize, prizeEntryFee: v })} />
+            <SettingsField label="Paystack Payment Link" hint="Link for the ₦1,000 entry fee" placeholder={ph(settings?.prizePaystackLink, "https://paystack.com/pay/lpp")} value={prize.prizePaystackLink} onChange={v => setPrize({ ...prize, prizePaystackLink: v })} />
+            <SettingsField label="Submission Email" hint="Email address for poem submissions" placeholder={ph(settings?.prizeEmail, "loudthotz@gmail.com")} value={prize.prizeEmail} onChange={v => setPrize({ ...prize, prizeEmail: v })} />
+          </div>
+          <SettingsField label="Competition Rules" hint="One rule per line. Leave blank to use built-in default rules." placeholder={ph(settings?.prizeRules, "The poem must not be more than 14 lines…\nOn any topic.\n…")} value={prize.prizeRules} onChange={v => setPrize({ ...prize, prizeRules: v })} multiline rows={10} />
+        </div>
+      )}
+
+      {/* Donate Page */}
+      {activeSection === "donate" && (
+        <div className="space-y-5">
+          <SettingsField label="Page Headline" hint='Large heading on the donate page, e.g. "Keep the Mic On."' placeholder={ph(settings?.donationHeadline, "Keep the Mic On.")} value={donate.donationHeadline} onChange={v => setDonate({ ...donate, donationHeadline: v })} />
+          <SettingsField label="Paystack Donation Link" hint="Link for the Donate button — your Paystack payment page" placeholder={ph(settings?.donationPaystackLink, "https://paystack.com/pay/loudthotzdonation")} value={donate.donationPaystackLink} onChange={v => setDonate({ ...donate, donationPaystackLink: v })} />
+          <SettingsField label="Body Text / Message" hint="Supporting paragraph below the headline" placeholder={ph(settings?.donationMessage, "Loudthotz Poetry is powered by the Naija Art Initiative…")} value={donate.donationMessage} onChange={v => setDonate({ ...donate, donationMessage: v })} multiline rows={4} />
+        </div>
+      )}
+
+      <button onClick={handleSave} disabled={saving}
+        className="flex items-center gap-2 bg-primary text-black font-bold px-6 py-3 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-60">
+        <Save className="h-4 w-4" /> {saving ? "Saving…" : `Save ${sections.find(s => s.id === activeSection)?.label} Settings`}
       </button>
 
-      {/* Initialize Database */}
+      {/* Database Management */}
       <div className="border-t border-white/5 pt-8 space-y-4">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Database Management</h3>
         <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-5">
