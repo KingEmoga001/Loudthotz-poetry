@@ -78,8 +78,8 @@ export function Footer() {
             © {new Date().getFullYear()} Naija Art Initiative. All rights reserved.
           </p>
           <div className="flex gap-6 text-xs text-gray-500">
-            <span className="hover:text-gray-300 cursor-pointer transition-colors">Terms of Service</span>
-            <span className="hover:text-gray-300 cursor-pointer transition-colors">Privacy Policy</span>
+            <span>Terms of Service</span>
+            <span>Privacy Policy</span>
           </div>
         </div>
       </div>

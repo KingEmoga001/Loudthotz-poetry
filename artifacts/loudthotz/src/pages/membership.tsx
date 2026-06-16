@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Users, Check, ExternalLink, Star, BookOpen, Shirt, Globe, Feather, MessageCircle } from "lucide-react";
+import { Users, Check, ExternalLink, Star, BookOpen, Shirt, Globe, Feather, MessageCircle, Settings } from "lucide-react";
 import { useSiteSettings } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
@@ -7,6 +7,50 @@ const fadeUp = (delay = 0) => ({
   animate: { opacity: 1, y: 0 },
   transition: { duration: 0.5, delay },
 });
+
+function TierButton({
+  href,
+  label,
+  highlight,
+  tierName,
+}: {
+  href: string;
+  label: string;
+  highlight: boolean;
+  tierName: string;
+}) {
+  const configured = href && href.startsWith("http");
+
+  const baseClass = `inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
+    highlight
+      ? configured
+        ? "bg-primary text-black hover:bg-primary/90 shadow-lg shadow-primary/10"
+        : "bg-primary/30 text-black/50 cursor-not-allowed"
+      : tierName === "Golden"
+      ? configured
+        ? "bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
+        : "bg-amber-500/5 border border-amber-500/10 text-amber-300/40 cursor-not-allowed"
+      : configured
+      ? "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+      : "bg-white/[0.02] border border-white/5 text-gray-600 cursor-not-allowed"
+  }`;
+
+  if (!configured) {
+    return (
+      <span title="Payment link not yet configured — set it in Admin → Settings" className={baseClass}>
+        <Settings className="h-3.5 w-3.5" />
+        {label}
+      </span>
+    );
+  }
+
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" className={baseClass}>
+      {label}
+      <ExternalLink className="h-3.5 w-3.5" />
+    </a>
+  );
+}
 
 export default function Membership() {
   const { data: s } = useSiteSettings();
@@ -18,7 +62,7 @@ export default function Membership() {
       period: "forever",
       color: "border-white/10",
       highlight: false,
-      payLink: s?.membershipFreeLink ?? "https://wa.me/loudthotz",
+      payLink: s?.membershipFreeLink ?? "",
       payLabel: "Join Free",
       icon: MessageCircle,
       iconColor: "text-gray-400",
@@ -35,7 +79,7 @@ export default function Membership() {
       period: "per year",
       color: "border-white/10",
       highlight: false,
-      payLink: s?.membershipBasicLink ?? "https://paystack.com/pay/basicmember",
+      payLink: s?.membershipBasicLink ?? "",
       payLabel: "Join Basic",
       icon: BookOpen,
       iconColor: "text-secondary",
@@ -52,7 +96,7 @@ export default function Membership() {
       period: "per year",
       color: "border-primary/30",
       highlight: true,
-      payLink: s?.membershipFullLink ?? "https://paystack.com/pay/fullloudthotz",
+      payLink: s?.membershipFullLink ?? "",
       payLabel: "Join Full",
       icon: Star,
       iconColor: "text-primary",
@@ -70,7 +114,7 @@ export default function Membership() {
       period: "per year",
       color: "border-amber-500/30",
       highlight: false,
-      payLink: s?.membershipGoldenLink ?? "https://paystack.com/pay/goldenmember",
+      payLink: s?.membershipGoldenLink ?? "",
       payLabel: "Join Golden",
       icon: Feather,
       iconColor: "text-amber-400",
@@ -90,6 +134,8 @@ export default function Membership() {
     "Free membership is open to anyone worldwide.",
     "Paid tiers support our mission to elevate literary culture across Africa.",
   ];
+
+  const fullLink = s?.membershipFullLink ?? "";
 
   return (
     <div className="min-h-screen">
@@ -165,21 +211,7 @@ export default function Membership() {
                   ))}
                 </ul>
 
-                <a
-                  href={tier.payLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all ${
-                    tier.highlight
-                      ? "bg-primary text-black hover:bg-primary/90 shadow-lg shadow-primary/10"
-                      : tier.name === "Golden"
-                      ? "bg-amber-500/10 border border-amber-500/30 text-amber-300 hover:bg-amber-500/20"
-                      : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
-                  }`}
-                >
-                  {tier.payLabel}
-                  <ExternalLink className="h-3.5 w-3.5" />
-                </a>
+                <TierButton href={tier.payLink} label={tier.payLabel} highlight={tier.highlight} tierName={tier.name} />
               </motion.div>
             ))}
           </div>
@@ -220,15 +252,25 @@ export default function Membership() {
             <p className="text-gray-400 text-sm mb-6 leading-relaxed">
               Full and Golden members receive an exclusive Loudthotz T-shirt — a badge of belonging to Nigeria's premier poetry community.
             </p>
-            <a
-              href={s?.membershipFullLink ?? "https://paystack.com/pay/fullloudthotz"}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-secondary text-black font-semibold px-8 py-3 rounded-xl hover:bg-secondary/90 transition-all text-sm"
-            >
-              Get Full Membership
-              <ExternalLink className="h-4 w-4" />
-            </a>
+            {fullLink && fullLink.startsWith("http") ? (
+              <a
+                href={fullLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-secondary text-black font-semibold px-8 py-3 rounded-xl hover:bg-secondary/90 transition-all text-sm"
+              >
+                Get Full Membership
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            ) : (
+              <span
+                title="Payment link not yet configured — set it in Admin → Settings"
+                className="inline-flex items-center gap-2 bg-secondary/20 text-secondary/40 font-semibold px-8 py-3 rounded-xl text-sm cursor-not-allowed"
+              >
+                <Settings className="h-4 w-4" />
+                Get Full Membership
+              </span>
+            )}
           </div>
         </div>
       </section>

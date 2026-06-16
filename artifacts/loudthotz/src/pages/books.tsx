@@ -62,14 +62,18 @@ export default function Books() {
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {books.map((book, i) => (
-                <motion.a
+              {books.map((book, i) => {
+                const hasLink = book.amazonUrl && book.amazonUrl.startsWith("http");
+                const Wrapper = hasLink ? motion.a : motion.div;
+                const wrapperProps = hasLink
+                  ? { href: book.amazonUrl, target: "_blank", rel: "noopener noreferrer" }
+                  : {};
+                return (
+                <Wrapper
                   key={book.id}
                   {...fadeUp(i * 0.06)}
-                  href={book.amazonUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex flex-col bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden hover:border-primary/20 hover:bg-white/[0.04] transition-all duration-300 cursor-pointer"
+                  {...wrapperProps}
+                  className={`group flex flex-col bg-white/[0.02] border border-white/5 rounded-2xl overflow-hidden transition-all duration-300 ${hasLink ? "hover:border-primary/20 hover:bg-white/[0.04] cursor-pointer" : "cursor-default"}`}
                 >
                   {/* Cover image or gradient fallback */}
                   {book.imageUrl ? (
@@ -119,14 +123,19 @@ export default function Books() {
                       ) : (
                         <span className="text-gray-500 text-sm">Price on Amazon</span>
                       )}
-                      <span className="inline-flex items-center gap-1.5 bg-[#f90]/10 border border-[#f90]/30 text-[#f90] text-xs font-bold px-3 py-1.5 rounded-lg group-hover:bg-[#f90] group-hover:text-black transition-all">
-                        <ShoppingCart className="h-3.5 w-3.5" />
-                        Buy on Amazon
-                      </span>
+                      {hasLink ? (
+                        <span className="inline-flex items-center gap-1.5 bg-[#f90]/10 border border-[#f90]/30 text-[#f90] text-xs font-bold px-3 py-1.5 rounded-lg group-hover:bg-[#f90] group-hover:text-black transition-all">
+                          <ShoppingCart className="h-3.5 w-3.5" />
+                          Buy on Amazon
+                        </span>
+                      ) : (
+                        <span className="text-xs text-gray-600 italic">Link coming soon</span>
+                      )}
                     </div>
                   </div>
-                </motion.a>
-              ))}
+                </Wrapper>
+                );
+              })}
             </div>
           )}
 

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Trophy, Calendar, FileText, DollarSign, Mail, AlertCircle, CheckCircle, Star, ExternalLink } from "lucide-react";
+import { Trophy, Calendar, FileText, DollarSign, Mail, AlertCircle, CheckCircle, Star, ExternalLink, Settings } from "lucide-react";
 import { useSiteSettings } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
@@ -24,12 +24,63 @@ const DEFAULT_RULES = [
   'All submissions should be sent to loudthotz@gmail.com with the subject e.g "January 2025 LPP Poem".',
 ];
 
+function PaystackButton({
+  href,
+  label,
+  entryFee,
+  primary = false,
+  large = false,
+}: {
+  href: string;
+  label: string;
+  entryFee: string;
+  primary?: boolean;
+  large?: boolean;
+}) {
+  const configured = href && href.startsWith("http");
+  const px = large ? "px-8 py-3" : "px-6 py-3";
+  const disabledTitle = "Paystack link not yet configured — set it in Admin → Settings";
+
+  if (!configured) {
+    return (
+      <span
+        title={disabledTitle}
+        className={`inline-flex items-center gap-2 ${px} rounded-xl text-sm font-semibold cursor-not-allowed ${
+          primary
+            ? "bg-primary/30 text-black/40"
+            : "border border-white/5 text-gray-600"
+        }`}
+      >
+        <Settings className="h-4 w-4" />
+        {label}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`inline-flex items-center gap-2 ${px} rounded-xl text-sm font-semibold transition-all ${
+        primary
+          ? "bg-primary text-black hover:bg-primary/90 shadow-lg shadow-primary/10"
+          : "border border-white/10 text-gray-300 hover:text-white hover:bg-white/5"
+      }`}
+    >
+      {primary && <DollarSign className="h-4 w-4" />}
+      {label}
+      <ExternalLink className="h-3.5 w-3.5" />
+    </a>
+  );
+}
+
 export default function Prize() {
   const { data: s } = useSiteSettings();
 
   const cashAmount = s?.prizeCashAmount ?? "₦10,000";
   const entryFee = s?.prizeEntryFee ?? "₦1,000";
-  const paystackLink = s?.prizePaystackLink ?? "https://paystack.com/pay/lpp";
+  const paystackLink = s?.prizePaystackLink ?? "";
   const email = s?.prizeEmail ?? "loudthotz@gmail.com";
   const rules = s?.prizeRules
     ? s.prizeRules.split("\n").filter(Boolean)
@@ -62,16 +113,7 @@ export default function Prize() {
           </motion.p>
 
           <motion.div {...fadeUp(0.22)} className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a
-              href={paystackLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-primary text-black font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 text-sm"
-            >
-              <DollarSign className="h-4 w-4" />
-              Pay Entry Fee — {entryFee}
-              <ExternalLink className="h-3.5 w-3.5" />
-            </a>
+            <PaystackButton href={paystackLink} label={`Pay Entry Fee — ${entryFee}`} entryFee={entryFee} primary />
             <a
               href={`mailto:${email}?subject=LPP Poem Submission`}
               className="inline-flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 font-medium px-6 py-3 rounded-xl transition-all text-sm"
@@ -152,12 +194,13 @@ export default function Prize() {
                 step: "01",
                 title: "Pay Entry Fee",
                 desc: `Pay the ${entryFee} competition fee via Paystack and keep your receipt.`,
-                action: { label: "Pay on Paystack", href: paystackLink },
+                action: paystackLink ? { label: "Pay on Paystack", href: paystackLink } : null,
               },
               {
                 step: "02",
                 title: "Prepare Your Submission",
                 desc: "Write your poem (max 14 lines, 6 words per line). Attach a 3-line bio, photo, and payment receipt in a Word document.",
+                action: null,
               },
               {
                 step: "03",
@@ -198,15 +241,13 @@ export default function Prize() {
             <p className="text-gray-400 text-sm mb-6">
               Winners are announced on the last day of every month across all Loudthotz platforms.
             </p>
-            <a
+            <PaystackButton
               href={paystackLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-primary text-black font-semibold px-8 py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 text-sm"
-            >
-              Enter This Month's Competition
-              <ExternalLink className="h-4 w-4" />
-            </a>
+              label="Enter This Month's Competition"
+              entryFee={entryFee}
+              primary
+              large
+            />
           </div>
         </div>
       </section>
