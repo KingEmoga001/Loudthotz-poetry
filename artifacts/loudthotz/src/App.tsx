@@ -6,6 +6,10 @@ import SubmitPoem from "@/pages/submit";
 import LiveReadings from "@/pages/live";
 import Books from "@/pages/books";
 import Donate from "@/pages/donate";
+import Prize from "@/pages/prize";
+import Membership from "@/pages/membership";
+import Poets from "@/pages/poets";
+import ArchivePage from "@/pages/archive";
 import AdminPanel from "@/pages/admin/index";
 import AdminLogin from "@/pages/admin/login";
 import { Switch, Route, Router as WouterRouter } from "wouter";
@@ -35,6 +39,10 @@ function Router() {
             <Route path="/live" component={LiveReadings} />
             <Route path="/books" component={Books} />
             <Route path="/donate" component={Donate} />
+            <Route path="/prize" component={Prize} />
+            <Route path="/membership" component={Membership} />
+            <Route path="/poets" component={Poets} />
+            <Route path="/archive" component={ArchivePage} />
             <Route component={NotFound} />
           </Switch>
         </AppLayout>
