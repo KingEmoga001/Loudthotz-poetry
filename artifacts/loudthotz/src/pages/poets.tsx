@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Feather, ExternalLink, User } from "lucide-react";
+import { Feather, User, BookOpen } from "lucide-react";
+import { Link } from "wouter";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -8,41 +9,41 @@ const fadeUp = (delay = 0) => ({
 });
 
 const poets = [
-  { name: "Akeem Adetayo Oyalowo", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_64.html" },
-  { name: "Lolade Ajayi Oye", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_39.html" },
-  { name: 'Chukwuemeka "Deus" Njoku', url: "http://loudthotzpoetry.blogspot.com.ng/p/chukwuemeka-deus-njoku.html" },
-  { name: "Ifeanyi Emmanuel", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_36.html" },
-  { name: "Tolu Daniel", url: "http://loudthotzpoetry.blogspot.com.ng/p/tolu-daniel.html" },
-  { name: "Henry Ahmami", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_77.html" },
-  { name: "Wale O. Stevens", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_29.html" },
-  { name: "Jovita Ekene", url: "http://loudthotzpoetry.blogspot.com.ng/p/jovita-ekene.html" },
-  { name: "Elijah Ekiyan", url: "http://loudthotzpoetry.blogspot.com.ng/p/elijah-ekiyan.html" },
-  { name: "Ubong Abasi", url: "http://loudthotzpoetry.blogspot.com.ng/p/ubong-abasi.html" },
-  { name: "Florence Salawu", url: "http://loudthotzpoetry.blogspot.com.ng/p/florence-salawu.html" },
-  { name: 'Kemi "Kemibon" Ahmed', url: "http://loudthotzpoetry.blogspot.com.ng/p/adekemi-kemibon-ahmed.html" },
-  { name: "Joy Nwamaka Chime", url: "http://loudthotzpoetry.blogspot.com.ng/p/joy-nwamaka-chime.html" },
-  { name: "Chris N. John", url: "http://loudthotzpoetry.blogspot.com.ng/p/chris-n-amos.html" },
-  { name: "Ifeanyi Okwosha", url: "http://loudthotzpoetry.blogspot.com.ng/p/ifeanyi-okwosha.html" },
-  { name: "Olamide J. Santos", url: "http://loudthotzpoetry.blogspot.com.ng/p/breathe.html" },
-  { name: "Andrew White", url: "http://loudthotzpoetry.blogspot.com.ng/p/andrew-white.html" },
-  { name: "Erhio Obodo", url: "http://loudthotzpoetry.blogspot.com.ng/p/erhio-obodo.html" },
-  { name: "Soonest Nathaniel", url: "http://loudthotzpoetry.blogspot.com.ng/p/soonest-nathaniel.html" },
-  { name: 'Ugochukwu "Hitch" Emebiriodo', url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_61.html" },
-  { name: "Ifeanyi Mbah", url: "http://loudthotzpoetry.blogspot.com.ng/p/ifeanyi-mbah.html" },
-  { name: 'Philip "Dokita Feel" Chukwu', url: "http://loudthotzpoetry.blogspot.com.ng/p/philip-dokita-feel-chukwu.html" },
-  { name: "Stephen Tolulope Alayande", url: "http://loudthotzpoetry.blogspot.com.ng/p/stephen-tolulope-alayande.html" },
-  { name: "Ilupeju Adebayo", url: "http://loudthotzpoetry.blogspot.com.ng/p/ilupeju-adebayo.html" },
-  { name: "Marilyn Maduka", url: "http://loudthotzpoetry.blogspot.com.ng/p/marilyn-maduka.html" },
-  { name: "Nneoma Onyeukwu", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_30.html" },
-  { name: "Ijeoma Opoko", url: "http://loudthotzpoetry.blogspot.com.ng/p/ijeoma-opoko.html" },
-  { name: "Oyinda Fakile", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_28.html" },
-  { name: "Ajibola Adeoya", url: "http://loudthotzpoetry.blogspot.com.ng/p/ajibola-adeoya.html" },
-  { name: "Immanuel Unekwuojo Ogu", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_41.html" },
-  { name: "Michael Achile Umameh", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_3.html" },
-  { name: "Teddy Ugonna Richard", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_37.html" },
-  { name: 'Priscilla "zaraahaiwe" Ahaiwe', url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_49.html" },
-  { name: "Fabian Mac-robe Ugbechie", url: "http://loudthotzpoetry.blogspot.com.ng/p/blog-page_21.html" },
-  { name: "Amar Basil", url: "http://loudthotzpoetry.blogspot.com.ng/p/basil-amar-basil.html" },
+  { name: "Akeem Adetayo Oyalowo" },
+  { name: "Lolade Ajayi Oye" },
+  { name: 'Chukwuemeka "Deus" Njoku' },
+  { name: "Ifeanyi Emmanuel" },
+  { name: "Tolu Daniel" },
+  { name: "Henry Ahmami" },
+  { name: "Wale O. Stevens" },
+  { name: "Jovita Ekene" },
+  { name: "Elijah Ekiyan" },
+  { name: "Ubong Abasi" },
+  { name: "Florence Salawu" },
+  { name: 'Kemi "Kemibon" Ahmed' },
+  { name: "Joy Nwamaka Chime" },
+  { name: "Chris N. John" },
+  { name: "Ifeanyi Okwosha" },
+  { name: "Olamide J. Santos" },
+  { name: "Andrew White" },
+  { name: "Erhio Obodo" },
+  { name: "Soonest Nathaniel" },
+  { name: 'Ugochukwu "Hitch" Emebiriodo' },
+  { name: "Ifeanyi Mbah" },
+  { name: 'Philip "Dokita Feel" Chukwu' },
+  { name: "Stephen Tolulope Alayande" },
+  { name: "Ilupeju Adebayo" },
+  { name: "Marilyn Maduka" },
+  { name: "Nneoma Onyeukwu" },
+  { name: "Ijeoma Opoko" },
+  { name: "Oyinda Fakile" },
+  { name: "Ajibola Adeoya" },
+  { name: "Immanuel Unekwuojo Ogu" },
+  { name: "Michael Achile Umameh" },
+  { name: "Teddy Ugonna Richard" },
+  { name: 'Priscilla "zaraahaiwe" Ahaiwe' },
+  { name: "Fabian Mac-robe Ugbechie" },
+  { name: "Amar Basil" },
 ];
 
 function getInitials(name: string) {
@@ -106,51 +107,38 @@ export default function Poets() {
             {poets.map((poet, i) => {
               const color = avatarColors[i % avatarColors.length];
               return (
-                <motion.a
+                <motion.div
                   key={poet.name}
-                  href={poet.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   {...fadeUp(Math.min(i * 0.03, 0.4))}
-                  className="group flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] hover:border-white/10 transition-all"
+                  className="flex items-center gap-3 p-4 bg-white/[0.02] border border-white/5 rounded-xl"
                 >
-                  {/* Avatar */}
                   <div className={`flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-br ${color} border flex items-center justify-center`}>
                     <span className="font-display text-sm font-bold text-white">{getInitials(poet.name)}</span>
                   </div>
-
-                  {/* Name */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors truncate">
-                      {poet.name}
-                    </p>
-                    <p className="text-xs text-gray-600 group-hover:text-gray-400 transition-colors mt-0.5">
-                      View profile
-                    </p>
+                    <p className="text-sm font-medium text-gray-200 truncate">{poet.name}</p>
+                    <p className="text-xs text-gray-600 mt-0.5">Loudthotz poet</p>
                   </div>
-
-                  {/* Arrow */}
-                  <ExternalLink className="h-3.5 w-3.5 text-gray-600 group-hover:text-primary transition-colors shrink-0" />
-                </motion.a>
+                </motion.div>
               );
             })}
           </div>
 
-          {/* Blog link */}
-          <div className="mt-12 text-center">
-            <p className="text-gray-500 text-sm mb-4">
-              Explore full poet profiles and their works on the Loudthotz blog
+          {/* CTA — submit your work */}
+          <motion.div {...fadeUp(0.3)} className="mt-16 text-center rounded-2xl border border-primary/20 bg-primary/5 p-10">
+            <Feather className="h-8 w-8 text-primary mx-auto mb-4" />
+            <h3 className="font-display text-2xl font-bold text-white mb-2">Are you a poet?</h3>
+            <p className="text-gray-400 font-serif text-base max-w-md mx-auto mb-6">
+              Submit your original work to be considered for the gallery and featured in our next open reading session.
             </p>
-            <a
-              href="https://loudthotzpoetry.blogspot.com/p/poets.html"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 font-medium px-6 py-3 rounded-xl transition-all text-sm"
+            <Link
+              href="/submit"
+              className="inline-flex items-center gap-2 bg-primary text-black font-bold px-6 py-3 rounded-xl text-sm hover:bg-primary/90 transition-all"
             >
-              Visit Poets Archive
-              <ExternalLink className="h-4 w-4" />
-            </a>
-          </div>
+              <BookOpen className="h-4 w-4" />
+              Submit a Poem
+            </Link>
+          </motion.div>
         </div>
       </section>
     </div>
