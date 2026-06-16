@@ -1,7 +1,7 @@
 import { Link } from "wouter";
-import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
+import loudthotzLogo from "@assets/correct_1781632949414.png";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
-import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Mail } from "lucide-react";
+import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info } from "lucide-react";
 
 export function Footer() {
   return (
@@ -13,14 +13,8 @@ export function Footer() {
 
           {/* Brand column */}
           <div className="lg:col-span-2 space-y-5">
-            <div className="flex items-center gap-3">
-              <div className="h-12 w-20 overflow-hidden rounded-lg border border-white/10">
-                <img src={loudthotzLogo} alt="Loudthotz" className="h-full w-full object-cover" />
-              </div>
-              <div>
-                <p className="font-display font-bold text-xl tracking-widest text-primary">LOUDTHOTZ</p>
-                <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-0.5">Poetry Open Reading</p>
-              </div>
+            <div>
+              <img src={loudthotzLogo} alt="Loudthotz Poetry Open Reading" className="h-14 w-auto object-contain" />
             </div>
             <p className="text-gray-400 font-serif text-base leading-relaxed max-w-sm">
               A living literary space for African and global spoken-word poets — raw and electric,
@@ -62,6 +56,7 @@ export function Footer() {
             <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500">Participate</h4>
             <ul className="space-y-3">
               {[
+                { href: "/about", label: "About Loudthotz", icon: Info },
                 { href: "/submit", label: "Submit Poetry", icon: PenTool },
                 { href: "/donate", label: "Support the Mission", icon: Heart },
                 { href: "/admin", label: "Admin Access", icon: Shield, amber: true },

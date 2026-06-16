@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, PenTool, Mic2, Library, Heart, Shield, Menu, X, Trophy, Users, Feather, Archive } from "lucide-react";
+import { BookOpen, PenTool, Mic2, Library, Heart, Shield, Menu, X, Trophy, Users, Feather, Archive, Info } from "lucide-react";
 import { usePendingCount } from "@/lib/firestore";
-import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
-import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
+import loudthotzLogo from "@assets/correct_1781632949414.png";
 
 export function Navbar() {
   const [location] = useLocation();
@@ -12,6 +11,7 @@ export function Navbar() {
   const pendingCount = usePendingCount();
 
   const navLinks = [
+    { href: "/about", label: "About", icon: Info },
     { href: "/poems", label: "Gallery", icon: BookOpen },
     { href: "/submit", label: "Submit", icon: PenTool },
     { href: "/live", label: "Live", icon: Mic2, isLive: true },
@@ -30,21 +30,12 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2">
 
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-3 shrink-0 group">
-          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-black border border-white/10 group-hover:border-primary/40 transition-colors">
-            <img src={loudthotzIcon} alt="Loudthotz" className="h-full w-full object-contain p-0.5" />
-          </div>
-          <div className="hidden lg:block">
-            <div className="flex items-center gap-2">
-              <span className="font-display font-bold text-lg tracking-widest text-primary">LOUDTHOTZ</span>
-              <span className="text-[9px] font-bold uppercase tracking-widest bg-white/5 text-gray-400 px-2 py-0.5 rounded border border-white/10">Poetry Event</span>
-            </div>
-            <div className="flex items-center gap-1.5 mt-0.5">
-              <span className="text-[10px] text-gray-500">hosted under</span>
-              <img src={naijaArtLogo} alt="Naija Art Initiative" className="h-3.5 w-auto object-contain rounded opacity-80" />
-              <span className="text-[10px] text-secondary font-medium">Naija Art Initiative</span>
-            </div>
-          </div>
+        <Link href="/" className="shrink-0 group">
+          <img
+            src={loudthotzLogo}
+            alt="Loudthotz Poetry Open Reading"
+            className="h-11 w-auto object-contain opacity-95 group-hover:opacity-100 transition-opacity"
+          />
         </Link>
 
         {/* Desktop Nav — icons only on md, icons+labels on xl */}

@@ -10,6 +10,7 @@ import Prize from "@/pages/prize";
 import Membership from "@/pages/membership";
 import Poets from "@/pages/poets";
 import ArchivePage from "@/pages/archive";
+import About from "@/pages/about";
 import AdminPanel from "@/pages/admin/index";
 import AdminLogin from "@/pages/admin/login";
 import { Switch, Route, Router as WouterRouter } from "wouter";
@@ -43,6 +44,7 @@ function Router() {
             <Route path="/membership" component={Membership} />
             <Route path="/poets" component={Poets} />
             <Route path="/archive" component={ArchivePage} />
+            <Route path="/about" component={About} />
             <Route component={NotFound} />
           </Switch>
         </AppLayout>
