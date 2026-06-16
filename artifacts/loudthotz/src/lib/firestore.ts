@@ -537,6 +537,89 @@ export async function deletePoet(id: string) {
   await deleteDoc(doc(db, "poets", id));
 }
 
+export async function seedStaticPoets(): Promise<number> {
+  const staticNames = [
+    "Akeem Adetayo Oyalowo", "Lolade Ajayi Oye", 'Chukwuemeka "Deus" Njoku',
+    "Ifeanyi Emmanuel", "Tolu Daniel", "Henry Ahmami", "Wale O. Stevens",
+    "Jovita Ekene", "Elijah Ekiyan", "Ubong Abasi", "Florence Salawu",
+    'Kemi "Kemibon" Ahmed', "Joy Nwamaka Chime", "Chris N. John",
+    "Ifeanyi Okwosha", "Olamide J. Santos", "Andrew White", "Erhio Obodo",
+    "Soonest Nathaniel", 'Ugochukwu "Hitch" Emebiriodo', "Ifeanyi Mbah",
+    'Philip "Dokita Feel" Chukwu', "Stephen Tolulope Alayande", "Ilupeju Adebayo",
+    "Marilyn Maduka", "Nneoma Onyeukwu", "Ijeoma Opoko", "Oyinda Fakile",
+    "Ajibola Adeoya", "Immanuel Unekwuojo Ogu", "Michael Achile Umameh",
+    "Teddy Ugonna Richard", 'Priscilla "zaraahaiwe" Ahaiwe', "Fabian Mac-robe Ugbechie",
+    "Amar Basil",
+  ];
+  const snap = await getDocs(collection(db, "poets"));
+  const existing = new Set(snap.docs.map((d) => d.data().name as string));
+  const toAdd = staticNames.filter((n) => !existing.has(n));
+  await Promise.all(toAdd.map((name) => addDoc(collection(db, "poets"), { name })));
+  return toAdd.length;
+}
+
+/* ─────────────────── Events ─────────────────── */
+export interface FireEvent {
+  id: string;
+  title: string;
+  description?: string;
+  date: string;
+  season?: string;
+  episode?: number;
+  theme?: string;
+  venue?: string;
+  youtubeUrl?: string;
+  blogUrl?: string;
+  imageUrl?: string;
+}
+
+export function useEvents(): { data: FireEvent[]; loading: boolean } {
+  const [data, setData] = useState<FireEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const ref = collection(db, "events");
+    const unsub = onSnapshot(ref, (snap) => {
+      const events: FireEvent[] = snap.docs.map((d) => {
+        const raw = d.data();
+        return {
+          id: d.id,
+          title: raw.title ?? "",
+          description: raw.description,
+          date: tsToIso(raw.date),
+          season: raw.season,
+          episode: raw.episode,
+          theme: raw.theme,
+          venue: raw.venue,
+          youtubeUrl: raw.youtubeUrl,
+          blogUrl: raw.blogUrl,
+          imageUrl: raw.imageUrl,
+        };
+      });
+      events.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      setData(events);
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  return { data, loading };
+}
+
+export async function createEvent(data: Omit<FireEvent, "id">) {
+  await addDoc(collection(db, "events"), { ...data, date: new Date(data.date) });
+}
+
+export async function updateEvent(id: string, data: Partial<Omit<FireEvent, "id">>) {
+  const upd: Record<string, unknown> = { ...data };
+  if (data.date) upd.date = new Date(data.date);
+  await updateDoc(doc(db, "events", id), upd);
+}
+
+export async function deleteEvent(id: string) {
+  await deleteDoc(doc(db, "events", id));
+}
+
 export async function addHeroImage(data: Omit<FireHeroImage, "id">) {
   await addDoc(collection(db, "hero_images"), data);
 }

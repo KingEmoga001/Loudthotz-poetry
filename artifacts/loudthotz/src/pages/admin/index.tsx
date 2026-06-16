@@ -18,15 +18,16 @@ import {
   addLivestreamSession, updateLivestreamSession, deleteLivestreamSession,
   updateSiteSettings, seedDatabase,
   useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage, uploadHeroImage,
-  usePoets, createPoet, updatePoet, deletePoet,
+  usePoets, createPoet, updatePoet, deletePoet, seedStaticPoets,
+  useEvents, createEvent, updateEvent, deleteEvent,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
-  type FireHeroImage, type FirePoet,
+  type FireHeroImage, type FirePoet, type FireEvent,
 } from "@/lib/firestore";
 import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
 
 /* ──────────────────────────── types ──────────────────────────── */
-type Tab = "dashboard" | "submissions" | "poems" | "livestream" | "books" | "poets" | "hero" | "settings";
+type Tab = "dashboard" | "submissions" | "poems" | "livestream" | "books" | "poets" | "events" | "hero" | "settings";
 
 /* ──────────────────────────── helpers ──────────────────────────── */
 function Toast({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) {
@@ -752,6 +753,14 @@ function PoetsManager({ show }: { show: (m: string, t?: "success" | "error") => 
         </div>
       )}
 
+      {/* Bulk import */}
+      {poets.length === 0 && !loading && (
+        <ImportStaticPoets show={show} />
+      )}
+      {poets.length > 0 && (
+        <ImportStaticPoets show={show} compact />
+      )}
+
       {/* Add new */}
       <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
         <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add New Poet</h3>
@@ -781,6 +790,259 @@ function PoetsManager({ show }: { show: (m: string, t?: "success" | "error") => 
         </div>
         <button onClick={handleCreate} disabled={saving} className="flex items-center gap-2 bg-primary/20 border border-primary/30 text-primary font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/30 transition-all disabled:opacity-60">
           <Plus className="h-4 w-4" /> {saving ? "Adding…" : "Add Poet"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ──────────────────────────── Import Static Poets ──────────────────────────── */
+function ImportStaticPoets({ show, compact }: { show: (m: string, t?: "success" | "error") => void; compact?: boolean }) {
+  const [importing, setImporting] = useState(false);
+
+  const handleImport = async () => {
+    if (!confirm("This will add the 35 community poets from the website into Firestore so you can edit their profiles. Duplicates are skipped. Continue?")) return;
+    setImporting(true);
+    try {
+      const added = await seedStaticPoets();
+      show(added > 0 ? `${added} poets imported! You can now edit each one.` : "All poets are already in the database.");
+    } catch { show("Import failed. Please try again.", "error"); }
+    finally { setImporting(false); }
+  };
+
+  if (compact) {
+    return (
+      <div className="flex items-center justify-between gap-4 p-4 bg-white/[0.02] border border-dashed border-white/10 rounded-xl">
+        <div>
+          <p className="text-xs font-semibold text-gray-300">Import community poets from website</p>
+          <p className="text-[10px] text-gray-600 mt-0.5">Adds any missing names from the static list — skips duplicates</p>
+        </div>
+        <button onClick={handleImport} disabled={importing}
+          className="shrink-0 flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl text-xs font-semibold transition-all disabled:opacity-50">
+          <RefreshCw className={`h-3.5 w-3.5 ${importing ? "animate-spin" : ""}`} />
+          {importing ? "Importing…" : "Sync Static List"}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-6 text-center space-y-4">
+      <Users className="h-10 w-10 text-amber-400 mx-auto" />
+      <div>
+        <p className="font-semibold text-white text-sm">No poets in Firestore yet</p>
+        <p className="text-xs text-gray-500 mt-1 max-w-xs mx-auto">Import the 35 community poets already listed on the website. Once imported, you can add photos, bios, countries and social links to each one.</p>
+      </div>
+      <button onClick={handleImport} disabled={importing}
+        className="flex items-center gap-2 mx-auto bg-amber-500/20 border border-amber-500/30 text-amber-400 font-bold px-6 py-3 rounded-xl text-sm hover:bg-amber-500/30 transition-all disabled:opacity-50">
+        <RefreshCw className={`h-4 w-4 ${importing ? "animate-spin" : ""}`} />
+        {importing ? "Importing…" : "Import 35 Community Poets"}
+      </button>
+    </div>
+  );
+}
+
+/* ──────────────────────────── Events ──────────────────────────── */
+function EventsManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
+  const { data: events, loading } = useEvents();
+  const [editing, setEditing] = useState<FireEvent | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const emptyForm: Omit<FireEvent, "id"> = {
+    title: "", description: "", date: "", season: "", episode: undefined,
+    theme: "", venue: "", youtubeUrl: "", blogUrl: "", imageUrl: "",
+  };
+  const [form, setForm] = useState(emptyForm);
+
+  const now = new Date();
+  const upcoming = events.filter((e) => new Date(e.date) > now);
+  const past = events.filter((e) => new Date(e.date) <= now);
+
+  const handleCreate = async () => {
+    if (!form.title.trim()) { show("Title is required.", "error"); return; }
+    if (!form.date) { show("Date is required.", "error"); return; }
+    setSaving(true);
+    try {
+      await createEvent({ ...form, episode: form.episode ? Number(form.episode) : undefined });
+      setForm(emptyForm);
+      show("Event added!");
+    } catch { show("Failed to add event.", "error"); }
+    finally { setSaving(false); }
+  };
+
+  const handleSave = async () => {
+    if (!editing) return;
+    setSaving(true);
+    try {
+      await updateEvent(editing.id, editing);
+      setEditing(null);
+      show("Event updated.");
+    } catch { show("Update failed.", "error"); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (e: FireEvent) => {
+    if (!confirm(`Delete "${e.title}"?`)) return;
+    try { await deleteEvent(e.id); show("Event deleted."); }
+    catch { show("Delete failed.", "error"); }
+  };
+
+  const eventFields: { key: keyof Omit<FireEvent, "id">; label: string; placeholder: string; hint?: string; type?: string; span?: boolean }[] = [
+    { key: "title", label: "Event Title", placeholder: "e.g. Brothers — Spotlights on Kinship" },
+    { key: "date", label: "Date & Time", placeholder: "", type: "datetime-local" },
+    { key: "season", label: "Season", placeholder: "e.g. Season 14" },
+    { key: "episode", label: "Episode #", placeholder: "e.g. 9", type: "number" },
+    { key: "theme", label: "Theme", placeholder: "e.g. Kinship & Brotherhood" },
+    { key: "venue", label: "Venue / Platform", placeholder: "e.g. Zoom / The Hub Lagos" },
+    { key: "youtubeUrl", label: "YouTube / Recording URL", placeholder: "https://youtube.com/..." },
+    { key: "blogUrl", label: "Blog Post URL", placeholder: "https://loudthotzpoetry.blogspot.com/..." },
+    { key: "imageUrl", label: "Cover Image URL", placeholder: "https://..." },
+    { key: "description", label: "Description", placeholder: "Brief description of this event", span: true },
+  ];
+
+  const EventCard = ({ ev }: { ev: FireEvent }) => {
+    const isPast = new Date(ev.date) <= now;
+    return (
+      <div className={`flex items-start gap-4 p-4 rounded-xl border transition-all ${isPast ? "border-white/5 bg-white/[0.01]" : "border-primary/20 bg-primary/5"}`}>
+        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${isPast ? "bg-white/5" : "bg-primary/10"}`}>
+          <Calendar className={`h-4 w-4 ${isPast ? "text-gray-500" : "text-primary"}`} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <p className="text-sm font-semibold text-white truncate">{ev.title}</p>
+            <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${isPast ? "bg-gray-500/10 text-gray-500 border-gray-500/20" : "bg-primary/10 text-primary border-primary/20"}`}>
+              {isPast ? "Past" : "Upcoming"}
+            </span>
+          </div>
+          <p className="text-xs text-gray-500">
+            {new Date(ev.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            {ev.season && ` · ${ev.season}`}
+            {ev.theme && ` · ${ev.theme}`}
+          </p>
+          {ev.venue && <p className="text-[10px] text-gray-600 mt-0.5">{ev.venue}</p>}
+          {ev.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{ev.description}</p>}
+          {(ev.youtubeUrl || ev.blogUrl) && (
+            <div className="flex gap-3 mt-1.5">
+              {ev.youtubeUrl && <a href={ev.youtubeUrl} target="_blank" rel="noreferrer" className="text-[10px] text-secondary hover:underline font-semibold">▶ Recording</a>}
+              {ev.blogUrl && <a href={ev.blogUrl} target="_blank" rel="noreferrer" className="text-[10px] text-secondary hover:underline font-semibold">Blog Post</a>}
+            </div>
+          )}
+        </div>
+        <div className="flex gap-1.5 shrink-0">
+          <button onClick={() => setEditing(ev)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
+          <button onClick={() => handleDelete(ev)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-white mb-1">Events</h2>
+        <p className="text-gray-500 text-sm">Manage preview and past events. Events automatically move to Past once their date passes.</p>
+      </div>
+
+      {loading ? (
+        <div className="space-y-3">
+          {[1,2,3].map(i => <div key={i} className="h-20 rounded-xl bg-white/[0.02] border border-white/5 animate-pulse" />)}
+        </div>
+      ) : (
+        <>
+          {/* Upcoming events */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-primary animate-pulse inline-block" />
+              Upcoming Events ({upcoming.length})
+            </h3>
+            {upcoming.length === 0 ? (
+              <div className="text-center py-8 border border-dashed border-white/10 rounded-xl">
+                <Calendar className="h-7 w-7 text-gray-700 mx-auto mb-2" />
+                <p className="text-gray-500 text-xs">No upcoming events. Add one below.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {upcoming.map((ev) => <EventCard key={ev.id} ev={ev} />)}
+              </div>
+            )}
+          </div>
+
+          {/* Past events */}
+          {past.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Past Events ({past.length})</h3>
+              <div className="space-y-3">
+                {past.map((ev) => <EventCard key={ev.id} ev={ev} />)}
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Edit inline panel */}
+      {editing && (
+        <div className="bg-white/[0.03] border border-primary/20 rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white">Editing: {editing.title}</h3>
+            <button onClick={() => setEditing(null)} className="text-gray-500 hover:text-white"><X className="h-4 w-4" /></button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {eventFields.map(({ key, label, placeholder, hint, type, span }) => (
+              <div key={key} className={span ? "sm:col-span-2" : ""}>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
+                {span ? (
+                  <textarea
+                    value={(editing[key] as string) ?? ""}
+                    onChange={e => setEditing({ ...editing, [key]: e.target.value })}
+                    placeholder={placeholder} rows={2}
+                    className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 resize-none" />
+                ) : (
+                  <input
+                    type={type ?? "text"}
+                    value={type === "datetime-local" && editing[key] ? (editing[key] as string).slice(0, 16) : ((editing[key] as string | number) ?? "")}
+                    onChange={e => setEditing({ ...editing, [key]: type === "number" ? (e.target.value ? Number(e.target.value) : undefined) : e.target.value })}
+                    placeholder={placeholder}
+                    className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors" />
+                )}
+                {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
+              </div>
+            ))}
+          </div>
+          <button onClick={handleSave} disabled={saving}
+            className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-60">
+            <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Changes"}
+          </button>
+        </div>
+      )}
+
+      {/* Add new event */}
+      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6 space-y-5">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add New Event</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {eventFields.map(({ key, label, placeholder, hint, type, span }) => (
+            <div key={key} className={span ? "sm:col-span-2" : ""}>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">{label}</label>
+              {span ? (
+                <textarea
+                  value={(form[key] as string) ?? ""}
+                  onChange={e => setForm({ ...form, [key]: e.target.value })}
+                  placeholder={placeholder} rows={2}
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 resize-none" />
+              ) : (
+                <input
+                  type={type ?? "text"}
+                  value={(form[key] as string | number) ?? ""}
+                  onChange={e => setForm({ ...form, [key]: type === "number" ? (e.target.value ? Number(e.target.value) : undefined) : e.target.value })}
+                  placeholder={placeholder}
+                  className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors" />
+              )}
+              {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
+            </div>
+          ))}
+        </div>
+        <button onClick={handleCreate} disabled={saving}
+          className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-60">
+          <Plus className="h-4 w-4" /> {saving ? "Adding…" : "Add Event"}
         </button>
       </div>
     </div>
@@ -1264,6 +1526,7 @@ export default function AdminPanel() {
     { id: "livestream", label: "Livestream", icon: Radio },
     { id: "books", label: "Books", icon: Library },
     { id: "poets", label: "Poets", icon: Feather },
+    { id: "events", label: "Events", icon: Calendar },
     { id: "hero", label: "Hero Carousel", icon: Image },
     { id: "settings", label: "Settings", icon: Settings },
   ];
@@ -1329,6 +1592,7 @@ export default function AdminPanel() {
               {activeTab === "livestream" && <LivestreamControl show={show} />}
               {activeTab === "books" && <BooksManager show={show} />}
               {activeTab === "poets" && <PoetsManager show={show} />}
+              {activeTab === "events" && <EventsManager show={show} />}
               {activeTab === "hero" && <HeroImagesManager show={show} />}
               {activeTab === "settings" && <SiteSettingsPanel show={show} />}
             </motion.div>
