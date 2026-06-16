@@ -640,6 +640,14 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
     reader.readAsDataURL(f);
   };
 
+  const withTimeout = <T,>(promise: Promise<T>, ms: number, label: string): Promise<T> =>
+    Promise.race([
+      promise,
+      new Promise<T>((_, reject) =>
+        setTimeout(() => reject(new Error(`${label} timed out. Check your internet connection and try again.`)), ms)
+      ),
+    ]);
+
   const handleAdd = async () => {
     setSaving(true);
     try {
@@ -649,15 +657,19 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
         url = urlInput.trim();
       } else {
         if (!file) { show("Please choose an image to upload.", "error"); setSaving(false); return; }
-        url = await uploadHeroImage(file);
+        url = await withTimeout(uploadHeroImage(file), 30000, "Upload");
       }
-      await addHeroImage({
-        url,
-        caption: form.caption.trim(),
-        credit: form.credit.trim() || undefined,
-        order: form.order ? parseInt(form.order) : images.length,
-        active: true,
-      });
+      await withTimeout(
+        addHeroImage({
+          url,
+          caption: form.caption.trim(),
+          credit: form.credit.trim() || undefined,
+          order: form.order ? parseInt(form.order) : images.length,
+          active: true,
+        }),
+        15000,
+        "Saving to Firestore"
+      );
       setFile(null);
       setPreview(null);
       setUrlInput("");

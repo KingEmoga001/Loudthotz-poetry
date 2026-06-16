@@ -10,11 +10,9 @@ import {
 } from "@/lib/firestore";
 import {
   Info, Calendar, Users, Globe2, ArrowRight, Star,
-  Mic2, PlayCircle, ChevronRight, BookOpen, ChevronLeft,
+  Mic2, PlayCircle, ChevronRight, BookOpen, ChevronLeft, ImageOff,
 } from "lucide-react";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
-
-const DEMO_HERO_IMAGE = `${import.meta.env.BASE_URL}opengraph.jpg`;
 
 /* ---------- helpers ---------- */
 const fadeUp = (delay = 0) => ({
@@ -53,14 +51,24 @@ function HeroCarousel() {
     return () => clearInterval(t);
   }, [images.length, paused]);
 
-  const allSlides = images.length > 0
-    ? images
-    : [{ id: "__demo__", url: DEMO_HERO_IMAGE, caption: "Loudthotz Poetry Open Reading", credit: undefined, order: 0, active: true }];
+  const hasImages = images.length > 0;
+  const prev = () => setCurrent((c) => (c - 1 + images.length) % images.length);
+  const next = () => setCurrent((c) => (c + 1) % images.length);
+  const safeCurrent = Math.min(current, Math.max(0, images.length - 1));
 
-  const prev = () => setCurrent((c) => (c - 1 + allSlides.length) % allSlides.length);
-  const next = () => setCurrent((c) => (c + 1) % allSlides.length);
-
-  const safeCurrent = Math.min(current, allSlides.length - 1);
+  /* No images yet — show a branded placeholder */
+  if (!hasImages) {
+    return (
+      <div className="relative w-full h-[60vh] min-h-[360px] flex items-center justify-center bg-gradient-to-br from-[#0e1208] via-[#111a08] to-[#090b06] overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_50%_at_50%_50%,rgba(181,230,29,0.06),transparent)]" />
+        <div className="relative text-center px-6">
+          <ImageOff className="h-10 w-10 text-primary/30 mx-auto mb-4" />
+          <p className="text-white/40 text-sm font-medium">No carousel images yet</p>
+          <p className="text-white/20 text-xs mt-1">Add images in the Admin → Hero Carousel panel</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -70,7 +78,7 @@ function HeroCarousel() {
     >
       <AnimatePresence mode="sync">
         <motion.div
-          key={allSlides[safeCurrent]?.id}
+          key={images[safeCurrent]?.id}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -78,8 +86,8 @@ function HeroCarousel() {
           className="absolute inset-0"
         >
           <img
-            src={allSlides[safeCurrent]?.url}
-            alt={allSlides[safeCurrent]?.caption}
+            src={images[safeCurrent]?.url}
+            alt={images[safeCurrent]?.caption}
             className="w-full h-full object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
@@ -87,17 +95,17 @@ function HeroCarousel() {
       </AnimatePresence>
 
       {/* Caption */}
-      {allSlides[safeCurrent]?.caption && (
+      {images[safeCurrent]?.caption && (
         <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 text-center px-4">
-          <p className="text-xs text-white/70 font-medium tracking-wide drop-shadow">{allSlides[safeCurrent].caption}</p>
-          {allSlides[safeCurrent].credit && (
-            <p className="text-[10px] text-white/50 mt-0.5">📷 {allSlides[safeCurrent].credit}</p>
+          <p className="text-xs text-white/70 font-medium tracking-wide drop-shadow">{images[safeCurrent].caption}</p>
+          {images[safeCurrent].credit && (
+            <p className="text-[10px] text-white/50 mt-0.5">📷 {images[safeCurrent].credit}</p>
           )}
         </div>
       )}
 
       {/* Arrows — only when multiple slides */}
-      {allSlides.length > 1 && (
+      {images.length > 1 && (
         <>
           <button
             onClick={prev}
@@ -116,7 +124,7 @@ function HeroCarousel() {
 
           {/* Dots */}
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-1.5">
-            {allSlides.map((_, i) => (
+            {images.map((_, i) => (
               <button
                 key={i}
                 onClick={() => setCurrent(i)}
