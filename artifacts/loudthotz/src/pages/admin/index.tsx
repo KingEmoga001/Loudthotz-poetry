@@ -716,42 +716,60 @@ function PoetsManager({ show }: { show: (m: string, t?: "success" | "error") => 
         </div>
       )}
 
-      {/* Edit modal */}
-      {editing && (
-        <div className="bg-white/[0.03] border border-primary/20 rounded-xl p-5 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">Editing: {editing.name}</h3>
-            <button onClick={() => setEditing(null)} className="text-gray-500 hover:text-white"><X className="h-4 w-4" /></button>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {fields.map(({ key, label, placeholder, hint }) => (
-              <div key={key} className={key === "bio" ? "sm:col-span-2" : ""}>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
-                {key === "bio" ? (
-                  <textarea
-                    value={editing[key] ?? ""}
-                    onChange={e => setEditing({ ...editing, [key]: e.target.value })}
-                    placeholder={placeholder}
-                    rows={2}
-                    className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors resize-none"
-                  />
-                ) : (
-                  <input
-                    value={editing[key] ?? ""}
-                    onChange={e => setEditing({ ...editing, [key]: e.target.value })}
-                    placeholder={placeholder}
-                    className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors"
-                  />
-                )}
-                {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
+      {/* Edit modal overlay */}
+      <AnimatePresence>
+        {editing && (
+          <motion.div
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+            onClick={() => setEditing(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95 }}
+              className="bg-[#0d100a] border border-white/10 rounded-2xl p-6 w-full max-w-lg space-y-4 max-h-[90vh] overflow-y-auto"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="flex items-center justify-between">
+                <h3 className="font-display text-lg font-bold text-white">Edit Poet</h3>
+                <button onClick={() => setEditing(null)} className="text-gray-500 hover:text-white transition-colors"><X className="h-4 w-4" /></button>
               </div>
-            ))}
-          </div>
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-60">
-            <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Changes"}
-          </button>
-        </div>
-      )}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {fields.map(({ key, label, placeholder, hint }) => (
+                  <div key={key} className={key === "bio" ? "sm:col-span-2" : ""}>
+                    <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
+                    {key === "bio" ? (
+                      <textarea
+                        value={editing[key] ?? ""}
+                        onChange={e => setEditing({ ...editing, [key]: e.target.value })}
+                        placeholder={placeholder}
+                        rows={3}
+                        className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors resize-none"
+                      />
+                    ) : (
+                      <input
+                        value={editing[key] ?? ""}
+                        onChange={e => setEditing({ ...editing, [key]: e.target.value })}
+                        placeholder={placeholder}
+                        className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+                      />
+                    )}
+                    {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
+                    {key === "imageUrl" && editing.imageUrl && (
+                      <img src={editing.imageUrl} alt="preview" className="mt-2 w-16 h-16 object-cover rounded-full border border-white/10" onError={e => (e.currentTarget.style.display = "none")} />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button onClick={() => setEditing(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-gray-400 text-sm hover:bg-white/5 transition-colors">Cancel</button>
+                <button onClick={handleSave} disabled={saving} className="flex-1 py-2.5 rounded-xl bg-primary text-black font-bold text-sm hover:bg-primary/90 transition-colors flex items-center justify-center gap-2 disabled:opacity-60">
+                  <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Changes"}
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bulk import */}
       {poets.length === 0 && !loading && (
