@@ -1,7 +1,8 @@
-import { motion } from "framer-motion";
-import { Feather, User, BookOpen, Globe, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Feather, User, BookOpen, Globe, ExternalLink, X, Star, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
-import { usePoets } from "@/lib/firestore";
+import { usePoets, usePoetPoems, type FirePoet } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -36,8 +37,140 @@ const avatarColors = [
   "from-emerald-500/30 to-emerald-500/10 border-emerald-500/20",
 ];
 
+/* ── Poet Profile Modal ── */
+function PoetModal({ poet, colorClass, onClose }: { poet: FirePoet; colorClass: string; onClose: () => void }) {
+  const { data: poems, loading } = usePoetPoems(poet.name);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 24 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.25 }}
+        className="bg-[#0b0e08] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="relative">
+          {poet.imageUrl ? (
+            <div className="h-48 overflow-hidden rounded-t-2xl">
+              <img src={poet.imageUrl} alt={poet.name} className="w-full h-full object-cover object-top" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#0b0e08] via-[#0b0e08]/20 to-transparent rounded-t-2xl" />
+            </div>
+          ) : (
+            <div className={`h-36 bg-gradient-to-br ${colorClass} rounded-t-2xl flex items-center justify-center`}>
+              <span className="font-display text-5xl font-bold text-white">{getInitials(poet.name)}</span>
+            </div>
+          )}
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 text-white rounded-full p-1.5 transition-colors"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        {/* Poet info */}
+        <div className="px-6 pb-2 pt-4">
+          <h2 className="font-display text-2xl font-bold text-white">{poet.name}</h2>
+          {poet.country && (
+            <p className="text-sm text-gray-500 flex items-center gap-1.5 mt-1">
+              <Globe className="h-3.5 w-3.5" /> {poet.country}
+            </p>
+          )}
+          {poet.bio && (
+            <p className="text-gray-400 font-serif text-sm leading-relaxed mt-3">{poet.bio}</p>
+          )}
+          {poet.social && (
+            <a
+              href={poet.social.startsWith("http") ? poet.social : `https://${poet.social}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 mt-3 text-xs text-primary hover:underline font-semibold"
+            >
+              <ExternalLink className="h-3 w-3" /> View Profile
+            </a>
+          )}
+        </div>
+
+        {/* Poems section */}
+        <div className="px-6 pb-6 mt-4">
+          <div className="flex items-center gap-2 mb-4">
+            <BookOpen className="h-4 w-4 text-primary" />
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">
+              Poems
+            </h3>
+            {!loading && poems.length > 0 && (
+              <span className="text-xs text-gray-600 bg-white/5 px-2 py-0.5 rounded-full">{poems.length}</span>
+            )}
+          </div>
+
+          {loading && (
+            <div className="space-y-3">
+              {[1, 2].map((i) => (
+                <div key={i} className="h-24 rounded-xl bg-white/[0.02] border border-white/5 animate-pulse" />
+              ))}
+            </div>
+          )}
+
+          {!loading && poems.length === 0 && (
+            <div className="text-center py-10 text-gray-600">
+              <Feather className="h-6 w-6 mx-auto mb-2 opacity-40" />
+              <p className="text-sm">No published poems yet.</p>
+            </div>
+          )}
+
+          {!loading && poems.length > 0 && (
+            <div className="space-y-3">
+              {poems.map((poem) => (
+                <Link
+                  key={poem.id}
+                  href={`/poems/${poem.id}`}
+                  className="block p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/20 hover:bg-white/[0.04] transition-all group"
+                  onClick={onClose}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-white group-hover:text-primary transition-colors truncate">
+                        {poem.title}
+                      </p>
+                      <div className="flex items-center gap-3 mt-1">
+                        {poem.season && (
+                          <span className="text-[10px] text-gray-600">{poem.season}</span>
+                        )}
+                        {poem.averageRating > 0 && (
+                          <span className="flex items-center gap-0.5 text-[10px] text-amber-500">
+                            <Star className="h-2.5 w-2.5 fill-amber-500" />
+                            {poem.averageRating.toFixed(1)}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-600 mt-2 line-clamp-2 leading-relaxed font-serif">
+                        {poem.content.split("\n").slice(0, 2).join(" · ")}
+                      </p>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-gray-600 group-hover:text-primary shrink-0 mt-0.5 transition-colors" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 export default function Poets() {
   const { data: firestorePoets, loading } = usePoets();
+  const [selectedPoet, setSelectedPoet] = useState<{ poet: FirePoet; colorClass: string } | null>(null);
 
   const useFirestore = !loading && firestorePoets.length > 0;
   const totalCount = useFirestore ? firestorePoets.length : staticPoets.length;
@@ -96,15 +229,16 @@ export default function Poets() {
               ))}
             </div>
           ) : useFirestore ? (
-            /* Rich Firestore cards with photo/bio */
+            /* Rich Firestore cards with photo/bio — clickable */
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {firestorePoets.map((poet, i) => {
                 const color = avatarColors[i % avatarColors.length];
                 return (
-                  <motion.div
+                  <motion.button
                     key={poet.id}
                     {...fadeUp(Math.min(i * 0.03, 0.4))}
-                    className="flex flex-col bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden hover:border-primary/20 hover:bg-white/[0.04] transition-all"
+                    onClick={() => setSelectedPoet({ poet, colorClass: color })}
+                    className="flex flex-col bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden hover:border-primary/20 hover:bg-white/[0.04] transition-all text-left w-full group"
                   >
                     {/* Avatar / Photo */}
                     {poet.imageUrl ? (
@@ -112,7 +246,7 @@ export default function Poets() {
                         <img
                           src={poet.imageUrl}
                           alt={poet.name}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
                     ) : (
@@ -123,7 +257,7 @@ export default function Poets() {
 
                     {/* Info */}
                     <div className="p-3 flex-1">
-                      <p className="text-sm font-semibold text-white leading-snug">{poet.name}</p>
+                      <p className="text-sm font-semibold text-white leading-snug group-hover:text-primary transition-colors">{poet.name}</p>
                       {poet.country && (
                         <p className="text-[10px] text-gray-500 mt-0.5 flex items-center gap-1">
                           <Globe className="h-2.5 w-2.5" /> {poet.country}
@@ -132,18 +266,9 @@ export default function Poets() {
                       {poet.bio && (
                         <p className="text-xs text-gray-500 mt-2 line-clamp-2 leading-relaxed">{poet.bio}</p>
                       )}
-                      {poet.social && (
-                        <a
-                          href={poet.social.startsWith("http") ? poet.social : `https://${poet.social}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="mt-2 inline-flex items-center gap-1 text-[10px] text-primary hover:underline font-semibold"
-                        >
-                          <ExternalLink className="h-2.5 w-2.5" /> Profile
-                        </a>
-                      )}
+                      <p className="text-[10px] text-primary/60 mt-2 font-semibold">View poems →</p>
                     </div>
-                  </motion.div>
+                  </motion.button>
                 );
               })}
             </div>
@@ -191,6 +316,17 @@ export default function Poets() {
           </motion.div>
         </div>
       </section>
+
+      {/* Poet Profile Modal */}
+      <AnimatePresence>
+        {selectedPoet && (
+          <PoetModal
+            poet={selectedPoet.poet}
+            colorClass={selectedPoet.colorClass}
+            onClose={() => setSelectedPoet(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

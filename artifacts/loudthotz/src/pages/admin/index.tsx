@@ -19,6 +19,7 @@ import {
   updateSiteSettings, seedDatabase,
   useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage, uploadHeroImage,
   usePoets, createPoet, updatePoet, deletePoet, seedStaticPoets,
+  usePoetPoems, createPoetPoem,
   useEvents, createEvent, updateEvent, deleteEvent,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
   type FireHeroImage, type FirePoet, type FireEvent,
@@ -639,12 +640,132 @@ function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => 
   );
 }
 
+/* ──────────────────────────── Poet Poems Modal ──────────────────────────── */
+function PoetPoemsModal({ poet, show, onClose }: { poet: FirePoet; show: (m: string, t?: "success" | "error") => void; onClose: () => void }) {
+  const { data: poems, loading } = usePoetPoems(poet.name);
+  const [form, setForm] = useState({ title: "", content: "", season: "", theme: "" });
+  const [saving, setSaving] = useState(false);
+
+  const handleAdd = async () => {
+    if (!form.title.trim() || !form.content.trim()) { show("Title and content are required.", "error"); return; }
+    setSaving(true);
+    try {
+      await createPoetPoem(poet.id, poet.name, form);
+      setForm({ title: "", content: "", season: "", theme: "" });
+      show(`Poem added for ${poet.name}!`);
+    } catch { show("Failed to add poem.", "error"); }
+    finally { setSaving(false); }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95 }}
+        className="bg-[#0d100a] border border-white/10 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between p-5 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            {poet.imageUrl ? (
+              <img src={poet.imageUrl} alt={poet.name} className="w-9 h-9 rounded-full object-cover border border-white/10" />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <Feather className="h-4 w-4 text-primary/60" />
+              </div>
+            )}
+            <div>
+              <h3 className="font-display text-base font-bold text-white">{poet.name}</h3>
+              <p className="text-xs text-gray-500">Poems</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors"><X className="h-4 w-4" /></button>
+        </div>
+
+        <div className="p-5 space-y-6">
+          {/* Existing poems */}
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400 mb-3">
+              Published ({loading ? "…" : poems.length})
+            </p>
+            {loading && <div className="space-y-2">{[1,2].map(i => <div key={i} className="h-14 rounded-xl bg-white/[0.02] border border-white/5 animate-pulse" />)}</div>}
+            {!loading && poems.length === 0 && (
+              <p className="text-sm text-gray-600 py-4 text-center">No poems yet — add one below.</p>
+            )}
+            {!loading && poems.length > 0 && (
+              <div className="space-y-2 max-h-56 overflow-y-auto pr-1">
+                {poems.map((poem) => (
+                  <div key={poem.id} className="flex items-start gap-3 p-3 rounded-xl bg-white/[0.02] border border-white/5">
+                    <BookOpen className="h-3.5 w-3.5 text-primary/50 mt-0.5 shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-white truncate">{poem.title}</p>
+                      {poem.season && <p className="text-[10px] text-gray-600">{poem.season}</p>}
+                      <p className="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed font-serif">
+                        {poem.content.split("\n").slice(0, 2).join(" · ")}
+                      </p>
+                    </div>
+                    <button onClick={async () => { if (!confirm(`Delete "${poem.title}"?`)) return; try { await deletePoem(poem.id); show("Poem deleted."); } catch { show("Delete failed.", "error"); } }} className="p-1 text-gray-600 hover:text-red-400 transition-colors shrink-0"><Trash2 className="h-3 w-3" /></button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Add new poem */}
+          <div className="border-t border-white/5 pt-5 space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-gray-400">Post New Poem</p>
+            <input
+              value={form.title}
+              onChange={e => setForm({ ...form, title: e.target.value })}
+              placeholder="Poem title"
+              className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+            />
+            <textarea
+              value={form.content}
+              onChange={e => setForm({ ...form, content: e.target.value })}
+              placeholder={"Paste or type the poem here…\nUse line breaks to separate stanzas."}
+              rows={8}
+              className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors resize-none font-serif leading-relaxed"
+            />
+            <div className="grid grid-cols-2 gap-3">
+              <input
+                value={form.season}
+                onChange={e => setForm({ ...form, season: e.target.value })}
+                placeholder="Season (e.g. Season 14)"
+                className="px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+              />
+              <input
+                value={form.theme}
+                onChange={e => setForm({ ...form, theme: e.target.value })}
+                placeholder="Theme (optional)"
+                className="px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+              />
+            </div>
+            <button
+              onClick={handleAdd}
+              disabled={saving}
+              className="w-full flex items-center justify-center gap-2 bg-primary text-black font-bold py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-colors disabled:opacity-60"
+            >
+              <Plus className="h-4 w-4" /> {saving ? "Posting…" : "Post Poem"}
+            </button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 /* ──────────────────────────── Poets ──────────────────────────── */
 function PoetsManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
   const { data: poets, loading } = usePoets();
   const emptyForm: Omit<FirePoet, "id"> = { name: "", bio: "", country: "", imageUrl: "", social: "" };
   const [form, setForm] = useState(emptyForm);
   const [editing, setEditing] = useState<FirePoet | null>(null);
+  const [poetPoemsTarget, setPoetPoemsTarget] = useState<FirePoet | null>(null);
   const [saving, setSaving] = useState(false);
 
   const handleCreate = async () => {
@@ -702,8 +823,9 @@ function PoetsManager({ show }: { show: (m: string, t?: "success" | "error") => 
                 {p.bio && <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">{p.bio}</p>}
               </div>
               <div className="flex gap-1.5 shrink-0">
-                <button onClick={() => setEditing(p)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
-                <button onClick={() => handleDelete(p)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+                <button onClick={() => setPoetPoemsTarget(p)} title="Manage poems" className="p-1.5 text-gray-500 hover:text-primary transition-colors"><BookOpen className="h-3.5 w-3.5" /></button>
+                <button onClick={() => setEditing(p)} title="Edit poet" className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
+                <button onClick={() => handleDelete(p)} title="Delete" className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
               </div>
             </div>
           ))}
@@ -768,6 +890,13 @@ function PoetsManager({ show }: { show: (m: string, t?: "success" | "error") => 
               </div>
             </motion.div>
           </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Poet poems modal */}
+      <AnimatePresence>
+        {poetPoemsTarget && (
+          <PoetPoemsModal poet={poetPoemsTarget} show={show} onClose={() => setPoetPoemsTarget(null)} />
         )}
       </AnimatePresence>
 

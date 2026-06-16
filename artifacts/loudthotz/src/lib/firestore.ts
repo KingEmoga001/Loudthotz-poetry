@@ -21,6 +21,7 @@ export interface FirePoem {
   isFeatured: boolean;
   season?: string;
   theme?: string;
+  poetId?: string;
 }
 
 export interface FireSubmission {
@@ -277,6 +278,63 @@ export function usePendingCount(): number {
     return unsub;
   }, []);
   return count;
+}
+
+export function usePoetPoems(poetName: string): { data: FirePoem[]; loading: boolean } {
+  const [data, setData] = useState<FirePoem[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!poetName) { setLoading(false); return; }
+    const q = query(collection(db, "poems"), where("author", "==", poetName));
+    const unsub = onSnapshot(q, (snap) => {
+      const poems: FirePoem[] = snap.docs.map((d) => {
+        const raw = d.data();
+        return {
+          id: d.id,
+          title: raw.title ?? "",
+          author: raw.author ?? "",
+          country: raw.country ?? "",
+          content: raw.content ?? "",
+          publishedAt: tsToIso(raw.publishedAt),
+          averageRating: raw.averageRating ?? 0,
+          ratingCount: raw.ratingCount ?? 0,
+          ratingSum: raw.ratingSum ?? 0,
+          isFeatured: raw.isFeatured ?? false,
+          season: raw.season,
+          theme: raw.theme,
+          poetId: raw.poetId,
+        };
+      });
+      poems.sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
+      setData(poems);
+      setLoading(false);
+    });
+    return unsub;
+  }, [poetName]);
+
+  return { data, loading };
+}
+
+export async function createPoetPoem(
+  poetId: string,
+  poetName: string,
+  data: { title: string; content: string; country?: string; season?: string; theme?: string },
+) {
+  await addDoc(collection(db, "poems"), {
+    title: data.title,
+    content: data.content,
+    author: poetName,
+    poetId,
+    country: data.country ?? "",
+    season: data.season ?? "",
+    theme: data.theme ?? "",
+    publishedAt: serverTimestamp(),
+    averageRating: 0,
+    ratingCount: 0,
+    ratingSum: 0,
+    isFeatured: false,
+  });
 }
 
 export async function submitPoem(data: { title: string; author: string; country: string; content: string }) {
