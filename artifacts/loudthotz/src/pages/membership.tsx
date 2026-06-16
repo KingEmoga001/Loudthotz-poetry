@@ -138,16 +138,20 @@ export default function Membership() {
                   </div>
                 )}
 
-                <div className="mb-3 flex items-center gap-3">
+                <div className="mb-4 flex items-center gap-3">
                   <div className="p-2 rounded-lg bg-white/5">
                     <tier.icon className={`h-5 w-5 ${tier.iconColor}`} />
                   </div>
                   <h3 className="font-display font-bold text-lg text-white">{tier.name}</h3>
                 </div>
 
-                <div className="mb-4">
-                  <span className="font-display text-2xl font-bold text-white">{tier.price}</span>
-                  <span className="text-gray-500 text-sm ml-1">/ {tier.period}</span>
+                <div className="mb-5 pb-5 border-b border-white/5">
+                  <div className="font-display text-3xl font-black text-white leading-none">
+                    {tier.price || "₦0"}
+                  </div>
+                  <div className="text-gray-500 text-xs mt-1 uppercase tracking-widest font-semibold">
+                    {tier.period}
+                  </div>
                 </div>
 
                 <p className="text-sm text-gray-400 mb-5 leading-relaxed">{tier.description}</p>
