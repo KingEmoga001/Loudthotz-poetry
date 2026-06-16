@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import { BookOpen, PenTool, Mic2, Library, Heart, Shield, Menu, X } from "lucide-react";
 import { usePendingCount } from "@/lib/firestore";
+import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
 
@@ -27,8 +28,9 @@ export function Navbar() {
 
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3 shrink-0 group">
-          <div className="h-11 w-20 overflow-hidden rounded-lg border border-white/10 group-hover:border-primary/40 transition-colors">
-            <img src={loudthotzLogo} alt="Loudthotz" className="h-full w-full object-cover" />
+          {/* Small icon used for nav — shows full symbol without cropping */}
+          <div className="h-11 w-11 shrink-0 overflow-hidden rounded-lg bg-black border border-white/10 group-hover:border-primary/40 transition-colors">
+            <img src={loudthotzIcon} alt="Loudthotz" className="h-full w-full object-contain p-0.5" />
           </div>
           <div className="hidden sm:block">
             <div className="flex items-center gap-2">

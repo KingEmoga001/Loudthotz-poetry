@@ -18,6 +18,7 @@ import {
   updateSiteSettings, seedDatabase,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
 } from "@/lib/firestore";
+import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
 
 /* ──────────────────────────── types ──────────────────────────── */
@@ -742,7 +743,7 @@ export default function AdminPanel() {
         <div className="p-5 border-b border-white/5">
           <div className="flex items-center gap-3">
             <div className="h-9 w-16 overflow-hidden rounded-lg border border-white/10">
-              <img src={loudthotzLogo} alt="Loudthotz" className="h-full w-full object-cover" />
+              <img src={loudthotzIcon} alt="Loudthotz" className="h-full w-full object-contain p-0.5" />
             </div>
             <div>
               <p className="font-display text-xs font-bold text-primary tracking-widest">LOUDTHOTZ</p>

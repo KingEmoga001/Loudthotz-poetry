@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "wouter";
 import { Eye, EyeOff, Lock, Shield, ExternalLink } from "lucide-react";
+import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
 
 export default function AdminLogin() {
@@ -32,10 +33,16 @@ export default function AdminLogin() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex flex-col items-center mb-10">
-          <div className="h-14 w-24 overflow-hidden rounded-xl border border-white/10 mb-4">
-            <img src={loudthotzLogo} alt="Loudthotz" className="h-full w-full object-cover" />
+          {/* Full logo shown in its entirety — object-contain keeps full image visible */}
+          <div className="w-48 h-28 overflow-hidden rounded-xl border border-white/10 mb-4 bg-black">
+            <img src={loudthotzLogo} alt="Loudthotz" className="h-full w-full object-contain" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-primary tracking-wider">LOUDTHOTZ</h1>
+          <div className="flex items-center gap-3 mt-2">
+            <div className="h-8 w-8 rounded-lg bg-black border border-white/10 overflow-hidden">
+              <img src={loudthotzIcon} alt="icon" className="h-full w-full object-contain p-0.5" />
+            </div>
+            <h1 className="font-display text-2xl font-bold text-primary tracking-wider">LOUDTHOTZ</h1>
+          </div>
           <p className="text-gray-500 text-sm mt-1">Admin Control Room</p>
         </div>
 
