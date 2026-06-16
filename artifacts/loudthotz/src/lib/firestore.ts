@@ -498,11 +498,18 @@ export async function deleteHeroImage(id: string) {
 }
 
 export async function uploadHeroImage(file: File): Promise<string> {
-  const { storage } = await import("./firebase");
-  const { ref, uploadBytes, getDownloadURL } = await import("firebase/storage");
-  const storageRef = ref(storage, `hero_images/${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`);
-  const snapshot = await uploadBytes(storageRef, file);
-  return getDownloadURL(snapshot.ref);
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch("/api/uploads/hero-image", {
+    method: "POST",
+    body: formData,
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ error: "Upload failed" }));
+    throw new Error(err.error ?? "Upload failed");
+  }
+  const { url } = await res.json();
+  return url;
 }
 
 /* ─────────────────── Seed Data ─────────────────── */
