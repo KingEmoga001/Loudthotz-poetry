@@ -7,7 +7,7 @@ import {
   Edit3, Plus, Save, Eye, EyeOff, Mic2, Calendar, Link2,
   Users, Globe2, BarChart3, RefreshCw, ChevronDown, ChevronUp,
   AlertCircle, BookMarked, Play, X, Database, Image, GripVertical,
-  ToggleLeft, ToggleRight,
+  ToggleLeft, ToggleRight, Feather,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -18,14 +18,15 @@ import {
   addLivestreamSession, updateLivestreamSession, deleteLivestreamSession,
   updateSiteSettings, seedDatabase,
   useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage, uploadHeroImage,
+  usePoets, createPoet, updatePoet, deletePoet,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
-  type FireHeroImage,
+  type FireHeroImage, type FirePoet,
 } from "@/lib/firestore";
 import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
 
 /* ──────────────────────────── types ──────────────────────────── */
-type Tab = "dashboard" | "submissions" | "poems" | "livestream" | "books" | "hero" | "settings";
+type Tab = "dashboard" | "submissions" | "poems" | "livestream" | "books" | "poets" | "hero" | "settings";
 
 /* ──────────────────────────── helpers ──────────────────────────── */
 function Toast({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) {
@@ -637,6 +638,155 @@ function BooksManager({ show }: { show: (m: string, t?: "success" | "error") => 
   );
 }
 
+/* ──────────────────────────── Poets ──────────────────────────── */
+function PoetsManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
+  const { data: poets, loading } = usePoets();
+  const emptyForm: Omit<FirePoet, "id"> = { name: "", bio: "", country: "", imageUrl: "", social: "" };
+  const [form, setForm] = useState(emptyForm);
+  const [editing, setEditing] = useState<FirePoet | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const handleCreate = async () => {
+    if (!form.name.trim()) { show("Name is required.", "error"); return; }
+    setSaving(true);
+    try { await createPoet(form); setForm(emptyForm); show("Poet added!"); }
+    catch { show("Failed to add poet.", "error"); }
+    finally { setSaving(false); }
+  };
+
+  const handleSave = async () => {
+    if (!editing) return;
+    setSaving(true);
+    try { await updatePoet(editing.id, editing); setEditing(null); show("Poet updated."); }
+    catch { show("Update failed.", "error"); }
+    finally { setSaving(false); }
+  };
+
+  const handleDelete = async (p: FirePoet) => {
+    if (!confirm(`Delete "${p.name}"?`)) return;
+    try { await deletePoet(p.id); show("Poet removed."); }
+    catch { show("Delete failed.", "error"); }
+  };
+
+  const fields: { key: keyof Omit<FirePoet, "id">; label: string; placeholder: string; hint?: string }[] = [
+    { key: "name", label: "Full Name", placeholder: "e.g. Soonest Nathaniel" },
+    { key: "country", label: "Country", placeholder: "e.g. Nigeria" },
+    { key: "imageUrl", label: "Photo URL", placeholder: "https://…", hint: "Direct link to a portrait photo" },
+    { key: "social", label: "Profile / Social Link", placeholder: "https://instagram.com/…", hint: "Optional link to their social or blog" },
+    { key: "bio", label: "Short Bio", placeholder: "A few words about this poet…", hint: "1–2 sentences max" },
+  ];
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-white mb-1">Poets</h2>
+        <p className="text-gray-500 text-sm">Add a photo URL, bio and country for each poet to show rich profile cards on the Poets page.</p>
+      </div>
+
+      {/* Existing poets */}
+      {!loading && poets.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {poets.map((p) => (
+            <div key={p.id} className="p-3 rounded-xl border border-white/10 bg-white/[0.02] flex gap-3 items-center">
+              {p.imageUrl ? (
+                <img src={p.imageUrl} alt={p.name} className="w-12 h-12 object-cover rounded-full shrink-0 border border-white/10" />
+              ) : (
+                <div className="w-12 h-12 rounded-full shrink-0 bg-primary/10 border border-primary/20 flex items-center justify-center">
+                  <Feather className="h-5 w-5 text-primary/60" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-white truncate">{p.name}</p>
+                {p.country && <p className="text-xs text-gray-500">{p.country}</p>}
+                {p.bio && <p className="text-xs text-gray-600 line-clamp-1 mt-0.5">{p.bio}</p>}
+              </div>
+              <div className="flex gap-1.5 shrink-0">
+                <button onClick={() => setEditing(p)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
+                <button onClick={() => handleDelete(p)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {loading && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {[1,2,3,4].map(i => <div key={i} className="h-16 rounded-xl bg-white/[0.02] border border-white/5 animate-pulse" />)}
+        </div>
+      )}
+
+      {/* Edit modal */}
+      {editing && (
+        <div className="bg-white/[0.03] border border-primary/20 rounded-xl p-5 space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white">Editing: {editing.name}</h3>
+            <button onClick={() => setEditing(null)} className="text-gray-500 hover:text-white"><X className="h-4 w-4" /></button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {fields.map(({ key, label, placeholder, hint }) => (
+              <div key={key} className={key === "bio" ? "sm:col-span-2" : ""}>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
+                {key === "bio" ? (
+                  <textarea
+                    value={editing[key] ?? ""}
+                    onChange={e => setEditing({ ...editing, [key]: e.target.value })}
+                    placeholder={placeholder}
+                    rows={2}
+                    className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors resize-none"
+                  />
+                ) : (
+                  <input
+                    value={editing[key] ?? ""}
+                    onChange={e => setEditing({ ...editing, [key]: e.target.value })}
+                    placeholder={placeholder}
+                    className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors"
+                  />
+                )}
+                {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
+              </div>
+            ))}
+          </div>
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-60">
+            <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Changes"}
+          </button>
+        </div>
+      )}
+
+      {/* Add new */}
+      <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add New Poet</h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {fields.map(({ key, label, placeholder, hint }) => (
+            <div key={key} className={key === "bio" ? "sm:col-span-2" : ""}>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">{label}</label>
+              {key === "bio" ? (
+                <textarea
+                  value={form[key]}
+                  onChange={e => setForm({ ...form, [key]: e.target.value })}
+                  placeholder={placeholder}
+                  rows={2}
+                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors resize-none"
+                />
+              ) : (
+                <input
+                  value={form[key]}
+                  onChange={e => setForm({ ...form, [key]: e.target.value })}
+                  placeholder={placeholder}
+                  className="w-full px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors"
+                />
+              )}
+              {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
+            </div>
+          ))}
+        </div>
+        <button onClick={handleCreate} disabled={saving} className="flex items-center gap-2 bg-primary/20 border border-primary/30 text-primary font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/30 transition-all disabled:opacity-60">
+          <Plus className="h-4 w-4" /> {saving ? "Adding…" : "Add Poet"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /* ──────────────────────────── Hero Images ──────────────────────────── */
 function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
   const { data: images, loading } = useAllHeroImages();
@@ -1113,6 +1263,7 @@ export default function AdminPanel() {
     { id: "poems", label: "Poems", icon: BookOpen },
     { id: "livestream", label: "Livestream", icon: Radio },
     { id: "books", label: "Books", icon: Library },
+    { id: "poets", label: "Poets", icon: Feather },
     { id: "hero", label: "Hero Carousel", icon: Image },
     { id: "settings", label: "Settings", icon: Settings },
   ];
@@ -1177,6 +1328,7 @@ export default function AdminPanel() {
               {activeTab === "poems" && <PoemsManager show={show} />}
               {activeTab === "livestream" && <LivestreamControl show={show} />}
               {activeTab === "books" && <BooksManager show={show} />}
+              {activeTab === "poets" && <PoetsManager show={show} />}
               {activeTab === "hero" && <HeroImagesManager show={show} />}
               {activeTab === "settings" && <SiteSettingsPanel show={show} />}
             </motion.div>

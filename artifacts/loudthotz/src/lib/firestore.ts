@@ -65,7 +65,17 @@ export interface FireLivestreamSession {
   season: string;
   episode: number;
   recordingUrl?: string;
+  blogUrl?: string;
   theme: string;
+}
+
+export interface FirePoet {
+  id: string;
+  name: string;
+  bio?: string;
+  country?: string;
+  imageUrl?: string;
+  social?: string;
 }
 
 export interface FireSiteSettings {
@@ -358,7 +368,7 @@ export function useLivestreamSessions(): { data: FireLivestreamSession[]; loadin
         return {
           id: d.id, title: raw.title ?? "", description: raw.description ?? "",
           date: tsToIso(raw.date), season: raw.season ?? "", episode: raw.episode ?? 1,
-          recordingUrl: raw.recordingUrl, theme: raw.theme ?? "",
+          recordingUrl: raw.recordingUrl, blogUrl: raw.blogUrl, theme: raw.theme ?? "",
         };
       });
       sessions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
@@ -485,6 +495,47 @@ export function useAllHeroImages(): { data: FireHeroImage[]; loading: boolean } 
   return { data, loading };
 }
 
+/* ─────────────────── Poets ─────────────────── */
+export function usePoets(): { data: FirePoet[]; loading: boolean } {
+  const [data, setData] = useState<FirePoet[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const ref = collection(db, "poets");
+    const unsub = onSnapshot(ref, (snap) => {
+      const poets: FirePoet[] = snap.docs.map((d) => {
+        const raw = d.data();
+        return {
+          id: d.id,
+          name: raw.name ?? "",
+          bio: raw.bio ?? "",
+          country: raw.country ?? "",
+          imageUrl: raw.imageUrl ?? "",
+          social: raw.social ?? "",
+        };
+      });
+      poets.sort((a, b) => a.name.localeCompare(b.name));
+      setData(poets);
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  return { data, loading };
+}
+
+export async function createPoet(data: Omit<FirePoet, "id">) {
+  await addDoc(collection(db, "poets"), data);
+}
+
+export async function updatePoet(id: string, data: Partial<Omit<FirePoet, "id">>) {
+  await updateDoc(doc(db, "poets", id), data as Record<string, unknown>);
+}
+
+export async function deletePoet(id: string) {
+  await deleteDoc(doc(db, "poets", id));
+}
+
 export async function addHeroImage(data: Omit<FireHeroImage, "id">) {
   await addDoc(collection(db, "hero_images"), data);
 }
@@ -551,10 +602,11 @@ export async function seedDatabase() {
   const siteSettings = {
     heroHeadline: "Where Words Ignite Loud Thoughts",
     heroSubtext: "Formerly managed under the Independent Poets Concerns, Loudthotz Poetry is now proudly hosted as an official event and literary vehicle under the Naija Art Initiative.",
-    upcomingEventTitle: "Brothers — Spotlights on Kinship",
+    upcomingEventTitle: "Next Open Reading",
     upcomingEventDate: new Date(Date.now() + 14 * 86400000).toISOString(),
     aboutText: "A living literary space for African and global spoken-word poets — raw and electric, like an open mic in a dimly lit Lagos art house.",
     donationMessage: "Loudthotz operates on community-led volunteering under the Naija Art Initiative.",
+    donationPaystackLink: "https://paystack.shop/pay/loudthotzdonate",
     totalCommunityVoices: 5000,
   };
 

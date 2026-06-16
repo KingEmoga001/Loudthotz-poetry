@@ -1,7 +1,8 @@
 import { motion } from "framer-motion";
-import { Archive, Calendar, Mic2 } from "lucide-react";
+import { Archive, Calendar, Mic2, ExternalLink, Play } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
+import { useLivestreamSessions } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -9,14 +10,14 @@ const fadeUp = (delay = 0) => ({
   transition: { duration: 0.5, delay },
 });
 
-type Session = {
+type StaticSession = {
   date: string;
   title: string;
   season: string;
   theme: string;
 };
 
-const sessions: Session[] = [
+const staticSessions: StaticSession[] = [
   { date: "2023-09-19", title: "Poems Read at Our Last Poetry Reading — September 14, 2023", season: "Season 14", theme: "" },
   { date: "2023-08-09", title: "Season 14 Episode 08 — Strings", season: "Season 14", theme: "Strings" },
   { date: "2023-03-03", title: "Season 14 Episode 03 — Slits", season: "Season 14", theme: "Slits" },
@@ -49,12 +50,6 @@ const sessions: Session[] = [
   { date: "2021-02-18", title: "Season 12 Episode 02 — Awake (Poems Read)", season: "Season 12", theme: "Awake" },
 ];
 
-const allSeasons = ["All", ...Array.from(new Set(sessions.map(s => s.season).filter(Boolean)))];
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
-}
-
 const themeColors: Record<string, string> = {
   Strings: "text-purple-400 bg-purple-500/10 border-purple-500/20",
   Slits: "text-rose-400 bg-rose-500/10 border-rose-500/20",
@@ -77,14 +72,61 @@ const themeColors: Record<string, string> = {
   Gain: "text-blue-400 bg-blue-500/10 border-blue-500/20",
   Storm: "text-primary bg-primary/10 border-primary/20",
   Awake: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+  "Kinship & Brotherhood": "text-amber-400 bg-amber-500/10 border-amber-500/20",
+  "Diaspora & Identity": "text-purple-400 bg-purple-500/10 border-purple-500/20",
+  "Womanhood & Power": "text-rose-400 bg-rose-500/10 border-rose-500/20",
+  "Urban Africa": "text-blue-400 bg-blue-500/10 border-blue-500/20",
+};
+
+function formatDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
+}
+
+type DisplaySession = {
+  key: string;
+  date: string;
+  title: string;
+  season: string;
+  theme: string;
+  recordingUrl?: string;
+  blogUrl?: string;
+  description?: string;
 };
 
 export default function ArchivePage() {
+  const { data: firestoreSessions, loading } = useLivestreamSessions();
   const [selectedSeason, setSelectedSeason] = useState("All");
 
+  const firestoreDisplayed: DisplaySession[] = firestoreSessions.map((s) => ({
+    key: s.id,
+    date: s.date,
+    title: s.title,
+    season: s.season,
+    theme: s.theme,
+    recordingUrl: s.recordingUrl,
+    blogUrl: s.blogUrl,
+    description: s.description,
+  }));
+
+  const staticDisplayed: DisplaySession[] = staticSessions.map((s) => ({
+    key: `${s.date}-${s.title}`,
+    date: s.date,
+    title: s.title,
+    season: s.season,
+    theme: s.theme,
+  }));
+
+  const allSessions: DisplaySession[] = firestoreDisplayed.length > 0
+    ? [...firestoreDisplayed, ...staticDisplayed].sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      )
+    : staticDisplayed;
+
+  const allSeasons = ["All", ...Array.from(new Set(allSessions.map((s) => s.season).filter(Boolean)))];
+
   const filtered = selectedSeason === "All"
-    ? sessions
-    : sessions.filter(s => s.season === selectedSeason);
+    ? allSessions
+    : allSessions.filter((s) => s.season === selectedSeason);
 
   return (
     <div className="min-h-screen">
@@ -114,7 +156,7 @@ export default function ArchivePage() {
           <motion.div {...fadeUp(0.22)} className="flex justify-center gap-3 mt-6 flex-wrap">
             <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary px-4 py-2 rounded-xl text-sm font-semibold">
               <Calendar className="h-4 w-4" />
-              {sessions.length} Sessions
+              {loading ? "…" : allSessions.length} Sessions
             </div>
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-gray-300 px-4 py-2 rounded-xl text-sm font-semibold">
               Since 2021
@@ -147,40 +189,74 @@ export default function ArchivePage() {
       {/* Session list */}
       <section className="pb-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="space-y-3">
-            {filtered.map((session, i) => (
-              <motion.div
-                key={`${session.date}-${session.title}`}
-                {...fadeUp(Math.min(i * 0.03, 0.3))}
-                className="flex items-start gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-xl"
-              >
-                {/* Date column */}
-                <div className="flex-shrink-0 text-right hidden sm:block min-w-[110px]">
-                  <span className="text-xs text-gray-500">{formatDate(session.date)}</span>
-                </div>
+          {loading ? (
+            <div className="space-y-3">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-16 rounded-xl bg-white/[0.02] border border-white/5 animate-pulse" />
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filtered.map((session, i) => {
+                const link = session.recordingUrl || session.blogUrl;
+                const inner = (
+                  <motion.div
+                    {...fadeUp(Math.min(i * 0.03, 0.3))}
+                    className={`flex items-start gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-xl transition-all ${
+                      link ? "hover:border-primary/20 hover:bg-white/[0.04] cursor-pointer group" : ""
+                    }`}
+                  >
+                    {/* Date column */}
+                    <div className="flex-shrink-0 text-right hidden sm:block min-w-[110px]">
+                      <span className="text-xs text-gray-500">{formatDate(session.date)}</span>
+                    </div>
+                    <div className="flex-shrink-0 w-px bg-white/10 self-stretch hidden sm:block" />
 
-                <div className="flex-shrink-0 w-px bg-white/10 self-stretch hidden sm:block" />
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                        {session.season && (
+                          <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
+                            {session.season}
+                          </span>
+                        )}
+                        {session.theme && (
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${themeColors[session.theme] ?? "text-gray-400 bg-white/5 border-white/10"}`}>
+                            {session.theme}
+                          </span>
+                        )}
+                        {session.recordingUrl && (
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                            <Play className="h-2.5 w-2.5" /> Recording
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-300 leading-snug">{session.title}</p>
+                      {session.description && (
+                        <p className="text-xs text-gray-500 mt-1 line-clamp-1">{session.description}</p>
+                      )}
+                      <span className="text-xs text-gray-600 sm:hidden mt-1 block">{formatDate(session.date)}</span>
+                    </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-1 flex-wrap">
-                    {session.season && (
-                      <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
-                        {session.season}
-                      </span>
+                    {/* Link icon */}
+                    {link && (
+                      <div className="flex-shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ExternalLink className="h-4 w-4 text-primary" />
+                      </div>
                     )}
-                    {session.theme && (
-                      <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${themeColors[session.theme] ?? "text-gray-400 bg-white/5 border-white/10"}`}>
-                        {session.theme}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-sm text-gray-300 leading-snug">{session.title}</p>
-                  <span className="text-xs text-gray-600 sm:hidden mt-1 block">{formatDate(session.date)}</span>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                  </motion.div>
+                );
+
+                return link ? (
+                  <a key={session.key} href={link} target="_blank" rel="noopener noreferrer" className="block">
+                    {inner}
+                  </a>
+                ) : (
+                  <div key={session.key}>{inner}</div>
+                );
+              })}
+            </div>
+          )}
 
           {/* CTA to live sessions page */}
           <motion.div {...fadeUp(0.3)} className="mt-12 text-center rounded-2xl border border-white/5 bg-white/[0.02] p-8">
