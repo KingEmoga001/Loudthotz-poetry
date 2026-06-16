@@ -64,7 +64,7 @@ function HeroCarousel() {
 
   return (
     <div
-      className="absolute inset-0 z-0"
+      className="relative w-full h-[60vh] min-h-[360px] overflow-hidden"
       onMouseEnter={() => setPaused(true)}
       onMouseLeave={() => setPaused(false)}
     >
@@ -82,21 +82,21 @@ function HeroCarousel() {
             alt={allSlides[safeCurrent]?.caption}
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/80" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60" />
         </motion.div>
       </AnimatePresence>
 
       {/* Caption */}
       {allSlides[safeCurrent]?.caption && (
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 text-center px-4">
-          <p className="text-xs text-white/60 font-medium tracking-wide">{allSlides[safeCurrent].caption}</p>
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-10 text-center px-4">
+          <p className="text-xs text-white/70 font-medium tracking-wide drop-shadow">{allSlides[safeCurrent].caption}</p>
           {allSlides[safeCurrent].credit && (
-            <p className="text-[10px] text-white/40 mt-0.5">📷 {allSlides[safeCurrent].credit}</p>
+            <p className="text-[10px] text-white/50 mt-0.5">📷 {allSlides[safeCurrent].credit}</p>
           )}
         </div>
       )}
 
-      {/* Arrows — only when multiple real slides */}
+      {/* Arrows — only when multiple slides */}
       {allSlides.length > 1 && (
         <>
           <button
@@ -144,16 +144,15 @@ export default function Home() {
     <div className="min-h-screen">
 
       {/* ═══════════════════════════════════════════════
-          HERO SECTION
+          HERO CAROUSEL — full-width image at the top
       ═══════════════════════════════════════════════ */}
-      <section className="relative overflow-hidden min-h-[70vh] flex flex-col">
-        {/* Hero image carousel (hidden when no images) */}
-        <HeroCarousel />
-        {/* ambient background — always rendered, visible when no carousel images */}
-        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(181,230,29,0.07),transparent)]" />
-        <div className="absolute inset-0 z-0 bg-[radial-gradient(ellipse_50%_40%_at_80%_60%,rgba(0,162,232,0.04),transparent)]" />
+      <HeroCarousel />
 
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28">
+      {/* ═══════════════════════════════════════════════
+          HERO TEXT — headline, subtext, CTAs, stats
+      ═══════════════════════════════════════════════ */}
+      <section className="relative overflow-hidden bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(181,230,29,0.07),transparent)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
           <motion.div
             className="max-w-3xl mx-auto text-center"
             variants={stagger}
@@ -225,7 +224,7 @@ export default function Home() {
           {!statsLoading && (
             <motion.div
               {...fadeUp(0.36)}
-              className="grid grid-cols-2 md:grid-cols-4 gap-px mt-16 bg-white/5 rounded-2xl overflow-hidden border border-white/5"
+              className="grid grid-cols-2 md:grid-cols-4 gap-px mt-12 bg-white/5 rounded-2xl overflow-hidden border border-white/5"
             >
               {[
                 { label: "Poems Published", value: stats?.totalPoems ?? 0 },
