@@ -1,14 +1,12 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, PenTool, Mic2, Library, Heart, Shield, Menu, X, Trophy, Users, Feather, Archive, Info } from "lucide-react";
-import { usePendingCount } from "@/lib/firestore";
+import { BookOpen, PenTool, Mic2, Library, Heart, Menu, X, Trophy, Users, Feather, Archive, Info } from "lucide-react";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781641089854.jpeg";
 
 export function Navbar() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const pendingCount = usePendingCount();
 
   const navLinks = [
     { href: "/about", label: "About", icon: Info },
@@ -63,19 +61,6 @@ export function Navbar() {
             );
           })}
 
-          <div className="h-5 w-px bg-white/10 mx-1 shrink-0" />
-
-          <Link href="/admin">
-            <div className={`flex items-center gap-1.5 px-2.5 py-2 rounded-xl text-sm font-semibold text-amber-400 hover:bg-amber-500/10 transition-all ${location === "/admin" ? "bg-amber-500/10" : ""}`}>
-              <Shield className="h-4 w-4 shrink-0" />
-              <span className="hidden xl:inline">Admin</span>
-              {pendingCount > 0 && (
-                <span className="bg-amber-500 text-black text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
-                  {pendingCount}
-                </span>
-              )}
-            </div>
-          </Link>
         </nav>
 
         {/* Mobile Toggle */}
@@ -121,18 +106,6 @@ export function Navbar() {
                   </Link>
                 );
               })}
-              <div className="col-span-2 h-px bg-white/5 my-1" />
-              <Link href="/admin" onClick={closeMobile} className="col-span-2">
-                <div className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold text-amber-400 ${location === "/admin" ? "bg-amber-500/10" : "hover:bg-amber-500/10"} transition-colors`}>
-                  <Shield className="h-5 w-5" />
-                  Admin CMS
-                  {pendingCount > 0 && (
-                    <span className="ml-auto bg-amber-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-full">
-                      {pendingCount} pending
-                    </span>
-                  )}
-                </div>
-              </Link>
             </nav>
           </motion.div>
         )}
