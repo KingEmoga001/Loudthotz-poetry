@@ -624,6 +624,8 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
   const [form, setForm] = useState({ caption: "", credit: "", order: "" });
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [urlInput, setUrlInput] = useState("");
+  const [addMode, setAddMode] = useState<"upload" | "url">("url");
   const [saving, setSaving] = useState(false);
   const [previewing, setPreviewing] = useState<string | null>(null);
 
@@ -639,10 +641,16 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
   };
 
   const handleAdd = async () => {
-    if (!file) { show("Please choose an image to upload.", "error"); return; }
     setSaving(true);
     try {
-      const url = await uploadHeroImage(file);
+      let url: string;
+      if (addMode === "url") {
+        if (!urlInput.trim()) { show("Please enter an image URL.", "error"); setSaving(false); return; }
+        url = urlInput.trim();
+      } else {
+        if (!file) { show("Please choose an image to upload.", "error"); setSaving(false); return; }
+        url = await uploadHeroImage(file);
+      }
       await addHeroImage({
         url,
         caption: form.caption.trim(),
@@ -652,9 +660,10 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
       });
       setFile(null);
       setPreview(null);
+      setUrlInput("");
       setForm({ caption: "", credit: "", order: "" });
-      show("Image uploaded and added to carousel!");
-    } catch (e: unknown) { show("Upload failed: " + (e as Error).message, "error"); }
+      show("Image added to carousel!");
+    } catch (e: unknown) { show("Failed: " + (e as Error).message, "error"); }
     finally { setSaving(false); }
   };
 
@@ -744,42 +753,76 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
 
       {/* Upload form */}
       <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6 space-y-5">
-        <h3 className="text-sm font-bold text-white uppercase tracking-wider">Upload New Image</h3>
+        <div className="flex items-center justify-between flex-wrap gap-3">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">Add New Image</h3>
+          {/* Mode toggle */}
+          <div className="flex gap-1 bg-white/[0.03] border border-white/10 rounded-lg p-1">
+            <button
+              onClick={() => setAddMode("url")}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${addMode === "url" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
+            >
+              Paste URL
+            </button>
+            <button
+              onClick={() => setAddMode("upload")}
+              className={`px-3 py-1.5 rounded-md text-xs font-semibold transition-all ${addMode === "upload" ? "bg-white/10 text-white" : "text-gray-500 hover:text-gray-300"}`}
+            >
+              Upload File
+            </button>
+          </div>
+        </div>
 
-        {/* Drop zone / file picker */}
-        <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
-            Image File <span className="text-red-400">*</span>
-          </label>
-          <label className={`flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed cursor-pointer transition-all ${preview ? "border-primary/30 bg-primary/5" : "border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.04]"}`}>
-            {preview ? (
-              <div className="relative w-full">
-                <img src={preview} alt="Preview" className="w-full max-h-52 object-cover rounded-xl" />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-xl opacity-0 hover:opacity-100 transition-opacity">
-                  <p className="text-white text-xs font-semibold">Click to change image</p>
-                </div>
-              </div>
-            ) : (
-              <div className="py-10 text-center px-4">
-                <Image className="h-8 w-8 text-gray-600 mx-auto mb-3" />
-                <p className="text-sm text-gray-400 font-medium">Click to choose a photo</p>
-                <p className="text-xs text-gray-600 mt-1">JPG, PNG or WebP · max 10 MB</p>
+        {/* URL input mode */}
+        {addMode === "url" && (
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
+              Image URL <span className="text-red-400">*</span>
+            </label>
+            <input
+              value={urlInput}
+              onChange={e => setUrlInput(e.target.value)}
+              placeholder="https://example.com/photo.jpg"
+              className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+            />
+            {urlInput && (
+              <div className="mt-2 rounded-xl overflow-hidden border border-white/10 max-h-40">
+                <img src={urlInput} alt="URL preview" className="w-full h-40 object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
               </div>
             )}
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleFileChange}
-            />
-          </label>
-          {file && (
-            <p className="text-[11px] text-gray-500 mt-1.5 flex items-center gap-1.5">
-              <CheckCircle className="h-3 w-3 text-primary" />
-              {file.name} · {(file.size / 1024).toFixed(0)} KB
-            </p>
-          )}
-        </div>
+          </div>
+        )}
+
+        {/* File upload mode */}
+        {addMode === "upload" && (
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1.5">
+              Image File <span className="text-red-400">*</span>
+            </label>
+            <label className={`flex flex-col items-center justify-center w-full rounded-xl border-2 border-dashed cursor-pointer transition-all ${preview ? "border-primary/30 bg-primary/5" : "border-white/10 hover:border-white/20 bg-white/[0.02] hover:bg-white/[0.04]"}`}>
+              {preview ? (
+                <div className="relative w-full">
+                  <img src={preview} alt="Preview" className="w-full max-h-52 object-cover rounded-xl" />
+                  <div className="absolute inset-0 bg-black/40 flex items-center justify-center rounded-xl opacity-0 hover:opacity-100 transition-opacity">
+                    <p className="text-white text-xs font-semibold">Click to change image</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="py-10 text-center px-4">
+                  <Image className="h-8 w-8 text-gray-600 mx-auto mb-3" />
+                  <p className="text-sm text-gray-400 font-medium">Click to choose a photo</p>
+                  <p className="text-xs text-gray-600 mt-1">JPG, PNG or WebP · max 10 MB</p>
+                </div>
+              )}
+              <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+            </label>
+            {file && (
+              <p className="text-[11px] text-gray-500 mt-1.5 flex items-center gap-1.5">
+                <CheckCircle className="h-3 w-3 text-primary" />
+                {file.name} · {(file.size / 1024).toFixed(0)} KB
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -814,13 +857,13 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
 
         <button
           onClick={handleAdd}
-          disabled={saving || !file}
+          disabled={saving || (addMode === "upload" && !file) || (addMode === "url" && !urlInput.trim())}
           className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-50"
         >
           {saving ? (
-            <><RefreshCw className="h-4 w-4 animate-spin" /> Uploading…</>
+            <><RefreshCw className="h-4 w-4 animate-spin" /> {addMode === "upload" ? "Uploading…" : "Adding…"}</>
           ) : (
-            <><Plus className="h-4 w-4" /> Upload &amp; Add to Carousel</>
+            <><Plus className="h-4 w-4" /> Add to Carousel</>
           )}
         </button>
       </div>

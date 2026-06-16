@@ -81,14 +81,14 @@ export default function Donate() {
           
           <div className="relative z-10 space-y-8">
             <div className="grid grid-cols-3 gap-4">
-              {[10, 25, 50].map(tier => (
+              {[1000, 5000, 10000].map(tier => (
                 <Button 
                   key={tier}
                   variant={amount === tier && !customAmount ? "default" : "outline"}
                   className={`h-16 text-xl font-bold ${amount === tier && !customAmount ? "bg-primary text-primary-foreground" : "border-white/10"}`}
                   onClick={() => { setAmount(tier); setCustomAmount(""); }}
                 >
-                  ${tier}
+                  ₦{tier.toLocaleString()}
                 </Button>
               ))}
             </div>
@@ -96,7 +96,7 @@ export default function Donate() {
             <div className="space-y-2">
               <label className="text-xs uppercase tracking-wider text-muted-foreground font-medium">Or enter custom amount</label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">$</span>
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">₦</span>
                 <Input 
                   type="number"
                   placeholder="Other amount"
@@ -136,7 +136,7 @@ export default function Donate() {
               {donateMutation.isPending ? "Processing..." : (
                 <>
                   <Heart className="mr-2 h-5 w-5 fill-current" />
-                  Donate ${(customAmount ? parseFloat(customAmount) : amount) || 0}
+                  Donate ₦{((customAmount ? parseFloat(customAmount) : amount) || 0).toLocaleString()}
                 </>
               )}
             </Button>

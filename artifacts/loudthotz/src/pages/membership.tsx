@@ -19,14 +19,14 @@ const tiers = [
     iconColor: "text-gray-400",
     description: "Get started with the Loudthotz community at no cost.",
     benefits: [
-      "Added to our Telegram community",
+      "Added to our WhatsApp community",
       "Access to community discussions",
       "Monthly newsletter updates",
     ],
   },
   {
     name: "Basic",
-    price: "₦—",
+    price: "₦24,000",
     period: "per year",
     color: "border-white/10",
     highlight: false,
@@ -42,7 +42,7 @@ const tiers = [
   },
   {
     name: "Full",
-    price: "₦—",
+    price: "₦48,000",
     period: "per year",
     color: "border-primary/30",
     highlight: true,
@@ -59,7 +59,7 @@ const tiers = [
   },
   {
     name: "Golden",
-    price: "₦—",
+    price: "₦60,000",
     period: "per year",
     color: "border-amber-500/30",
     highlight: false,
@@ -169,7 +169,7 @@ export default function Membership() {
                   </a>
                 ) : (
                   <a
-                    href="https://t.me/loudthotz"
+                    href="https://wa.me/loudthotz"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-all"
