@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import loudthotzLogo from "@assets/correct_1781632949414.png";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
-import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info } from "lucide-react";
+import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info, Twitter } from "lucide-react";
 
 export function Footer() {
   return (
@@ -29,6 +29,19 @@ export function Footer() {
                 <p className="text-sm font-semibold text-secondary">Naija Art Initiative</p>
                 <p className="text-[10px] text-gray-500 italic">Formerly Independent Poets Concerns</p>
               </div>
+            </div>
+
+            {/* Socials */}
+            <div className="flex items-center gap-3">
+              <a
+                href="https://x.com/intent/follow?original_referer=https%3A%2F%2Floudthotzpoetry.blogspot.com%2F&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Efollow%7Ctwgr%5ELoudthotz&screen_name=Loudthotz"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-center h-9 w-9 rounded-xl bg-white/[0.05] border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 hover:border-white/20 transition-all"
+                aria-label="Follow Loudthotz on X"
+              >
+                <Twitter className="h-4 w-4" />
+              </a>
             </div>
           </div>
 
