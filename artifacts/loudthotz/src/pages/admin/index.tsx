@@ -7,7 +7,7 @@ import {
   Edit3, Plus, Save, Eye, EyeOff, Mic2, Calendar, Link2,
   Users, Globe2, BarChart3, RefreshCw, ChevronDown, ChevronUp,
   AlertCircle, BookMarked, Play, X, Database, Image, GripVertical,
-  ToggleLeft, ToggleRight, Feather,
+  ToggleLeft, ToggleRight, Feather, Archive,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
