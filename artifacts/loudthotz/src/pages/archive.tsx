@@ -231,19 +231,21 @@ export default function ArchivePage() {
               ))}
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {filtered.map((session, i) => {
                 const link = session.recordingUrl || session.blogUrl;
-                const inner = (
+                const card = (
                   <motion.div
                     {...fadeUp(Math.min(i * 0.03, 0.3))}
-                    className={`flex items-start gap-4 p-4 bg-white/[0.02] border border-white/5 rounded-xl transition-all ${
-                      link ? "hover:border-primary/20 hover:bg-white/[0.04] cursor-pointer group" : ""
+                    className={`flex items-start gap-4 p-4 rounded-xl border transition-all ${
+                      link
+                        ? "bg-white/[0.02] border-white/5 hover:border-primary/20 hover:bg-white/[0.04] cursor-pointer group"
+                        : "bg-transparent border-white/[0.03] opacity-60"
                     }`}
                   >
                     {/* Date column */}
                     <div className="flex-shrink-0 text-right hidden sm:block min-w-[110px]">
-                      <span className="text-xs text-gray-500">{formatDate(session.date)}</span>
+                      <span className={`text-xs ${link ? "text-gray-500" : "text-gray-600"}`}>{formatDate(session.date)}</span>
                     </div>
                     <div className="flex-shrink-0 w-px bg-white/10 self-stretch hidden sm:block" />
 
@@ -251,12 +253,12 @@ export default function ArchivePage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1 flex-wrap">
                         {session.season && (
-                          <span className="text-[10px] font-bold uppercase tracking-widest bg-primary/10 text-primary px-2 py-0.5 rounded-full border border-primary/20">
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${link ? "bg-primary/10 text-primary border-primary/20" : "bg-white/5 text-gray-600 border-white/10"}`}>
                             {session.season}
                           </span>
                         )}
                         {session.theme && (
-                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${themeColors[session.theme] ?? "text-gray-400 bg-white/5 border-white/10"}`}>
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${link ? (themeColors[session.theme] ?? "text-gray-400 bg-white/5 border-white/10") : "text-gray-600 bg-white/5 border-white/10"}`}>
                             {session.theme}
                           </span>
                         )}
@@ -265,15 +267,20 @@ export default function ArchivePage() {
                             <Play className="h-2.5 w-2.5" /> Recording
                           </span>
                         )}
+                        {session.blogUrl && !session.recordingUrl && (
+                          <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
+                            Blog Post
+                          </span>
+                        )}
                       </div>
-                      <p className="text-sm text-gray-300 leading-snug">{session.title}</p>
+                      <p className={`text-sm leading-snug ${link ? "text-gray-300" : "text-gray-500"}`}>{session.title}</p>
                       {session.description && (
-                        <p className="text-xs text-gray-500 mt-1 line-clamp-1">{session.description}</p>
+                        <p className="text-xs text-gray-600 mt-1 line-clamp-1">{session.description}</p>
                       )}
                       <span className="text-xs text-gray-600 sm:hidden mt-1 block">{formatDate(session.date)}</span>
                     </div>
 
-                    {/* Link icon */}
+                    {/* Link icon — only for linked items */}
                     {link && (
                       <div className="flex-shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
                         <ExternalLink className="h-4 w-4 text-primary" />
@@ -284,10 +291,10 @@ export default function ArchivePage() {
 
                 return link ? (
                   <a key={session.key} href={link} target="_blank" rel="noopener noreferrer" className="block">
-                    {inner}
+                    {card}
                   </a>
                 ) : (
-                  <div key={session.key}>{inner}</div>
+                  <div key={session.key}>{card}</div>
                 );
               })}
 

@@ -697,6 +697,65 @@ export async function uploadHeroImage(file: File): Promise<string> {
   return await getDownloadURL(storageRef);
 }
 
+/* ─────────────────── Import Historical Sessions ─────────────────── */
+const HISTORICAL_SESSIONS = [
+  { date: "2023-09-19", title: "Poems Read at Our Last Poetry Reading — September 14, 2023", season: "Season 14", theme: "" },
+  { date: "2023-08-09", title: "Season 14 Episode 08 — Strings", season: "Season 14", theme: "Strings" },
+  { date: "2023-03-03", title: "Season 14 Episode 03 — Slits", season: "Season 14", theme: "Slits" },
+  { date: "2023-02-05", title: "Season 14 Episode 02 — Bent", season: "Season 14", theme: "Bent" },
+  { date: "2023-01-11", title: "Season 14 Episode 01 — Season Premier", season: "Season 14", theme: "" },
+  { date: "2022-12-04", title: "Season 13 Episode 12 — Cease", season: "Season 13", theme: "Cease" },
+  { date: "2022-10-08", title: "October 2022 Open Reading", season: "Season 13", theme: "" },
+  { date: "2022-08-06", title: "Season 13 Episode 08 — Seven", season: "Season 13", theme: "Seven" },
+  { date: "2022-07-02", title: "Season 13 Episode 07 — Good Times", season: "Season 13", theme: "Good Times" },
+  { date: "2022-06-14", title: "Season 12 Episode 06 — Changes (Poems Read)", season: "Season 12", theme: "Changes" },
+  { date: "2022-06-02", title: "Next Reading — June 9, 2022", season: "Season 13", theme: "" },
+  { date: "2022-05-15", title: "Season 13 Episode 05 — Self (Poems Read)", season: "Season 13", theme: "Self" },
+  { date: "2022-05-10", title: "Season 13 Episode 04 — Greed (Poems Read)", season: "Season 13", theme: "Greed" },
+  { date: "2022-01-27", title: "Season 13 Episode 01 — Alpha (Poems Read)", season: "Season 13", theme: "Alpha" },
+  { date: "2022-01-11", title: "Season 13 Episode 01 — Alpha (Season Premier)", season: "Season 13", theme: "Alpha" },
+  { date: "2021-12-11", title: "Season 12 Episode 12 — Distance (Poems Read)", season: "Season 12", theme: "Distance" },
+  { date: "2021-12-08", title: "Season 12 Episode 12 — Distance (Season Finale)", season: "Season 12", theme: "Distance" },
+  { date: "2021-11-16", title: "Season 12 — Reason (Poems Read)", season: "Season 12", theme: "Reason" },
+  { date: "2021-11-16", title: "Season 12 Episode 06 — Elegant (October 2021, Poems Read)", season: "Season 12", theme: "Elegant" },
+  { date: "2021-09-16", title: "Season 12 Episode 10 — Elegant", season: "Season 12", theme: "Elegant" },
+  { date: "2021-09-11", title: "Season 12 Episode 09 — Tree (Poems Read)", season: "Season 12", theme: "Tree" },
+  { date: "2021-09-06", title: "Season 12 Episode 09 — Tree", season: "Season 12", theme: "Tree" },
+  { date: "2021-08-15", title: "Season 12 Episode 08 — Jungle (Poems Read)", season: "Season 12", theme: "Jungle" },
+  { date: "2021-07-21", title: "Season 12 Episode 08 — Jungle (August 12)", season: "Season 12", theme: "Jungle" },
+  { date: "2021-07-21", title: "Season 12 Episode 07 — Sent (Poems Read)", season: "Season 12", theme: "Sent" },
+  { date: "2021-06-16", title: "Season 12 Episode 06 — These Times (Poems Read)", season: "Season 12", theme: "These Times" },
+  { date: "2021-05-21", title: "Season 12 Episode 05 — Drain (Poems Read)", season: "Season 12", theme: "Drain" },
+  { date: "2021-04-11", title: "Season 12 Episode 04 — Gain (Poems Read)", season: "Season 12", theme: "Gain" },
+  { date: "2021-03-19", title: "Season 12 Episode 03 — Storm (Poems Read)", season: "Season 12", theme: "Storm" },
+  { date: "2021-02-18", title: "Season 12 Episode 02 — Awake (Poems Read)", season: "Season 12", theme: "Awake" },
+];
+
+export async function importStaticSessions(): Promise<number> {
+  const snap = await getDocs(collection(db, "livestream_sessions"));
+  const existingKeys = new Set(
+    snap.docs.map((d) => {
+      const raw = d.data();
+      const dateStr = raw.date?.toDate?.()?.toISOString?.()?.slice(0, 10) ?? "";
+      return `${dateStr}|${(raw.title ?? "").toLowerCase().trim()}`;
+    })
+  );
+  const toAdd = HISTORICAL_SESSIONS.filter((s) => {
+    const key = `${s.date}|${s.title.toLowerCase().trim()}`;
+    return !existingKeys.has(key);
+  });
+  await Promise.all(
+    toAdd.map((s) =>
+      addDoc(collection(db, "livestream_sessions"), {
+        title: s.title, season: s.season, theme: s.theme,
+        description: "", episode: 0, recordingUrl: "", blogUrl: "",
+        date: new Date(s.date),
+      })
+    )
+  );
+  return toAdd.length;
+}
+
 /* ─────────────────── Seed Data ─────────────────── */
 export async function seedDatabase() {
   const poems = [

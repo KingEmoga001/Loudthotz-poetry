@@ -21,6 +21,7 @@ import {
   usePoets, createPoet, updatePoet, deletePoet, seedStaticPoets,
   usePoetPoems, createPoetPoem,
   useEvents, createEvent, updateEvent, deleteEvent,
+  importStaticSessions,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
   type FireHeroImage, type FirePoet, type FireEvent,
 } from "@/lib/firestore";
@@ -1072,6 +1073,7 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
   const [editingEvent, setEditingEvent] = useState<FireEvent | null>(null);
   const [editingSession, setEditingSession] = useState<FireLivestreamSession | null>(null);
   const [saving, setSaving] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   const emptyForm: Omit<FireEvent, "id"> = {
     title: "", description: "", date: "", season: "", episode: undefined,
@@ -1353,6 +1355,29 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Import historical sessions */}
+      <div className="flex items-center justify-between p-4 rounded-xl border border-dashed border-white/10 bg-white/[0.01]">
+        <div>
+          <p className="text-sm font-semibold text-white">Import Historical Sessions</p>
+          <p className="text-xs text-gray-500 mt-0.5">Add all 30 historical sessions (Season 12–14, 2021–2023) into Firestore so you can edit and add recording links.</p>
+        </div>
+        <button
+          onClick={async () => {
+            setImporting(true);
+            try {
+              const n = await importStaticSessions();
+              show(n > 0 ? `Imported ${n} historical session${n === 1 ? "" : "s"}.` : "All historical sessions are already imported.");
+            } catch { show("Import failed.", "error"); }
+            finally { setImporting(false); }
+          }}
+          disabled={importing}
+          className="ml-4 shrink-0 flex items-center gap-2 bg-white/5 border border-white/10 text-gray-300 hover:text-white hover:bg-white/10 font-semibold px-4 py-2 rounded-xl text-xs transition-all disabled:opacity-60"
+        >
+          <Archive className="h-3.5 w-3.5" />
+          {importing ? "Importing…" : "Import"}
+        </button>
+      </div>
 
       {/* Add new event */}
       <div className="bg-white/[0.02] border border-white/5 rounded-xl p-6 space-y-5">
