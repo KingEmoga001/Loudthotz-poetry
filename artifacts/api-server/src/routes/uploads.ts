@@ -42,10 +42,25 @@ router.post("/uploads/hero-image", upload.single("file"), async (req, res) => {
   }
 });
 
-router.get("/uploads/hero-image/:key", async (_req, res) => {
-  res.status(410).json({
-    error: "This proxy endpoint is no longer used. Images are served directly from Firebase Storage.",
-  });
+router.get("/uploads/hero-image/:key", async (req, res) => {
+  try {
+    const objectName = Buffer.from(req.params.key, "base64").toString("utf-8");
+    const app = getAdminApp();
+    const file = getStorage(app).bucket().file(objectName);
+    const [exists] = await file.exists();
+    if (!exists) return res.status(404).json({ error: "Image not found" });
+    const [metadata] = await file.getMetadata();
+    res.set({
+      "Content-Type": (metadata.contentType as string) || "image/jpeg",
+      "Cache-Control": "public, max-age=31536000, immutable",
+    });
+    file.createReadStream().on("error", () => {
+      if (!res.headersSent) res.status(500).json({ error: "Stream error" });
+    }).pipe(res);
+  } catch (err) {
+    console.error("Hero image proxy error:", err);
+    if (!res.headersSent) res.status(500).json({ error: "Failed to serve image" });
+  }
 });
 
 export default router;
