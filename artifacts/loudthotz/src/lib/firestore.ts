@@ -109,6 +109,14 @@ export interface FireSiteSettings {
   // Donate page
   donationHeadline: string;
   donationPaystackLink: string;
+
+  // Footer socials
+  socialX: string;
+  socialYoutube: string;
+  socialFacebook: string;
+  socialSpotify: string;
+  socialInstagram: string;
+  socialTiktok: string;
 }
 
 /* ───────────────────────── Helpers ───────────────────────── */

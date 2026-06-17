@@ -1685,7 +1685,7 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
 }
 
 /* ──────────────────────────── Site Settings ──────────────────────────── */
-type SettingsSection = "home" | "membership" | "prize" | "donate";
+type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer";
 
 function SettingsField({
   label, hint, value, onChange, multiline, placeholder, rows,
@@ -1720,6 +1720,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const [membership, setMembership] = useState({ membershipFreeLink: "", membershipBasicPrice: "", membershipBasicLink: "", membershipFullPrice: "", membershipFullLink: "", membershipGoldenPrice: "", membershipGoldenLink: "" });
   const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeRules: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
+  const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "" });
 
   const handleSave = async () => {
     setSaving(true);
@@ -1738,6 +1739,9 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     }
     if (activeSection === "donate") {
       Object.keys(donate).forEach(k => add(donate as Record<string, string>, k));
+    }
+    if (activeSection === "footer") {
+      Object.keys(footer).forEach(k => add(footer as Record<string, string>, k));
     }
 
     try { await updateSiteSettings(upd as never); show("Settings saved!"); }
@@ -1758,6 +1762,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     { id: "membership", label: "Membership" },
     { id: "prize", label: "Poetry Prize" },
     { id: "donate", label: "Donate Page" },
+    { id: "footer", label: "Footer / Socials" },
   ];
 
   return (
@@ -1840,6 +1845,59 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
           <SettingsField label="Page Headline" hint='Large heading on the donate page, e.g. "Keep the Mic On."' placeholder={ph(settings?.donationHeadline, "Keep the Mic On.")} value={donate.donationHeadline} onChange={v => setDonate({ ...donate, donationHeadline: v })} />
           <SettingsField label="Paystack Donation Link" hint="Link for the Donate button — your Paystack payment page" placeholder={ph(settings?.donationPaystackLink, "https://paystack.com/pay/loudthotzdonation")} value={donate.donationPaystackLink} onChange={v => setDonate({ ...donate, donationPaystackLink: v })} />
           <SettingsField label="Body Text / Message" hint="Supporting paragraph below the headline" placeholder={ph(settings?.donationMessage, "Loudthotz Poetry is powered by the Naija Art Initiative…")} value={donate.donationMessage} onChange={v => setDonate({ ...donate, donationMessage: v })} multiline rows={4} />
+        </div>
+      )}
+
+      {/* Footer / Socials */}
+      {activeSection === "footer" && (
+        <div className="space-y-5">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Paste the full URL for each social account. Leave a field blank to keep the current link. To remove a link from the footer, save an empty field after clearing it.
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <SettingsField
+              label="X (Twitter)"
+              hint="Your X profile or follow-intent URL"
+              placeholder={ph(settings?.socialX, "https://x.com/Loudthotz")}
+              value={footer.socialX}
+              onChange={v => setFooter({ ...footer, socialX: v })}
+            />
+            <SettingsField
+              label="YouTube"
+              hint="Your YouTube channel URL"
+              placeholder={ph(settings?.socialYoutube, "https://youtube.com/@IpcLoudthotz")}
+              value={footer.socialYoutube}
+              onChange={v => setFooter({ ...footer, socialYoutube: v })}
+            />
+            <SettingsField
+              label="Facebook"
+              hint="Your Facebook page URL"
+              placeholder={ph(settings?.socialFacebook, "https://facebook.com/loudthotz.poetry")}
+              value={footer.socialFacebook}
+              onChange={v => setFooter({ ...footer, socialFacebook: v })}
+            />
+            <SettingsField
+              label="Spotify"
+              hint="Link to your Spotify podcast or episode"
+              placeholder={ph(settings?.socialSpotify, "https://creators.spotify.com/pod/profile/loudthotzpoetry/…")}
+              value={footer.socialSpotify}
+              onChange={v => setFooter({ ...footer, socialSpotify: v })}
+            />
+            <SettingsField
+              label="Instagram"
+              hint="Your Instagram profile URL"
+              placeholder={ph(settings?.socialInstagram, "https://instagram.com/loudthotz")}
+              value={footer.socialInstagram}
+              onChange={v => setFooter({ ...footer, socialInstagram: v })}
+            />
+            <SettingsField
+              label="TikTok"
+              hint="Your TikTok profile URL"
+              placeholder={ph(settings?.socialTiktok, "https://tiktok.com/@loudthotz")}
+              value={footer.socialTiktok}
+              onChange={v => setFooter({ ...footer, socialTiktok: v })}
+            />
+          </div>
         </div>
       )}
 
