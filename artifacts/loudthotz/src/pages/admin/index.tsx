@@ -1716,7 +1716,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
   const ph = (v: string | number | undefined, fallback: string) => (v ? String(v) : fallback);
 
-  const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "" });
+  const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "" });
   const [membership, setMembership] = useState({ membershipFreeLink: "", membershipBasicPrice: "", membershipBasicLink: "", membershipFullPrice: "", membershipFullLink: "", membershipGoldenPrice: "", membershipGoldenLink: "" });
   const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeRules: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
@@ -1728,7 +1728,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     const add = (obj: Record<string, string>, key: string) => { if (obj[key]) upd[key] = obj[key]; };
 
     if (activeSection === "home") {
-      add(home, "heroHeadline"); add(home, "heroSubtext"); add(home, "upcomingEventTitle"); add(home, "upcomingEventDate"); add(home, "aboutText");
+      add(home, "heroHeadline"); add(home, "heroSubtext"); add(home, "upcomingEventTitle"); add(home, "upcomingEventDate"); add(home, "aboutText"); add(home, "featuredVideoUrl");
       if (home.totalCommunityVoices) upd.totalCommunityVoices = parseInt(home.totalCommunityVoices);
     }
     if (activeSection === "membership") {
@@ -1797,6 +1797,15 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
           </div>
           <SettingsField label="Hero Subtext" hint="Paragraph below the hero headline" placeholder={ph(settings?.heroSubtext, "Formerly managed under…")} value={home.heroSubtext} onChange={v => setHome({ ...home, heroSubtext: v })} multiline rows={3} />
           <SettingsField label="About Text" hint="Shown on the Home page About/Mission section" placeholder={ph(settings?.aboutText, "A living literary space…")} value={home.aboutText} onChange={v => setHome({ ...home, aboutText: v })} multiline rows={4} />
+          <div className="border-t border-white/5 pt-5">
+            <SettingsField
+              label="Featured Video URL"
+              hint="YouTube link shown next to the hero headline — paste a youtu.be/… or youtube.com/watch?v=… URL"
+              placeholder={ph(settings?.featuredVideoUrl, "https://youtu.be/-UTQE47uNIY")}
+              value={home.featuredVideoUrl ?? ""}
+              onChange={v => setHome({ ...home, featuredVideoUrl: v } as typeof home)}
+            />
+          </div>
         </div>
       )}
 

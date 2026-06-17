@@ -7,12 +7,20 @@ import {
   useLivestreamSessions,
   useSiteStats,
   useHeroImages,
+  useSiteSettings,
 } from "@/lib/firestore";
+
 import {
   Info, Calendar, Users, Globe2, ArrowRight, Star,
   Mic2, PlayCircle, ChevronRight, BookOpen, ChevronLeft, ImageOff,
 } from "lucide-react";
+
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
+
+function getYouTubeEmbedUrl(url: string): string {
+  const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^?&\s]+)/);
+  return m ? `https://www.youtube.com/embed/${m[1]}?rel=0&modestbranding=1` : "";
+}
 
 /* ---------- helpers ---------- */
 const fadeUp = (delay = 0) => ({
@@ -139,12 +147,19 @@ function HeroCarousel() {
 }
 
 /* ---------- page ---------- */
+const DEFAULT_FEATURED_VIDEO = "https://youtu.be/-UTQE47uNIY";
+
 export default function Home() {
   const stats = useSiteStats();
   const statsLoading = false;
   const { data: featuredPoems, loading: poemsLoading } = useFeaturedPoems();
   const { data: liveStatus } = useLivestreamStatus();
   const { data: sessions } = useLivestreamSessions();
+  const { data: settings } = useSiteSettings();
+
+  const featuredVideoEmbedUrl = getYouTubeEmbedUrl(
+    settings?.featuredVideoUrl || DEFAULT_FEATURED_VIDEO
+  );
 
   const pastSessions = sessions.slice(0, 3);
 
@@ -161,72 +176,89 @@ export default function Home() {
       ═══════════════════════════════════════════════ */}
       <section className="relative overflow-hidden bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(181,230,29,0.07),transparent)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
-          <motion.div
-            className="max-w-3xl mx-auto text-center"
-            variants={stagger}
-            initial="initial"
-            animate="animate"
-          >
-            {/* Alignment notice badge */}
-            <motion.div {...fadeUp(0)} className="flex justify-center mb-8">
-              <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs font-medium text-gray-300 backdrop-blur-sm">
-                <Info className="h-3.5 w-3.5 text-secondary shrink-0" />
-                Institutional Alignment Notice
-              </div>
+
+          {/* Two-col: text left, video right */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+            {/* Left — text content */}
+            <motion.div variants={stagger} initial="initial" animate="animate">
+              {/* Alignment notice badge */}
+              <motion.div {...fadeUp(0)} className="flex justify-start mb-8">
+                <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-full text-xs font-medium text-gray-300 backdrop-blur-sm">
+                  <Info className="h-3.5 w-3.5 text-secondary shrink-0" />
+                  Institutional Alignment Notice
+                </div>
+              </motion.div>
+
+              {/* Headline */}
+              <motion.h1 {...fadeUp(0.08)} className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-[1.05] mb-6">
+                Where Words Ignite
+                <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#d2ff34]">
+                  Loud Thoughts
+                </span>
+              </motion.h1>
+
+              {/* Sub-text */}
+              <motion.p {...fadeUp(0.16)} className="font-serif text-lg text-gray-400 leading-relaxed mb-4 max-w-xl">
+                Formerly managed under the{" "}
+                <span className="text-gray-200 font-semibold">Independent Poets Concerns</span>,
+                Loudthotz Poetry is now proudly hosted as an official event and literary vehicle under the{" "}
+                <span className="text-secondary font-semibold">Naija Art Initiative</span>. We continue to
+                elevate literary culture across the continent.
+              </motion.p>
+
+              {/* Stat badges */}
+              <motion.div {...fadeUp(0.22)} className="flex flex-wrap gap-3 mt-8 mb-10">
+                <span className="flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-xl text-sm font-medium">
+                  <Calendar className="h-4 w-4" />
+                  Monthly Open Readings
+                </span>
+                <span className="flex items-center gap-2 bg-secondary/10 text-secondary border border-secondary/20 px-4 py-2 rounded-xl text-sm font-medium">
+                  <Users className="h-4 w-4" />
+                  {`${(stats?.totalCommunityVoices ?? stats?.totalPoets ?? 0).toLocaleString()}+`} Community Voices
+                </span>
+                <span className="flex items-center gap-2 bg-white/5 text-gray-300 border border-white/10 px-4 py-2 rounded-xl text-sm font-medium">
+                  <Globe2 className="h-4 w-4" />
+                  Global Distribution
+                </span>
+              </motion.div>
+
+              {/* CTAs */}
+              <motion.div {...fadeUp(0.28)} className="flex flex-col sm:flex-row items-start gap-3">
+                <Link
+                  href="/poems"
+                  className="flex items-center gap-2 bg-primary text-black font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 text-sm"
+                >
+                  <BookOpen className="h-4 w-4" />
+                  Read the Gallery
+                </Link>
+                <Link
+                  href="/submit"
+                  className="flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 font-medium px-6 py-3 rounded-xl transition-all text-sm"
+                >
+                  Submit a Poem
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </motion.div>
             </motion.div>
 
-            {/* Headline */}
-            <motion.h1 {...fadeUp(0.08)} className="font-display text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.05] mb-6">
-              Where Words Ignite
-              <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#d2ff34]">
-                Loud Thoughts
-              </span>
-            </motion.h1>
-
-            {/* Sub-text */}
-            <motion.p {...fadeUp(0.16)} className="font-serif text-lg md:text-xl text-gray-400 leading-relaxed mb-4 max-w-2xl mx-auto">
-              Formerly managed under the{" "}
-              <span className="text-gray-200 font-semibold">Independent Poets Concerns</span>,
-              Loudthotz Poetry is now proudly hosted as an official event and literary vehicle under the{" "}
-              <span className="text-secondary font-semibold">Naija Art Initiative</span>. We continue to
-              elevate literary culture across the continent.
-            </motion.p>
-
-            {/* Stat badges */}
-            <motion.div {...fadeUp(0.22)} className="flex flex-wrap justify-center gap-3 mt-8 mb-10">
-              <span className="flex items-center gap-2 bg-primary/10 text-primary border border-primary/20 px-4 py-2 rounded-xl text-sm font-medium">
-                <Calendar className="h-4 w-4" />
-                Monthly Open Readings
-              </span>
-              <span className="flex items-center gap-2 bg-secondary/10 text-secondary border border-secondary/20 px-4 py-2 rounded-xl text-sm font-medium">
-                <Users className="h-4 w-4" />
-                {`${(stats?.totalCommunityVoices ?? stats?.totalPoets ?? 0).toLocaleString()}+`} Community Voices
-              </span>
-              <span className="flex items-center gap-2 bg-white/5 text-gray-300 border border-white/10 px-4 py-2 rounded-xl text-sm font-medium">
-                <Globe2 className="h-4 w-4" />
-                Global Distribution
-              </span>
-            </motion.div>
-
-            {/* CTAs */}
-            <motion.div {...fadeUp(0.28)} className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                href="/poems"
-                className="flex items-center gap-2 bg-primary text-black font-semibold px-6 py-3 rounded-xl hover:bg-primary/90 transition-all shadow-lg shadow-primary/10 text-sm"
-              >
-                <BookOpen className="h-4 w-4" />
-                Read the Gallery
-              </Link>
-              <Link
-                href="/submit"
-                className="flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 font-medium px-6 py-3 rounded-xl transition-all text-sm"
-              >
-                Submit a Poem
-                <ArrowRight className="h-4 w-4" />
-              </Link>
-            </motion.div>
-          </motion.div>
+            {/* Right — featured video */}
+            {featuredVideoEmbedUrl && (
+              <motion.div {...fadeUp(0.2)} className="w-full">
+                <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50 bg-black aspect-video">
+                  <iframe
+                    src={featuredVideoEmbedUrl}
+                    title="Featured video"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="absolute inset-0 w-full h-full"
+                  />
+                </div>
+                <p className="text-[11px] text-gray-600 text-center mt-3 uppercase tracking-widest font-semibold">Featured Session</p>
+              </motion.div>
+            )}
+          </div>
 
           {/* Stats row */}
           {!statsLoading && (

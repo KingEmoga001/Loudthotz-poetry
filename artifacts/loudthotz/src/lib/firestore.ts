@@ -110,6 +110,9 @@ export interface FireSiteSettings {
   donationHeadline: string;
   donationPaystackLink: string;
 
+  // Featured video
+  featuredVideoUrl: string;
+
   // Footer socials
   socialX: string;
   socialYoutube: string;
