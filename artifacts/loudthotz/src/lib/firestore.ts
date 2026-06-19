@@ -107,6 +107,7 @@ export interface FireSiteSettings {
   prizePaystackLink: string;
   prizeEmail: string;
   prizeRules: string;
+  prizeDeadline: string; // ISO datetime string for the countdown
 
   // Donate page
   donationHeadline: string;

@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Trophy, Calendar, FileText, DollarSign, Mail, AlertCircle, CheckCircle, Star, ExternalLink, Settings } from "lucide-react";
+import { Trophy, Calendar, FileText, DollarSign, Mail, AlertCircle, CheckCircle, Star, ExternalLink, Settings, Clock } from "lucide-react";
 import { useSiteSettings } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
@@ -23,6 +24,72 @@ const DEFAULT_RULES = [
   "Only Nigerians with a functional Nigerian NUBAN Bank Account are eligible for this competition.",
   'All submissions should be sent to loudthotz@gmail.com with the subject e.g "January 2025 LPP Poem".',
 ];
+
+function useCountdown(deadline: string | undefined) {
+  const getRemaining = () => {
+    if (!deadline) return null;
+    const diff = new Date(deadline).getTime() - Date.now();
+    if (diff <= 0) return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+    return {
+      days: Math.floor(diff / 86400000),
+      hours: Math.floor((diff % 86400000) / 3600000),
+      minutes: Math.floor((diff % 3600000) / 60000),
+      seconds: Math.floor((diff % 60000) / 1000),
+      expired: false,
+    };
+  };
+
+  const [remaining, setRemaining] = useState(getRemaining);
+
+  useEffect(() => {
+    if (!deadline) return;
+    setRemaining(getRemaining());
+    const id = setInterval(() => setRemaining(getRemaining()), 1000);
+    return () => clearInterval(id);
+  }, [deadline]);
+
+  return remaining;
+}
+
+function CountdownBanner({ deadline }: { deadline: string | undefined }) {
+  const remaining = useCountdown(deadline);
+  if (!deadline || !remaining) return null;
+
+  const units = [
+    { label: "Days", value: remaining.days },
+    { label: "Hours", value: remaining.hours },
+    { label: "Minutes", value: remaining.minutes },
+    { label: "Seconds", value: remaining.seconds },
+  ];
+
+  return (
+    <div className="w-full bg-primary/10 border-b border-primary/20">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row items-center gap-4 justify-between">
+        <div className="flex items-center gap-2 text-primary font-semibold text-sm">
+          <Clock className="h-4 w-4 shrink-0" />
+          {remaining.expired ? "Submissions closed for this month" : "Submission deadline"}
+        </div>
+        {!remaining.expired && (
+          <div className="flex items-center gap-2 sm:gap-4">
+            {units.map(({ label, value }) => (
+              <div key={label} className="flex flex-col items-center min-w-[52px]">
+                <div className="font-display text-2xl sm:text-3xl font-bold text-white tabular-nums leading-none">
+                  {String(value).padStart(2, "0")}
+                </div>
+                <div className="text-[10px] uppercase tracking-widest text-gray-500 mt-1">{label}</div>
+              </div>
+            ))}
+          </div>
+        )}
+        {!remaining.expired && (
+          <div className="text-xs text-gray-500 hidden sm:block">
+            {new Date(deadline).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 function PaystackButton({
   href,
@@ -85,9 +152,13 @@ export default function Prize() {
   const rules = s?.prizeRules
     ? s.prizeRules.split("\n").filter(Boolean)
     : DEFAULT_RULES;
+  const deadline = s?.prizeDeadline || undefined;
 
   return (
     <div className="min-h-screen">
+      {/* Countdown banner */}
+      <CountdownBanner deadline={deadline} />
+
       {/* Hero */}
       <section className="relative overflow-hidden py-20 md:py-28">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(181,230,29,0.09),transparent)]" />

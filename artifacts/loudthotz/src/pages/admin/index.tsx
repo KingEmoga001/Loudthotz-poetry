@@ -1749,7 +1749,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
   const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "" });
   const [membership, setMembership] = useState({ membershipFreeLink: "", membershipBasicPrice: "", membershipBasicLink: "", membershipFullPrice: "", membershipFullLink: "", membershipGoldenPrice: "", membershipGoldenLink: "" });
-  const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "" });
+  const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeDeadline: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
   const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "" });
   const [poets, setPoets] = useState({ poetPageDescription: "", poetPageBlogUrl: "" });
@@ -1894,6 +1894,16 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
             <SettingsField label="Entry Fee" hint="e.g. ₦1,000" placeholder={ph(settings?.prizeEntryFee, "₦1,000")} value={prize.prizeEntryFee} onChange={v => setPrize({ ...prize, prizeEntryFee: v })} />
             <SettingsField label="Paystack Payment Link" hint="Link for the ₦1,000 entry fee" placeholder={ph(settings?.prizePaystackLink, "https://paystack.com/pay/lpp")} value={prize.prizePaystackLink} onChange={v => setPrize({ ...prize, prizePaystackLink: v })} />
             <SettingsField label="Submission Email" hint="Email address for poem submissions" placeholder={ph(settings?.prizeEmail, "loudthotz@gmail.com")} value={prize.prizeEmail} onChange={v => setPrize({ ...prize, prizeEmail: v })} />
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Submission Deadline</label>
+              <p className="text-[10px] text-gray-600 mb-2">Sets the countdown timer shown at the top of the LPP Prize page.</p>
+              <input
+                type="datetime-local"
+                value={prize.prizeDeadline || (settings?.prizeDeadline ? settings.prizeDeadline.slice(0, 16) : "")}
+                onChange={e => setPrize({ ...prize, prizeDeadline: e.target.value })}
+                className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors"
+              />
+            </div>
           </div>
           {/* Prize rules list */}
           <div>
