@@ -1160,6 +1160,7 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
     { key: "theme", label: "Theme", placeholder: "e.g. Kinship & Brotherhood" },
     { key: "recordingUrl", label: "Recording / YouTube URL", placeholder: "https://youtube.com/..." },
     { key: "blogUrl", label: "Blog Post URL", placeholder: "https://loudthotzpoetry.blogspot.com/..." },
+    { key: "imageUrl", label: "Cover Image URL", placeholder: "https://example.com/image.jpg", span: true },
     { key: "description", label: "Description", placeholder: "Brief description", span: true },
   ];
 
