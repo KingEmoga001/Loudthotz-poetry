@@ -37,7 +37,7 @@ export function Navbar() {
           />
         </Link>
 
-        {/* Desktop Nav — icons only on md, icons+labels on xl */}
+        {/* Desktop Nav — icons + labels on md and above */}
         <nav className="hidden md:flex flex-1 min-w-0 items-center gap-0 overflow-x-auto scrollbar-none">
           {navLinks.map((link) => {
             const active = location === link.href;
@@ -45,13 +45,13 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-1 px-2 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                className={`flex items-center gap-1 px-1.5 py-2 rounded-xl text-xs font-medium transition-all whitespace-nowrap ${
                   active ? "text-primary bg-primary/10" : "text-gray-400 hover:text-white hover:bg-white/5"
                 }`}
                 title={link.label}
               >
                 <link.icon className="h-4 w-4 shrink-0" />
-                <span className="hidden xl:inline">{link.label}</span>
+                <span>{link.label}</span>
                 {link.isLive && (
                   <span className="relative flex h-1.5 w-1.5 shrink-0">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
@@ -61,10 +61,9 @@ export function Navbar() {
               </Link>
             );
           })}
-
         </nav>
 
-        {/* Mobile Toggle */}
+        {/* Mobile Toggle — shown below md */}
         <button
           className="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
