@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Feather, User, BookOpen, Globe, ExternalLink, X, Star, ChevronRight } from "lucide-react";
 import { Link } from "wouter";
-import { usePoets, usePoetPoems, type FirePoet } from "@/lib/firestore";
+import { usePoets, usePoetPoems, useSiteSettings, type FirePoet } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -170,10 +170,13 @@ function PoetModal({ poet, colorClass, onClose }: { poet: FirePoet; colorClass: 
 
 export default function Poets() {
   const { data: firestorePoets, loading } = usePoets();
+  const { data: siteSettings } = useSiteSettings();
   const [selectedPoet, setSelectedPoet] = useState<{ poet: FirePoet; colorClass: string } | null>(null);
 
   const useFirestore = !loading && firestorePoets.length > 0;
   const totalCount = useFirestore ? firestorePoets.length : staticPoets.length;
+  const description = siteSettings?.poetPageDescription || `${totalCount} voices that have graced the Loudthotz stage — from Nigeria and across the continent, these are the poets who make up our literary family.`;
+  const blogUrl = siteSettings?.poetPageBlogUrl || "https://loudthotzpoetry.blogspot.com/p/poets.html?m=0";
 
   return (
     <div className="min-h-screen">
@@ -197,7 +200,7 @@ export default function Poets() {
           </motion.h1>
 
           <motion.p {...fadeUp(0.16)} className="font-serif text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">
-            {totalCount} voices that have graced the Loudthotz stage — from Nigeria and across the continent, these are the poets who make up our literary family.
+            {description}
           </motion.p>
 
           <motion.div {...fadeUp(0.22)} className="flex justify-center gap-3 mt-6 flex-wrap">
@@ -206,7 +209,7 @@ export default function Poets() {
               {totalCount} Featured Poets
             </div>
             <a
-              href="https://loudthotzpoetry.blogspot.com/p/poets.html?m=0"
+              href={blogUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"

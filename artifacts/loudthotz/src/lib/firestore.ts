@@ -19,6 +19,7 @@ export interface FirePoem {
   ratingCount: number;
   ratingSum: number;
   isFeatured: boolean;
+  isPoemOfMonth?: boolean;
   season?: string;
   theme?: string;
   poetId?: string;
@@ -69,6 +70,7 @@ export interface FireLivestreamSession {
   recordingUrl?: string;
   blogUrl?: string;
   theme: string;
+  imageUrl?: string;
 }
 
 export interface FirePoet {
@@ -120,6 +122,10 @@ export interface FireSiteSettings {
   socialSpotify: string;
   socialInstagram: string;
   socialTiktok: string;
+
+  // Poets page
+  poetPageDescription: string;
+  poetPageBlogUrl: string;
 }
 
 /* ───────────────────────── Helpers ───────────────────────── */
@@ -150,6 +156,7 @@ export function usePoems(search?: string, sort?: string): { data: FirePoem[]; lo
           ratingCount: raw.ratingCount ?? 0,
           ratingSum: raw.ratingSum ?? 0,
           isFeatured: raw.isFeatured ?? false,
+          isPoemOfMonth: raw.isPoemOfMonth ?? false,
           season: raw.season,
           theme: raw.theme,
         };
@@ -439,6 +446,7 @@ export function useLivestreamSessions(): { data: FireLivestreamSession[]; loadin
           id: d.id, title: raw.title ?? "", description: raw.description ?? "",
           date: tsToIso(raw.date), season: raw.season ?? "", episode: raw.episode ?? 1,
           recordingUrl: raw.recordingUrl, blogUrl: raw.blogUrl, theme: raw.theme ?? "",
+          imageUrl: raw.imageUrl,
         };
       });
       sessions.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

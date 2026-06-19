@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -7,7 +7,7 @@ import {
   Edit3, Plus, Save, Eye, EyeOff, Mic2, Calendar, Link2,
   Users, Globe2, BarChart3, RefreshCw, ChevronDown, ChevronUp,
   AlertCircle, BookMarked, Play, X, Database, Image, GripVertical,
-  ToggleLeft, ToggleRight, Feather, Archive,
+  ToggleLeft, ToggleRight, Feather, Archive, Trophy,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -234,6 +234,11 @@ function PoemsManager({ show }: { show: (m: string, t?: "success" | "error") => 
     catch { show("Update failed.", "error"); }
   };
 
+  const handleTogglePoemOfMonth = async (p: FirePoem) => {
+    try { await updatePoem(p.id, { isPoemOfMonth: !p.isPoemOfMonth }); show(`${p.isPoemOfMonth ? "Removed from" : "Added to"} Poem of the Month.`); }
+    catch { show("Update failed.", "error"); }
+  };
+
   const handleDelete = async (p: FirePoem) => {
     if (!confirm(`Delete "${p.title}"? This cannot be undone.`)) return;
     try { await deletePoem(p.id); show("Poem deleted."); }
@@ -242,7 +247,7 @@ function PoemsManager({ show }: { show: (m: string, t?: "success" | "error") => 
 
   const handleSaveEdit = async () => {
     if (!editing) return;
-    try { await updatePoem(editing.id, { title: editing.title, author: editing.author, season: editing.season, theme: editing.theme, isFeatured: editing.isFeatured }); setEditing(null); show("Poem updated."); }
+    try { await updatePoem(editing.id, { title: editing.title, author: editing.author, season: editing.season, theme: editing.theme, isFeatured: editing.isFeatured, isPoemOfMonth: editing.isPoemOfMonth }); setEditing(null); show("Poem updated."); }
     catch { show("Update failed.", "error"); }
   };
 
@@ -264,6 +269,7 @@ function PoemsManager({ show }: { show: (m: string, t?: "success" | "error") => 
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-display text-sm font-bold text-white">{p.title}</p>
                     {p.isFeatured && <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-primary/10 text-primary border-primary/20">Featured</span>}
+                    {p.isPoemOfMonth && <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-amber-500/10 text-amber-400 border-amber-500/20">POTM</span>}
                     {p.theme && <span className="text-[10px] text-secondary border border-secondary/20 px-2 py-0.5 rounded">{p.theme}</span>}
                   </div>
                   <p className="text-xs text-gray-400 font-serif italic mt-0.5">by {p.author} · {p.country}</p>
@@ -277,6 +283,7 @@ function PoemsManager({ show }: { show: (m: string, t?: "success" | "error") => 
                     {expanded === p.id ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
                   </button>
                   <button onClick={() => setEditing(p)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-4 w-4" /></button>
+                  <button onClick={() => handleTogglePoemOfMonth(p)} title={p.isPoemOfMonth ? "Remove from Poem of the Month" : "Set as Poem of the Month"} className={`p-1.5 transition-colors ${p.isPoemOfMonth ? "text-amber-400" : "text-gray-500 hover:text-amber-400"}`}><Trophy className="h-4 w-4" /></button>
                   <button onClick={() => handleToggleFeatured(p)} className={`p-1.5 transition-colors ${p.isFeatured ? "text-primary" : "text-gray-500 hover:text-primary"}`}><Star className="h-4 w-4" /></button>
                   <button onClick={() => handleDelete(p)} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-4 w-4" /></button>
                 </div>
@@ -315,6 +322,13 @@ function PoemsManager({ show }: { show: (m: string, t?: "success" | "error") => 
                   <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${editing.isFeatured ? "left-5" : "left-0.5"}`} />
                 </div>
                 <span className="text-sm text-gray-300">Featured poem</span>
+              </label>
+              <label className="flex items-center gap-3 cursor-pointer">
+                <div onClick={() => setEditing({ ...editing, isPoemOfMonth: !editing.isPoemOfMonth })}
+                  className={`w-10 h-5 rounded-full transition-colors relative ${editing.isPoemOfMonth ? "bg-amber-500" : "bg-white/10"}`}>
+                  <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-white transition-all ${editing.isPoemOfMonth ? "left-5" : "left-0.5"}`} />
+                </div>
+                <span className="text-sm text-gray-300">Poem of the Month (appears in Gallery)</span>
               </label>
               <div className="flex gap-3 pt-2">
                 <button onClick={() => setEditing(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-gray-400 text-sm hover:bg-white/5 transition-colors">Cancel</button>
@@ -1685,7 +1699,7 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
 }
 
 /* ──────────────────────────── Site Settings ──────────────────────────── */
-type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer";
+type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets";
 
 function SettingsField({
   label, hint, value, onChange, multiline, placeholder, rows,
@@ -1718,9 +1732,18 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
   const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "" });
   const [membership, setMembership] = useState({ membershipFreeLink: "", membershipBasicPrice: "", membershipBasicLink: "", membershipFullPrice: "", membershipFullLink: "", membershipGoldenPrice: "", membershipGoldenLink: "" });
-  const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeRules: "" });
+  const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
   const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "" });
+  const [poets, setPoets] = useState({ poetPageDescription: "", poetPageBlogUrl: "" });
+  const [prizeRulesList, setPrizeRulesList] = useState<string[]>([]);
+  const [newRule, setNewRule] = useState("");
+
+  useEffect(() => {
+    if (settings?.prizeRules) {
+      setPrizeRulesList(settings.prizeRules.split("\n").filter(Boolean));
+    }
+  }, [settings?.prizeRules]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -1736,12 +1759,16 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     }
     if (activeSection === "prize") {
       Object.keys(prize).forEach(k => add(prize as Record<string, string>, k));
+      upd.prizeRules = prizeRulesList.join("\n");
     }
     if (activeSection === "donate") {
       Object.keys(donate).forEach(k => add(donate as Record<string, string>, k));
     }
     if (activeSection === "footer") {
       Object.keys(footer).forEach(k => add(footer as Record<string, string>, k));
+    }
+    if (activeSection === "poets") {
+      Object.keys(poets).forEach(k => add(poets as Record<string, string>, k));
     }
 
     try { await updateSiteSettings(upd as never); show("Settings saved!"); }
@@ -1763,6 +1790,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     { id: "prize", label: "Poetry Prize" },
     { id: "donate", label: "Donate Page" },
     { id: "footer", label: "Footer / Socials" },
+    { id: "poets", label: "Poets Page" },
   ];
 
   return (
@@ -1844,7 +1872,59 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
             <SettingsField label="Paystack Payment Link" hint="Link for the ₦1,000 entry fee" placeholder={ph(settings?.prizePaystackLink, "https://paystack.com/pay/lpp")} value={prize.prizePaystackLink} onChange={v => setPrize({ ...prize, prizePaystackLink: v })} />
             <SettingsField label="Submission Email" hint="Email address for poem submissions" placeholder={ph(settings?.prizeEmail, "loudthotz@gmail.com")} value={prize.prizeEmail} onChange={v => setPrize({ ...prize, prizeEmail: v })} />
           </div>
-          <SettingsField label="Competition Rules" hint="One rule per line. Leave blank to use built-in default rules." placeholder={ph(settings?.prizeRules, "The poem must not be more than 14 lines…\nOn any topic.\n…")} value={prize.prizeRules} onChange={v => setPrize({ ...prize, prizeRules: v })} multiline rows={10} />
+          {/* Prize rules list */}
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Competition Rules</label>
+            <p className="text-[10px] text-gray-600 mb-3">Add, edit, or delete individual rules. Saved automatically when you click Save.</p>
+            <div className="space-y-2 mb-3">
+              {prizeRulesList.length === 0 && (
+                <p className="text-xs text-gray-600 italic py-3 text-center border border-white/5 rounded-xl">No custom rules — default rules will be shown. Add a rule below to override them.</p>
+              )}
+              {prizeRulesList.map((rule, idx) => (
+                <div key={idx} className="flex items-start gap-2">
+                  <div className="flex-shrink-0 w-5 h-5 mt-2.5 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center">
+                    <span className="text-primary text-[10px] font-bold">{idx + 1}</span>
+                  </div>
+                  <input
+                    value={rule}
+                    onChange={e => {
+                      const next = [...prizeRulesList];
+                      next[idx] = e.target.value;
+                      setPrizeRulesList(next);
+                    }}
+                    className="flex-1 px-3 py-2 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+                  />
+                  <button
+                    onClick={() => setPrizeRulesList(prizeRulesList.filter((_, i) => i !== idx))}
+                    className="flex-shrink-0 mt-2 p-1.5 text-gray-600 hover:text-red-400 transition-colors"
+                    title="Delete rule"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                value={newRule}
+                onChange={e => setNewRule(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === "Enter" && newRule.trim()) {
+                    setPrizeRulesList([...prizeRulesList, newRule.trim()]);
+                    setNewRule("");
+                  }
+                }}
+                placeholder="Type a new rule and press Enter or click Add…"
+                className="flex-1 px-3 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+              />
+              <button
+                onClick={() => { if (newRule.trim()) { setPrizeRulesList([...prizeRulesList, newRule.trim()]); setNewRule(""); } }}
+                className="px-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm text-gray-300 hover:text-white hover:bg-white/10 transition-all font-medium"
+              >
+                + Add
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1854,6 +1934,31 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
           <SettingsField label="Page Headline" hint='Large heading on the donate page, e.g. "Keep the Mic On."' placeholder={ph(settings?.donationHeadline, "Keep the Mic On.")} value={donate.donationHeadline} onChange={v => setDonate({ ...donate, donationHeadline: v })} />
           <SettingsField label="Paystack Donation Link" hint="Link for the Donate button — your Paystack payment page" placeholder={ph(settings?.donationPaystackLink, "https://paystack.com/pay/loudthotzdonation")} value={donate.donationPaystackLink} onChange={v => setDonate({ ...donate, donationPaystackLink: v })} />
           <SettingsField label="Body Text / Message" hint="Supporting paragraph below the headline" placeholder={ph(settings?.donationMessage, "Loudthotz Poetry is powered by the Naija Art Initiative…")} value={donate.donationMessage} onChange={v => setDonate({ ...donate, donationMessage: v })} multiline rows={4} />
+        </div>
+      )}
+
+      {/* Poets Page */}
+      {activeSection === "poets" && (
+        <div className="space-y-5">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Customise the text and blog link shown on the Poets page hero section.
+          </p>
+          <SettingsField
+            label="Page Description"
+            hint="Text shown below the heading on the Poets page"
+            placeholder={ph(settings?.poetPageDescription, "Voices that have graced the Loudthotz stage…")}
+            value={poets.poetPageDescription}
+            onChange={v => setPoets({ ...poets, poetPageDescription: v })}
+            multiline
+            rows={3}
+          />
+          <SettingsField
+            label="Blog URL"
+            hint='Link for the "View on Blog" button (defaults to the Loudthotz blogspot poets page)'
+            placeholder={ph(settings?.poetPageBlogUrl, "https://loudthotzpoetry.blogspot.com/p/poets.html?m=0")}
+            value={poets.poetPageBlogUrl}
+            onChange={v => setPoets({ ...poets, poetPageBlogUrl: v })}
+          />
         </div>
       )}
 

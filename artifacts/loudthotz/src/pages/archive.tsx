@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Archive, Calendar, Mic2, ExternalLink, Play } from "lucide-react";
+import { Archive, Calendar, Mic2, ExternalLink, Play, Image } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import { useLivestreamSessions, useEvents } from "@/lib/firestore";
@@ -78,6 +78,16 @@ const themeColors: Record<string, string> = {
   "Urban Africa": "text-blue-400 bg-blue-500/10 border-blue-500/20",
 };
 
+const cardGradients = [
+  "from-primary/20 to-primary/5",
+  "from-purple-500/20 to-purple-500/5",
+  "from-amber-500/20 to-amber-500/5",
+  "from-rose-500/20 to-rose-500/5",
+  "from-blue-500/20 to-blue-500/5",
+  "from-emerald-500/20 to-emerald-500/5",
+  "from-secondary/20 to-secondary/5",
+];
+
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-NG", { day: "numeric", month: "long", year: "numeric" });
 }
@@ -88,6 +98,7 @@ type DisplaySession = {
   title: string;
   season: string;
   theme: string;
+  imageUrl?: string;
   recordingUrl?: string;
   blogUrl?: string;
   description?: string;
@@ -102,7 +113,6 @@ export default function ArchivePage() {
   const loading = sessionsLoading || eventsLoading;
   const now = new Date();
 
-  /* Past events from the events collection (date already passed) */
   const pastEvents = allEvents.filter((e) => new Date(e.date) <= now);
 
   const eventDisplayed: DisplaySession[] = pastEvents.map((e) => ({
@@ -111,6 +121,7 @@ export default function ArchivePage() {
     title: e.title,
     season: e.season ?? "",
     theme: e.theme ?? "",
+    imageUrl: e.imageUrl,
     recordingUrl: e.youtubeUrl,
     blogUrl: e.blogUrl,
     description: e.description,
@@ -123,6 +134,7 @@ export default function ArchivePage() {
     title: s.title,
     season: s.season,
     theme: s.theme,
+    imageUrl: s.imageUrl,
     recordingUrl: s.recordingUrl,
     blogUrl: s.blogUrl,
     description: s.description,
@@ -138,10 +150,8 @@ export default function ArchivePage() {
     source: "static",
   }));
 
-  /* Merge: if Firestore has any data, use Firestore + events; always append static as historical base */
   const hasFirestoreData = firestoreSessions.length > 0 || pastEvents.length > 0;
 
-  /* Deduplicate by normalised title+date in case event and session overlap */
   const seen = new Set<string>();
   const allSessions: DisplaySession[] = [
     ...eventDisplayed,
@@ -202,7 +212,7 @@ export default function ArchivePage() {
 
       {/* Season filter */}
       <section className="pb-8">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap gap-2 justify-center">
             {allSeasons.map((s) => (
               <button
@@ -221,89 +231,116 @@ export default function ArchivePage() {
         </div>
       </section>
 
-      {/* Session list */}
+      {/* Session cards */}
       <section className="pb-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <div key={i} className="h-16 rounded-xl bg-white/[0.02] border border-white/5 animate-pulse" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+              {[...Array(9)].map((_, i) => (
+                <div key={i} className="rounded-xl bg-white/[0.02] border border-white/5 animate-pulse overflow-hidden">
+                  <div className="aspect-video bg-white/[0.03]" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-3 bg-white/[0.04] rounded w-1/2" />
+                    <div className="h-4 bg-white/[0.04] rounded w-3/4" />
+                  </div>
+                </div>
               ))}
             </div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-16 text-gray-600">
+              <Archive className="h-8 w-8 mx-auto mb-3 opacity-40" />
+              <p className="text-sm">No sessions found for this season.</p>
+            </div>
           ) : (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
               {filtered.map((session, i) => {
                 const link = session.recordingUrl || session.blogUrl;
-                const card = (
+                const gradient = cardGradients[i % cardGradients.length];
+                const themeColor = session.theme ? (themeColors[session.theme] ?? "text-gray-400 bg-white/5 border-white/10") : null;
+
+                const cardContent = (
                   <motion.div
                     {...fadeUp(Math.min(i * 0.03, 0.3))}
-                    className={`flex items-start gap-4 p-4 rounded-xl border transition-all ${
+                    className={`flex flex-col bg-white/[0.02] border border-white/5 rounded-xl overflow-hidden transition-all h-full ${
                       link
-                        ? "bg-white/[0.02] border-white/5 hover:border-primary/20 hover:bg-white/[0.04] cursor-pointer group"
-                        : "bg-transparent border-white/[0.03] opacity-60"
+                        ? "hover:border-primary/20 hover:bg-white/[0.04] group cursor-pointer"
+                        : "opacity-70"
                     }`}
                   >
-                    {/* Date column */}
-                    <div className="flex-shrink-0 text-right hidden sm:block min-w-[110px]">
-                      <span className={`text-xs ${link ? "text-gray-500" : "text-gray-600"}`}>{formatDate(session.date)}</span>
-                    </div>
-                    <div className="flex-shrink-0 w-px bg-white/10 self-stretch hidden sm:block" />
+                    {/* Image area */}
+                    {session.imageUrl ? (
+                      <div className="aspect-video overflow-hidden">
+                        <img
+                          src={session.imageUrl}
+                          alt={session.title}
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                      </div>
+                    ) : (
+                      <div className={`aspect-video bg-gradient-to-br ${gradient} border-b border-white/5 flex flex-col items-center justify-center gap-2 relative`}>
+                        <Image className="h-7 w-7 text-white/10" />
+                        <div className="flex flex-wrap gap-1.5 justify-center px-3">
+                          {session.season && (
+                            <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full bg-black/30 text-white/60 border border-white/10">
+                              {session.season}
+                            </span>
+                          )}
+                          {session.theme && (
+                            <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-full border ${themeColor}`}>
+                              {session.theme}
+                            </span>
+                          )}
+                        </div>
+                        {session.recordingUrl && (
+                          <div className="absolute top-2 right-2">
+                            <span className="flex items-center gap-1 text-[10px] font-bold text-emerald-400 bg-emerald-500/20 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                              <Play className="h-2.5 w-2.5 fill-emerald-400" /> REC
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    )}
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-1 flex-wrap">
+                    {/* Info */}
+                    <div className="p-4 flex-1 flex flex-col gap-2">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {session.season && (
-                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${link ? "bg-primary/10 text-primary border-primary/20" : "bg-white/5 text-gray-600 border-white/10"}`}>
+                          <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">
                             {session.season}
                           </span>
                         )}
                         {session.theme && (
-                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${link ? (themeColors[session.theme] ?? "text-gray-400 bg-white/5 border-white/10") : "text-gray-600 bg-white/5 border-white/10"}`}>
+                          <span className={`text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full border ${themeColor}`}>
                             {session.theme}
                           </span>
                         )}
-                        {session.recordingUrl && (
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <Play className="h-2.5 w-2.5" /> Recording
-                          </span>
-                        )}
-                        {session.blogUrl && !session.recordingUrl && (
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2 py-0.5 rounded-full">
-                            Blog Post
-                          </span>
-                        )}
+                        {session.recordingUrl && !session.imageUrl && null}
                       </div>
-                      <p className={`text-sm leading-snug ${link ? "text-gray-300" : "text-gray-500"}`}>{session.title}</p>
-                      {session.description && (
-                        <p className="text-xs text-gray-600 mt-1 line-clamp-1">{session.description}</p>
-                      )}
-                      <span className="text-xs text-gray-600 sm:hidden mt-1 block">{formatDate(session.date)}</span>
-                    </div>
 
-                    {/* Link icon — only for linked items */}
-                    {link && (
-                      <div className="flex-shrink-0 self-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <ExternalLink className="h-4 w-4 text-primary" />
+                      <p className={`text-sm font-semibold leading-snug flex-1 ${link ? "text-gray-200 group-hover:text-primary transition-colors" : "text-gray-500"}`}>
+                        {session.title}
+                      </p>
+
+                      <div className="flex items-center justify-between mt-auto pt-2 border-t border-white/5">
+                        <span className="text-xs text-gray-600">{formatDate(session.date)}</span>
+                        {link && (
+                          <span className="flex items-center gap-1 text-xs text-primary opacity-0 group-hover:opacity-100 transition-opacity font-semibold">
+                            {session.recordingUrl ? <><Play className="h-3 w-3" /> Watch</> : <><ExternalLink className="h-3 w-3" /> View</>}
+                          </span>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </motion.div>
                 );
 
                 return link ? (
-                  <a key={session.key} href={link} target="_blank" rel="noopener noreferrer" className="block">
-                    {card}
+                  <a key={session.key} href={link} target="_blank" rel="noopener noreferrer" className="block h-full">
+                    {cardContent}
                   </a>
                 ) : (
-                  <div key={session.key}>{card}</div>
+                  <div key={session.key} className="h-full">{cardContent}</div>
                 );
               })}
-
-              {filtered.length === 0 && (
-                <div className="text-center py-16 text-gray-600">
-                  <Archive className="h-8 w-8 mx-auto mb-3 opacity-40" />
-                  <p className="text-sm">No sessions found for this season.</p>
-                </div>
-              )}
             </div>
           )}
 
