@@ -11,6 +11,7 @@ import Membership from "@/pages/membership";
 import Poets from "@/pages/poets";
 import ArchivePage from "@/pages/archive";
 import About from "@/pages/about";
+import PrivacyPolicy from "@/pages/privacy";
 import AdminPanel from "@/pages/admin/index";
 import AdminLogin from "@/pages/admin/login";
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
@@ -55,6 +56,7 @@ function Router() {
             <Route path="/poets" component={Poets} />
             <Route path="/archive" component={ArchivePage} />
             <Route path="/about" component={About} />
+            <Route path="/privacy" component={PrivacyPolicy} />
             <Route component={NotFound} />
           </Switch>
         </AppLayout>

@@ -142,7 +142,7 @@ export function Footer() {
           </p>
           <div className="flex gap-6 text-xs text-gray-500">
             <span>Terms of Service</span>
-            <span>Privacy Policy</span>
+            <Link href="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
           </div>
         </div>
       </div>
