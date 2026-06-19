@@ -1753,17 +1753,14 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "" });
   const [poets, setPoets] = useState({ poetPageDescription: "", poetPageBlogUrl: "" });
   const [privacy, setPrivacy] = useState({ privacyPolicyText: "", privacyPolicyUpdatedAt: "" });
-  const [prizeRulesList, setPrizeRulesList] = useState<string[]>([]);
+  const [prizeRulesList, setPrizeRulesList] = useState<string[]>([...DEFAULT_PRIZE_RULES]);
   const [newRule, setNewRule] = useState("");
 
   useEffect(() => {
-    if (!settings) return;
-    if (settings.prizeRules) {
+    if (settings?.prizeRules) {
       setPrizeRulesList(settings.prizeRules.split("\n").filter(Boolean));
-    } else {
-      setPrizeRulesList([...DEFAULT_PRIZE_RULES]);
     }
-  }, [settings]);
+  }, [settings?.prizeRules]);
 
   const handleSave = async () => {
     setSaving(true);
