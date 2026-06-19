@@ -1699,7 +1699,7 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
 }
 
 /* ──────────────────────────── Site Settings ──────────────────────────── */
-type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets";
+type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets" | "privacy";
 
 function SettingsField({
   label, hint, value, onChange, multiline, placeholder, rows,
@@ -1736,6 +1736,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
   const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "" });
   const [poets, setPoets] = useState({ poetPageDescription: "", poetPageBlogUrl: "" });
+  const [privacy, setPrivacy] = useState({ privacyPolicyText: "", privacyPolicyUpdatedAt: "" });
   const [prizeRulesList, setPrizeRulesList] = useState<string[]>([]);
   const [newRule, setNewRule] = useState("");
 
@@ -1770,6 +1771,10 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     if (activeSection === "poets") {
       Object.keys(poets).forEach(k => add(poets as Record<string, string>, k));
     }
+    if (activeSection === "privacy") {
+      if (privacy.privacyPolicyText) upd.privacyPolicyText = privacy.privacyPolicyText;
+      if (privacy.privacyPolicyUpdatedAt) upd.privacyPolicyUpdatedAt = privacy.privacyPolicyUpdatedAt;
+    }
 
     try { await updateSiteSettings(upd as never); show("Settings saved!"); }
     catch { show("Failed to save settings.", "error"); }
@@ -1791,6 +1796,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     { id: "donate", label: "Donate Page" },
     { id: "footer", label: "Footer / Socials" },
     { id: "poets", label: "Poets Page" },
+    { id: "privacy", label: "Privacy Policy" },
   ];
 
   return (
@@ -1958,6 +1964,31 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
             placeholder={ph(settings?.poetPageBlogUrl, "https://loudthotzpoetry.blogspot.com/p/poets.html?m=0")}
             value={poets.poetPageBlogUrl}
             onChange={v => setPoets({ ...poets, poetPageBlogUrl: v })}
+          />
+        </div>
+      )}
+
+      {/* Privacy Policy */}
+      {activeSection === "privacy" && (
+        <div className="space-y-5">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Edit the full Privacy Policy text. Use <code className="text-primary text-xs">## Heading</code> for section titles and <code className="text-primary text-xs">### Sub-heading</code> for sub-sections. Separate paragraphs with a blank line. Leave blank to use the built-in default policy.
+          </p>
+          <SettingsField
+            label="Last Updated Date"
+            hint='Shown at the top and bottom of the Privacy Policy page, e.g. "January 1, 2025"'
+            placeholder={ph(settings?.privacyPolicyUpdatedAt, "August 18, 2015")}
+            value={privacy.privacyPolicyUpdatedAt}
+            onChange={v => setPrivacy({ ...privacy, privacyPolicyUpdatedAt: v })}
+          />
+          <SettingsField
+            label="Policy Text"
+            hint="Full policy content. Use ## for section headings, ### for sub-headings. Blank line = new paragraph."
+            placeholder={ph(settings?.privacyPolicyText, "## Personal Identification Information\nWe may collect…\n\n## Non-Personal Identification Information\n…")}
+            value={privacy.privacyPolicyText}
+            onChange={v => setPrivacy({ ...privacy, privacyPolicyText: v })}
+            multiline
+            rows={22}
           />
         </div>
       )}

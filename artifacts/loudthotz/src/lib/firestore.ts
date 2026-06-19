@@ -126,6 +126,10 @@ export interface FireSiteSettings {
   // Poets page
   poetPageDescription: string;
   poetPageBlogUrl: string;
+
+  // Privacy policy
+  privacyPolicyText: string;
+  privacyPolicyUpdatedAt: string;
 }
 
 /* ───────────────────────── Helpers ───────────────────────── */
