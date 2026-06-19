@@ -1699,6 +1699,22 @@ function HeroImagesManager({ show }: { show: (m: string, t?: "success" | "error"
 }
 
 /* ──────────────────────────── Site Settings ──────────────────────────── */
+const DEFAULT_PRIZE_RULES = [
+  "The poem must not be more than 14 lines, a maximum of 6 words per line.",
+  "On any topic.",
+  "The deadline is the second Thursday of every month.",
+  "Only one poem per participant per month.",
+  "Winner will be announced the last day of every month on our blog and all social media platforms.",
+  "All entries must come with a 3-line Bio, a picture, Phone Number, Email and Address.",
+  "All submissions (both poem and bio) must be attached as a Microsoft Word document.",
+  "Loudthotz decisions are final.",
+  "Any entry that did not comply with ALL the rules will be disqualified.",
+  "Poetry competition fee per month is ₦1,000.00.",
+  "The winning poem every month will be included in our annual anthology published at the end of every year.",
+  "Only Nigerians with a functional Nigerian NUBAN Bank Account are eligible for this competition.",
+  'All submissions should be sent to loudthotz@gmail.com with the subject e.g "January 2025 LPP Poem".',
+];
+
 type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets" | "privacy";
 
 function SettingsField({
@@ -1741,10 +1757,13 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const [newRule, setNewRule] = useState("");
 
   useEffect(() => {
-    if (settings?.prizeRules) {
+    if (!settings) return;
+    if (settings.prizeRules) {
       setPrizeRulesList(settings.prizeRules.split("\n").filter(Boolean));
+    } else {
+      setPrizeRulesList([...DEFAULT_PRIZE_RULES]);
     }
-  }, [settings?.prizeRules]);
+  }, [settings]);
 
   const handleSave = async () => {
     setSaving(true);
