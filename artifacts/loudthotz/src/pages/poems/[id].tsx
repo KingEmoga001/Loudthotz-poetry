@@ -1,4 +1,4 @@
-import { useParams } from "wouter";
+import { useParams, useSearch } from "wouter";
 import { usePoem, ratePoem } from "@/lib/firestore";
 import { Loader2, Star, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
@@ -8,6 +8,8 @@ import { useState } from "react";
 
 export default function PoemReader() {
   const { id } = useParams<{ id: string }>();
+  const search = useSearch();
+  const fromPoetId = new URLSearchParams(search).get("from");
   const { data: poem, loading } = usePoem(id ?? "");
 
   const [hoverRating, setHoverRating] = useState(0);
@@ -48,9 +50,10 @@ export default function PoemReader() {
 
   return (
     <div className="container mx-auto px-4 py-16 max-w-3xl">
-      <Link href="/poems">
+      <Link href={fromPoetId ? `/poets?open=${fromPoetId}` : "/poems"}>
         <Button variant="ghost" className="mb-12 text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Gallery
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          {fromPoetId ? `Back to ${poem.author}` : "Back to Gallery"}
         </Button>
       </Link>
 

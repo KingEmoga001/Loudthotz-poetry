@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Feather, User, BookOpen, Globe, ExternalLink, X, Star, ChevronRight } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { usePoets, usePoetPoems, useSiteSettings, type FirePoet } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
@@ -132,7 +132,7 @@ function PoetModal({ poet, colorClass, onClose }: { poet: FirePoet; colorClass: 
               {poems.map((poem) => (
                 <Link
                   key={poem.id}
-                  href={`/poems/${poem.id}`}
+                  href={`/poems/${poem.id}?from=${poet.id}`}
                   className="block p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-primary/20 hover:bg-white/[0.04] transition-all group"
                   onClick={onClose}
                 >
@@ -172,6 +172,15 @@ export default function Poets() {
   const { data: firestorePoets, loading } = usePoets();
   const { data: siteSettings } = useSiteSettings();
   const [selectedPoet, setSelectedPoet] = useState<{ poet: FirePoet; colorClass: string } | null>(null);
+  const search = useSearch();
+
+  useEffect(() => {
+    const openId = new URLSearchParams(search).get("open");
+    if (!openId || loading || firestorePoets.length === 0) return;
+    const idx = firestorePoets.findIndex(p => p.id === openId);
+    if (idx === -1) return;
+    setSelectedPoet({ poet: firestorePoets[idx], colorClass: avatarColors[idx % avatarColors.length] });
+  }, [search, loading, firestorePoets]);
 
   const useFirestore = !loading && firestorePoets.length > 0;
   const totalCount = useFirestore ? firestorePoets.length : staticPoets.length;
