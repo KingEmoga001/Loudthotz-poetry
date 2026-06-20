@@ -107,12 +107,20 @@ export interface FireSiteSettings {
 
   // Membership page
   membershipFreeLink: string;
+  membershipFreeDescription: string;
+  membershipFreeBenefits: string;
   membershipBasicPrice: string;
   membershipBasicLink: string;
+  membershipBasicDescription: string;
+  membershipBasicBenefits: string;
   membershipFullPrice: string;
   membershipFullLink: string;
+  membershipFullDescription: string;
+  membershipFullBenefits: string;
   membershipGoldenPrice: string;
   membershipGoldenLink: string;
+  membershipGoldenDescription: string;
+  membershipGoldenBenefits: string;
 
   // Prize page
   prizeCashAmount: string;

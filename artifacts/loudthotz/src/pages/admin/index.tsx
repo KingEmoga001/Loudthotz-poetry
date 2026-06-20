@@ -1836,7 +1836,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const ph = (v: string | number | undefined, fallback: string) => (v ? String(v) : fallback);
 
   const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "", homeHeadline: "", homeSubtext: "", potmReadingTitle: "", potmReadingSubtext: "", potmReadingCtaLabel: "" });
-  const [membership, setMembership] = useState({ membershipFreeLink: "", membershipBasicPrice: "", membershipBasicLink: "", membershipFullPrice: "", membershipFullLink: "", membershipGoldenPrice: "", membershipGoldenLink: "" });
+  const [membership, setMembership] = useState({ membershipFreeLink: "", membershipFreeDescription: "", membershipFreeBenefits: "", membershipBasicPrice: "", membershipBasicLink: "", membershipBasicDescription: "", membershipBasicBenefits: "", membershipFullPrice: "", membershipFullLink: "", membershipFullDescription: "", membershipFullBenefits: "", membershipGoldenPrice: "", membershipGoldenLink: "", membershipGoldenDescription: "", membershipGoldenBenefits: "" });
   const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeDeadline: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
   const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "", contactWhatsapp: "" });
@@ -1994,22 +1994,44 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
       {/* Membership Page */}
       {activeSection === "membership" && (
         <div className="space-y-6">
-          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">Update the prices and payment links for each membership tier. Leave a field blank to keep the current value.</p>
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Edit prices, payment links, descriptions, and benefits for each membership tier. For benefits, put each item on its own line.
+          </p>
           <div className="space-y-5">
+            {/* Free tier */}
             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
               <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Free Tier</p>
-              <SettingsField label="WhatsApp Link" hint="The link visitors click to join the free community" placeholder={ph(settings?.membershipFreeLink, "https://wa.me/...")} value={membership.membershipFreeLink} onChange={v => setMembership({ ...membership, membershipFreeLink: v })} />
+              <SettingsField label="WhatsApp Link" hint="The link visitors click to join the free community" placeholder={ph(settings?.membershipFreeLink, "https://chat.whatsapp.com/...")} value={membership.membershipFreeLink} onChange={v => setMembership({ ...membership, membershipFreeLink: v })} />
+              <SettingsField label="Description" hint="Short tagline shown under the tier name" placeholder={ph(settings?.membershipFreeDescription, "Get started with the Loudthotz community at no cost.")} value={membership.membershipFreeDescription} onChange={v => setMembership({ ...membership, membershipFreeDescription: v })} />
+              <SettingsField label="Benefits" hint="One benefit per line" multiline rows={3} placeholder={ph(settings?.membershipFreeBenefits, "Added to our WhatsApp community\nAccess to community discussions\nMonthly newsletter updates")} value={membership.membershipFreeBenefits} onChange={v => setMembership({ ...membership, membershipFreeBenefits: v })} />
             </div>
+
+            {/* Basic / Full / Golden */}
             {(["Basic", "Full", "Golden"] as const).map((tier) => {
               const priceKey = `membership${tier}Price` as keyof typeof membership;
               const linkKey = `membership${tier}Link` as keyof typeof membership;
+              const descKey = `membership${tier}Description` as keyof typeof membership;
+              const beneKey = `membership${tier}Benefits` as keyof typeof membership;
+              const defaultPrices: Record<string, string> = { Basic: "₦24,000", Full: "₦48,000", Golden: "₦60,000" };
+              const defaultDescs: Record<string, string> = {
+                Basic: "Support the initiative and receive our annual anthology.",
+                Full: "The complete Loudthotz experience — merch included.",
+                Golden: "Our most exclusive tier — your poems live in the anthology.",
+              };
+              const defaultBenefits: Record<string, string> = {
+                Basic: "A copy of First Gong anthology at end of year\nAccess to our Telegram community\nRecognition as a Basic Member",
+                Full: "A copy of the First Gong anthology at end of year\nExclusive Loudthotz T-shirt\nAccess to our Telegram community\nPriority event invitations",
+                Golden: "A copy of the First Gong anthology at end of year\nExclusive Loudthotz T-shirt\nFree outings with Loudthotz team\nA dedicated section of First Gong anthology for 10 of your poems\nPriority recognition across all platforms",
+              };
               return (
                 <div key={tier} className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
                   <p className="text-xs font-bold uppercase tracking-widest text-gray-400">{tier} Tier</p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <SettingsField label="Price" hint="e.g. ₦24,000" placeholder={ph(settings?.[priceKey as keyof typeof settings] as string, `Current: ${tier === "Basic" ? "₦24,000" : tier === "Full" ? "₦48,000" : "₦60,000"}`)} value={membership[priceKey]} onChange={v => setMembership({ ...membership, [priceKey]: v })} />
+                    <SettingsField label="Price" hint="e.g. ₦24,000" placeholder={ph(settings?.[priceKey as keyof typeof settings] as string, defaultPrices[tier])} value={membership[priceKey]} onChange={v => setMembership({ ...membership, [priceKey]: v })} />
                     <SettingsField label="Paystack Link" hint="Full https://paystack.com/pay/... URL" placeholder={ph(settings?.[linkKey as keyof typeof settings] as string, "https://paystack.com/pay/...")} value={membership[linkKey]} onChange={v => setMembership({ ...membership, [linkKey]: v })} />
                   </div>
+                  <SettingsField label="Description" hint="Short tagline shown under the tier name" placeholder={ph(settings?.[descKey as keyof typeof settings] as string, defaultDescs[tier])} value={membership[descKey]} onChange={v => setMembership({ ...membership, [descKey]: v })} />
+                  <SettingsField label="Benefits" hint="One benefit per line" multiline rows={tier === "Golden" ? 5 : 4} placeholder={ph(settings?.[beneKey as keyof typeof settings] as string, defaultBenefits[tier])} value={membership[beneKey]} onChange={v => setMembership({ ...membership, [beneKey]: v })} />
                 </div>
               );
             })}

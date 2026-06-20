@@ -55,6 +55,9 @@ function TierButton({
 export default function Membership() {
   const { data: s } = useSiteSettings();
 
+  const parseBenefits = (raw: string | undefined, defaults: string[]) =>
+    raw ? raw.split("\n").map(b => b.trim()).filter(Boolean) : defaults;
+
   const tiers = [
     {
       name: "Free",
@@ -66,12 +69,12 @@ export default function Membership() {
       payLabel: "Join Free",
       icon: MessageCircle,
       iconColor: "text-gray-400",
-      description: "Get started with the Loudthotz community at no cost.",
-      benefits: [
+      description: s?.membershipFreeDescription || "Get started with the Loudthotz community at no cost.",
+      benefits: parseBenefits(s?.membershipFreeBenefits, [
         "Added to our WhatsApp community",
         "Access to community discussions",
         "Monthly newsletter updates",
-      ],
+      ]),
     },
     {
       name: "Basic",
@@ -83,12 +86,12 @@ export default function Membership() {
       payLabel: "Join Basic",
       icon: BookOpen,
       iconColor: "text-secondary",
-      description: "Support the initiative and receive our annual anthology.",
-      benefits: [
+      description: s?.membershipBasicDescription || "Support the initiative and receive our annual anthology.",
+      benefits: parseBenefits(s?.membershipBasicBenefits, [
         "A copy of First Gong anthology at end of year",
         "Access to our Telegram community",
         "Recognition as a Basic Member",
-      ],
+      ]),
     },
     {
       name: "Full",
@@ -100,13 +103,13 @@ export default function Membership() {
       payLabel: "Join Full",
       icon: Star,
       iconColor: "text-primary",
-      description: "The complete Loudthotz experience — merch included.",
-      benefits: [
+      description: s?.membershipFullDescription || "The complete Loudthotz experience — merch included.",
+      benefits: parseBenefits(s?.membershipFullBenefits, [
         "A copy of the First Gong anthology at end of year",
         "Exclusive Loudthotz T-shirt",
         "Access to our Telegram community",
         "Priority event invitations",
-      ],
+      ]),
     },
     {
       name: "Golden",
@@ -118,14 +121,14 @@ export default function Membership() {
       payLabel: "Join Golden",
       icon: Feather,
       iconColor: "text-amber-400",
-      description: "Our most exclusive tier — your poems live in the anthology.",
-      benefits: [
+      description: s?.membershipGoldenDescription || "Our most exclusive tier — your poems live in the anthology.",
+      benefits: parseBenefits(s?.membershipGoldenBenefits, [
         "A copy of the First Gong anthology at end of year",
         "Exclusive Loudthotz T-shirt",
         "Free outings with Loudthotz team",
         "A dedicated section of First Gong anthology for 10 of your poems",
         "Priority recognition across all platforms",
-      ],
+      ]),
     },
   ];
 
