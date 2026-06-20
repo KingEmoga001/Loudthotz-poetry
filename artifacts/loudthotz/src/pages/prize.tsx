@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Trophy, Calendar, FileText, DollarSign, Mail, AlertCircle, CheckCircle, Star, ExternalLink, Settings, Clock, ArrowRight } from "lucide-react";
+import { Trophy, Calendar, FileText, DollarSign, AlertCircle, CheckCircle, Star, ExternalLink, Settings, Clock } from "lucide-react";
 import { useSiteSettings } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
@@ -186,16 +185,7 @@ export default function Prize() {
 
           <motion.div {...fadeUp(0.22)} className="flex flex-col sm:flex-row gap-3 justify-center">
             <PaystackButton href={paystackLink} label={`Pay Entry Fee — ${entryFee}`} entryFee={entryFee} primary />
-            <Link href="/lpp-submit">
-              <button className="inline-flex items-center gap-2 border border-primary/30 text-primary hover:bg-primary/10 font-semibold px-6 py-3 rounded-xl transition-all text-sm">
-                <ArrowRight className="h-4 w-4" />
-                Already Paid? Submit Here
-              </button>
-            </Link>
           </motion.div>
-          <motion.p {...fadeUp(0.28)} className="text-xs text-gray-600 mt-4">
-            Pay the entry fee first, then use our online portal to submit your poem and Word document.
-          </motion.p>
         </div>
       </section>
 
@@ -278,9 +268,9 @@ export default function Prize() {
               },
               {
                 step: "03",
-                title: "Submit Online",
-                desc: "Use our online submission portal to upload your Word document. No email needed — we receive it directly.",
-                action: { label: "Submit Your Entry →", href: "/lpp-submit", internal: true },
+                title: "Submit Your Entry",
+                desc: "After payment, Paystack will automatically redirect you to our submission portal where you upload your Word document.",
+                action: null,
               },
             ].map((s) => (
               <div key={s.step} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col gap-4">
@@ -320,24 +310,16 @@ export default function Prize() {
             <Trophy className="h-10 w-10 text-primary mx-auto mb-4" />
             <h3 className="font-display text-2xl font-bold mb-3">Ready to compete?</h3>
             <p className="text-gray-400 text-sm mb-6">
-              Pay the entry fee, prepare your Word document, then submit using our online portal. Winners are announced the last day of every month.
+              Pay the entry fee via Paystack and you'll be redirected to submit your poem. Winners are announced the last day of every month.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <PaystackButton
-                href={paystackLink}
-                label={`Pay Entry Fee — ${entryFee}`}
-                entryFee={entryFee}
-                primary
-                large
-              />
-              <Link href="/lpp-submit">
-                <button className="inline-flex items-center gap-2 border border-primary/30 text-primary hover:bg-primary/10 font-semibold px-8 py-3 rounded-xl transition-all text-sm">
-                  <ArrowRight className="h-4 w-4" />
-                  Submit Your Entry
-                </button>
-              </Link>
-            </div>
-            <p className="text-xs text-gray-600 mt-4">Step 1: Pay → Step 2: Prepare Word doc → Step 3: Submit online</p>
+            <PaystackButton
+              href={paystackLink}
+              label={`Pay Entry Fee — ${entryFee}`}
+              entryFee={entryFee}
+              primary
+              large
+            />
+            <p className="text-xs text-gray-600 mt-4">After payment, Paystack will redirect you to the submission portal automatically.</p>
           </div>
         </div>
       </section>
