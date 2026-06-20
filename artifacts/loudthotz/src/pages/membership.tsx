@@ -62,7 +62,7 @@ export default function Membership() {
       period: "forever",
       color: "border-white/10",
       highlight: false,
-      payLink: s?.membershipFreeLink ?? "",
+      payLink: s?.membershipFreeLink ?? "https://chat.whatsapp.com/Fq4JTtAQuMOHXPeGVmn8Sc?mode=gi_t",
       payLabel: "Join Free",
       icon: MessageCircle,
       iconColor: "text-gray-400",
