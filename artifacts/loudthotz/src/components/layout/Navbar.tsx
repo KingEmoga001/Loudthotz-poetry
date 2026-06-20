@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { motion, AnimatePresence } from "framer-motion";
-import { BookOpen, PenTool, Mic2, Library, Heart, Menu, X, Trophy, Users, Feather, Archive, Info, Home } from "lucide-react";
+import { Mic2, Library, Heart, Menu, X, Trophy, Users, Feather, Archive, Info, Home } from "lucide-react";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781641089854.jpeg";
 
 export function Navbar() {
@@ -11,8 +11,6 @@ export function Navbar() {
   const navLinks = [
     { href: "/", label: "Home", icon: Home },
     { href: "/about", label: "About", icon: Info },
-    { href: "/poems", label: "Gallery", icon: BookOpen },
-    { href: "/submit", label: "Submit", icon: PenTool },
     { href: "/live", label: "Live", icon: Mic2, isLive: true },
     { href: "/books", label: "Anthologies", icon: Library },
     { href: "/prize", label: "LPP Prize", icon: Trophy },

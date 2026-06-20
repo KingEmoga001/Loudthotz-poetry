@@ -22,8 +22,9 @@ import {
   usePoetPoems, createPoetPoem,
   useEvents, createEvent, updateEvent, deleteEvent,
   importStaticSessions,
+  useLppSubmissions,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
-  type FireHeroImage, type FirePoet, type FireEvent,
+  type FireHeroImage, type FirePoet, type FireEvent, type FireLppSubmission,
 } from "@/lib/firestore";
 import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
@@ -124,9 +125,77 @@ function Dashboard() {
   );
 }
 
+/* ──────────────────────────── LPP Prize Submissions ──────────────────────────── */
+function LppPrizeSubmissionsPanel() {
+  const { data: subs, loading } = useLppSubmissions();
+
+  const downloadAll = () => {
+    if (subs.length === 0) return;
+    subs.forEach((s, i) => {
+      setTimeout(() => {
+        const a = document.createElement("a");
+        a.href = s.fileUrl;
+        a.download = s.fileName || `lpp-submission-${i + 1}.docx`;
+        a.target = "_blank";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }, i * 600);
+    });
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-gray-500 text-sm">Word document entries submitted via the LPP Prize submission page.</p>
+        </div>
+        <button onClick={downloadAll} disabled={subs.length === 0}
+          className="flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary font-semibold px-4 py-2 rounded-xl text-sm hover:bg-primary/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed">
+          <BookMarked className="h-4 w-4" /> Download All ({subs.length})
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="text-gray-500 text-sm py-12 text-center">Loading submissions…</div>
+      ) : subs.length === 0 ? (
+        <div className="text-center py-16 border border-white/5 rounded-xl">
+          <Trophy className="h-10 w-10 text-gray-700 mx-auto mb-3" />
+          <p className="text-gray-500 text-sm">No LPP Prize submissions yet.</p>
+          <p className="text-gray-600 text-xs mt-1">Submissions come from the /lpp-submit page after Paystack payment.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {subs.map((s: FireLppSubmission) => (
+            <div key={s.id} className="bg-white/[0.02] border border-white/5 rounded-xl p-5">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap mb-1">
+                    <h3 className="font-display text-base font-bold text-white">{s.poemTitle || "(Untitled)"}</h3>
+                    <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-primary/10 text-primary border-primary/20">{s.month}</span>
+                  </div>
+                  <p className="text-sm text-gray-400">by <span className="font-semibold text-white">{s.name}</span></p>
+                  <p className="text-xs text-gray-600 mt-0.5">{s.email} · {s.phone}</p>
+                  {s.bio && <p className="text-xs text-gray-500 mt-2 line-clamp-2 font-serif italic">"{s.bio}"</p>}
+                  <p className="text-xs text-gray-700 mt-1">{new Date(s.submittedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</p>
+                </div>
+                <a href={s.fileUrl} target="_blank" rel="noreferrer" download={s.fileName}
+                  className="flex items-center gap-2 bg-white/5 border border-white/10 text-gray-300 hover:text-primary hover:border-primary/30 font-medium px-4 py-2 rounded-xl text-xs transition-all shrink-0">
+                  <BookMarked className="h-3.5 w-3.5" /> {s.fileName || "Download"}
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ──────────────────────────── Submissions ──────────────────────────── */
 function Submissions({ show }: { show: (m: string, t?: "success" | "error") => void }) {
   const { data: submissions, loading } = useSubmissions();
+  const [subTab, setSubTab] = useState<"poems" | "lpp">("poems");
   const [filter, setFilter] = useState<"pending" | "approved" | "rejected" | "all">("pending");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [rejectNote, setRejectNote] = useState("");
@@ -145,9 +214,27 @@ function Submissions({ show }: { show: (m: string, t?: "success" | "error") => v
 
   return (
     <div className="space-y-6">
+      <div>
+        <h2 className="font-display text-2xl font-bold text-white mb-1">Submissions</h2>
+      </div>
+
+      {/* Sub-tab toggle */}
+      <div className="flex gap-2 border-b border-white/5 pb-4">
+        <button onClick={() => setSubTab("poems")}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${subTab === "poems" ? "bg-primary text-black" : "bg-white/5 border border-white/10 text-gray-400 hover:text-white"}`}>
+          Poem Submissions
+        </button>
+        <button onClick={() => setSubTab("lpp")}
+          className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${subTab === "lpp" ? "bg-primary text-black" : "bg-white/5 border border-white/10 text-gray-400 hover:text-white"}`}>
+          LPP Prize Submissions
+        </button>
+      </div>
+
+      {subTab === "lpp" && <LppPrizeSubmissionsPanel />}
+
+      {subTab === "poems" && <>
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h2 className="font-display text-2xl font-bold text-white mb-1">Submissions</h2>
           <p className="text-gray-500 text-sm">Review poems submitted by the community</p>
         </div>
         <div className="flex gap-1.5 bg-white/[0.03] border border-white/5 rounded-xl p-1">
@@ -219,6 +306,7 @@ function Submissions({ show }: { show: (m: string, t?: "success" | "error") => v
           ))}
         </div>
       )}
+      </>}
     </div>
   );
 }
@@ -1747,7 +1835,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
   const ph = (v: string | number | undefined, fallback: string) => (v ? String(v) : fallback);
 
-  const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "" });
+  const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "", homeHeadline: "", homeSubtext: "", potmReadingTitle: "", potmReadingSubtext: "", potmReadingCtaLabel: "" });
   const [membership, setMembership] = useState({ membershipFreeLink: "", membershipBasicPrice: "", membershipBasicLink: "", membershipFullPrice: "", membershipFullLink: "", membershipGoldenPrice: "", membershipGoldenLink: "" });
   const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeDeadline: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
@@ -1770,6 +1858,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
     if (activeSection === "home") {
       add(home, "heroHeadline"); add(home, "heroSubtext"); add(home, "upcomingEventTitle"); add(home, "upcomingEventDate"); add(home, "aboutText"); add(home, "featuredVideoUrl");
+      add(home, "homeHeadline"); add(home, "homeSubtext"); add(home, "potmReadingTitle"); add(home, "potmReadingSubtext"); add(home, "potmReadingCtaLabel");
       if (home.totalCommunityVoices) upd.totalCommunityVoices = parseInt(home.totalCommunityVoices);
     }
     if (activeSection === "membership") {
@@ -1851,11 +1940,53 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
           <div className="border-t border-white/5 pt-5">
             <SettingsField
               label="Featured Video URL"
-              hint="YouTube link shown next to the hero headline — paste a youtu.be/… or youtube.com/watch?v=… URL"
+              hint="YouTube link shown in Card 4 on the homepage — paste a youtu.be/… or youtube.com/watch?v=… URL"
               placeholder={ph(settings?.featuredVideoUrl, "https://youtu.be/-UTQE47uNIY")}
               value={home.featuredVideoUrl ?? ""}
               onChange={v => setHome({ ...home, featuredVideoUrl: v } as typeof home)}
             />
+          </div>
+
+          <div className="border-t border-white/5 pt-5 space-y-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Homepage Headline &amp; Cards</p>
+            <SettingsField
+              label="Big Homepage Headline"
+              hint="Large bold headline displayed below the carousel. Shown in uppercase."
+              placeholder={ph(settings?.homeHeadline, "THE HOME OF THE MOST INTERESTING POETS IN AFRICA")}
+              value={home.homeHeadline}
+              onChange={v => setHome({ ...home, homeHeadline: v })}
+            />
+            <SettingsField
+              label="Homepage Subtext"
+              hint="Paragraph shown below the big headline."
+              placeholder={ph(settings?.homeSubtext, "Loudthotz Poetry is proudly hosted under the Naija Art Initiative…")}
+              value={home.homeSubtext}
+              onChange={v => setHome({ ...home, homeSubtext: v })}
+              multiline rows={3}
+            />
+            <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+              <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Card 1 — Open Reading Call</p>
+              <SettingsField
+                label="Card 1 Title"
+                placeholder={ph(settings?.potmReadingTitle, "Open Reading")}
+                value={home.potmReadingTitle}
+                onChange={v => setHome({ ...home, potmReadingTitle: v })}
+              />
+              <SettingsField
+                label="Card 1 Subtext"
+                placeholder={ph(settings?.potmReadingSubtext, "Submit your poem for the next Loudthotz Poetry Open Reading session…")}
+                value={home.potmReadingSubtext}
+                onChange={v => setHome({ ...home, potmReadingSubtext: v })}
+                multiline rows={2}
+              />
+              <SettingsField
+                label="Card 1 CTA Button Label"
+                placeholder={ph(settings?.potmReadingCtaLabel, "Submit Your Poem")}
+                value={home.potmReadingCtaLabel}
+                onChange={v => setHome({ ...home, potmReadingCtaLabel: v })}
+              />
+            </div>
+            <p className="text-[10px] text-gray-600">Card 2 (LPP Prize) uses the deadline & prize amount from the <strong>Poetry Prize</strong> settings section. Card 3 (Poem of the Month) uses the poem marked as POTM in <strong>Poems</strong>. Card 4 uses the Featured Video URL above.</p>
           </div>
         </div>
       )}

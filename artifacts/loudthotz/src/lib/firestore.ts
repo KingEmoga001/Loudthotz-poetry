@@ -36,6 +36,19 @@ export interface FireSubmission {
   adminNote?: string;
 }
 
+export interface FireLppSubmission {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  poemTitle: string;
+  bio: string;
+  month: string;
+  fileName: string;
+  fileUrl: string;
+  submittedAt: string;
+}
+
 export interface FireBook {
   id: string;
   title: string;
@@ -108,6 +121,13 @@ export interface FireSiteSettings {
   prizeEmail: string;
   prizeRules: string;
   prizeDeadline: string; // ISO datetime string for the countdown
+
+  // Homepage hero & cards
+  homeHeadline: string;
+  homeSubtext: string;
+  potmReadingTitle: string;
+  potmReadingSubtext: string;
+  potmReadingCtaLabel: string;
 
   // Donate page
   donationHeadline: string;
@@ -301,6 +321,84 @@ export function usePendingCount(): number {
     return unsub;
   }, []);
   return count;
+}
+
+/* ─────────────────── Poem of the Month ─────────────────── */
+export function usePoemOfMonth(): { data: FirePoem | null; loading: boolean } {
+  const [data, setData] = useState<FirePoem | null>(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    // Simple where-only query to avoid requiring a composite Firestore index
+    const q = query(collection(db, "poems"), where("isPoemOfMonth", "==", true));
+    const unsub = onSnapshot(q, (snap) => {
+      if (!snap.empty) {
+        // Sort client-side by publishedAt descending and take first
+        const sorted = snap.docs.sort((a, b) => {
+          const aAt = a.data().publishedAt?.seconds ?? 0;
+          const bAt = b.data().publishedAt?.seconds ?? 0;
+          return bAt - aAt;
+        });
+        const d = sorted[0];
+        const raw = d.data();
+        setData({
+          id: d.id, title: raw.title ?? "", author: raw.author ?? "",
+          country: raw.country ?? "", content: raw.content ?? "",
+          publishedAt: tsToIso(raw.publishedAt), averageRating: raw.averageRating ?? 0,
+          ratingCount: raw.ratingCount ?? 0, ratingSum: raw.ratingSum ?? 0,
+          isFeatured: raw.isFeatured ?? false, isPoemOfMonth: true,
+          season: raw.season, theme: raw.theme, poetId: raw.poetId,
+        });
+      } else { setData(null); }
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+  return { data, loading };
+}
+
+/* ─────────────────── LPP Prize Submissions ─────────────────── */
+export function useLppSubmissions(): { data: FireLppSubmission[]; loading: boolean } {
+  const [data, setData] = useState<FireLppSubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, "lpp_submissions"), (snap) => {
+      const subs: FireLppSubmission[] = snap.docs.map((d) => {
+        const raw = d.data();
+        return {
+          id: d.id,
+          name: raw.name ?? "",
+          email: raw.email ?? "",
+          phone: raw.phone ?? "",
+          poemTitle: raw.poemTitle ?? "",
+          bio: raw.bio ?? "",
+          month: raw.month ?? "",
+          fileName: raw.fileName ?? "",
+          fileUrl: raw.fileUrl ?? "",
+          submittedAt: tsToIso(raw.submittedAt),
+        };
+      });
+      subs.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
+      setData(subs);
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+  return { data, loading };
+}
+
+export async function addLppSubmission(
+  data: { name: string; email: string; phone: string; poemTitle: string; bio: string; month: string },
+  file: File
+): Promise<void> {
+  const storageRef = ref(storage, `lpp_submissions/${Date.now()}_${file.name}`);
+  await uploadBytes(storageRef, file);
+  const fileUrl = await getDownloadURL(storageRef);
+  await addDoc(collection(db, "lpp_submissions"), {
+    ...data,
+    fileName: file.name,
+    fileUrl,
+    submittedAt: serverTimestamp(),
+  });
 }
 
 export function usePoetPoems(poetName: string): { data: FirePoem[]; loading: boolean } {
