@@ -20,7 +20,7 @@ const DEFAULT_RULES = [
   "All submissions (both poem and bio) must be attached as a Microsoft Word document.",
   "Loudthotz decisions are final.",
   "Any entry that did not comply with ALL the rules will be disqualified.",
-  "Poetry competition fee per month is ₦1,000.00.",
+  "Poetry competition fee per month is ₦2,000.00.",
   "The winning poem every month will be included in our annual anthology published at the end of every year.",
   "Only Nigerians with a functional Nigerian NUBAN Bank Account are eligible for this competition.",
   'All submissions should be sent to loudthotz@gmail.com with the subject e.g "January 2025 LPP Poem".',
@@ -147,7 +147,7 @@ export default function Prize() {
   const { data: s } = useSiteSettings();
 
   const cashAmount = s?.prizeCashAmount ?? "₦10,000";
-  const entryFee = s?.prizeEntryFee ?? "₦1,000";
+  const entryFee = s?.prizeEntryFee ?? "₦2,000";
   const paystackLink = s?.prizePaystackLink ?? "";
   const email = s?.prizeEmail ?? "loudthotz@gmail.com";
   const rules = s?.prizeRules
