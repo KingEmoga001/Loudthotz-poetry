@@ -36,7 +36,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop Nav — icons + labels on md and above */}
-        <nav className="hidden md:flex flex-1 min-w-0 items-center gap-0 overflow-x-auto scrollbar-none">
+        <nav className="hidden md:flex ml-auto items-center gap-0 overflow-x-auto scrollbar-none">
           {navLinks.map((link) => {
             const active = location === link.href;
             return (
