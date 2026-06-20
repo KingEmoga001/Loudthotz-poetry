@@ -1839,7 +1839,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const [membership, setMembership] = useState({ membershipFreeLink: "", membershipBasicPrice: "", membershipBasicLink: "", membershipFullPrice: "", membershipFullLink: "", membershipGoldenPrice: "", membershipGoldenLink: "" });
   const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeDeadline: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
-  const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "" });
+  const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "", contactWhatsapp: "" });
   const [poets, setPoets] = useState({ poetPageDescription: "", poetPageBlogUrl: "" });
   const [privacy, setPrivacy] = useState({ privacyPolicyText: "", privacyPolicyUpdatedAt: "" });
   const [prizeRulesList, setPrizeRulesList] = useState<string[]>([...DEFAULT_PRIZE_RULES]);
@@ -1900,7 +1900,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     { id: "membership", label: "Membership" },
     { id: "prize", label: "Poetry Prize" },
     { id: "donate", label: "Donate Page" },
-    { id: "footer", label: "Footer / Socials" },
+    { id: "footer", label: "Footer & Contact" },
     { id: "poets", label: "Poets Page" },
     { id: "privacy", label: "Privacy Policy" },
   ];
@@ -2154,9 +2154,24 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
       {/* Footer / Socials */}
       {activeSection === "footer" && (
         <div className="space-y-5">
-          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
-            Paste the full URL for each social account. Leave a field blank to keep the current link. To remove a link from the footer, save an empty field after clearing it.
-          </p>
+          {/* Contact */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Contact</h3>
+            <SettingsField
+              label="WhatsApp Number"
+              hint="International format without + or spaces, e.g. 2347064384235. Used for the 'Chat on WhatsApp' button in the footer."
+              placeholder={ph(settings?.contactWhatsapp, "2347064384235")}
+              value={footer.contactWhatsapp}
+              onChange={v => setFooter({ ...footer, contactWhatsapp: v })}
+            />
+          </div>
+
+          <div className="border-t border-white/5 pt-4 space-y-3">
+            <h3 className="text-sm font-bold text-white uppercase tracking-wider">Social Links</h3>
+            <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+              Paste the full URL for each social account. Leave a field blank to keep the current link.
+            </p>
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
             <SettingsField
               label="X (Twitter)"

@@ -136,13 +136,14 @@ export interface FireSiteSettings {
   // Featured video
   featuredVideoUrl: string;
 
-  // Footer socials
+  // Footer socials & contact
   socialX: string;
   socialYoutube: string;
   socialFacebook: string;
   socialSpotify: string;
   socialInstagram: string;
   socialTiktok: string;
+  contactWhatsapp: string;
 
   // Poets page
   poetPageDescription: string;

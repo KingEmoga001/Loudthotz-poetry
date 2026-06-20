@@ -5,7 +5,7 @@ import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_178151198
 import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info, Twitter, Youtube, Facebook, Instagram, MessageCircle, Send, CheckCircle } from "lucide-react";
 import { useSiteSettings, addFeedback } from "@/lib/firestore";
 
-const WHATSAPP_NUMBER = "2347064384235";
+const DEFAULT_WHATSAPP = "2347064384235";
 
 const DEFAULT_SOCIALS = {
   x: "https://x.com/intent/follow?original_referer=https%3A%2F%2Floudthotzpoetry.blogspot.com%2F&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Efollow%7Ctwgr%5ELoudthotz&screen_name=Loudthotz",
@@ -214,7 +214,7 @@ export function Footer() {
               Have a question or want to reach us directly? Chat with us on WhatsApp — we're available for enquiries, collaborations, and event info.
             </p>
             <a
-              href={`https://wa.me/${WHATSAPP_NUMBER}`}
+              href={`https://wa.me/${settings?.contactWhatsapp || DEFAULT_WHATSAPP}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2.5 bg-[#25D366]/10 border border-[#25D366]/25 text-[#25D366] hover:bg-[#25D366]/20 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
