@@ -99,7 +99,7 @@ export default function Donate() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-px bg-white/5 rounded-2xl overflow-hidden border border-white/5">
             {[
               { value: "14+", label: "Seasons" },
-              { value: "100+", label: "Poets" },
+              { value: "15+", label: "Featured Poets" },
               { value: "30+", label: "Sessions" },
               { value: s?.prizeCashAmount ?? "₦20,000", label: "Monthly Prize" },
             ].map((stat) => (
