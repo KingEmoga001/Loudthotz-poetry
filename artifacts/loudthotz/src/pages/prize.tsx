@@ -280,22 +280,15 @@ export default function Prize() {
                   <p className="text-sm text-gray-400 leading-relaxed">{s.desc}</p>
                 </div>
                 {s.action && (
-                  "internal" in s.action && s.action.internal ? (
-                    <Link href={s.action.href} className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:text-primary/80 transition-colors mt-auto">
-                      <CheckCircle className="h-4 w-4" />
-                      {s.action.label}
-                    </Link>
-                  ) : (
-                    <a
-                      href={s.action.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:text-primary/80 transition-colors mt-auto"
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                      {s.action.label}
-                    </a>
-                  )
+                  <a
+                    href={s.action.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:text-primary/80 transition-colors mt-auto"
+                  >
+                    <CheckCircle className="h-4 w-4" />
+                    {s.action.label}
+                  </a>
                 )}
               </div>
             ))}

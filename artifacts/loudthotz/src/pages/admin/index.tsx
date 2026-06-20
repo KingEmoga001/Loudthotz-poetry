@@ -7,7 +7,7 @@ import {
   Edit3, Plus, Save, Eye, EyeOff, Mic2, Calendar, Link2,
   Users, Globe2, BarChart3, RefreshCw, ChevronDown, ChevronUp,
   AlertCircle, BookMarked, Play, X, Database, Image, GripVertical,
-  ToggleLeft, ToggleRight, Feather, Archive, Trophy,
+  ToggleLeft, ToggleRight, Feather, Archive, Trophy, MessageSquare, MailOpen,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -22,15 +22,15 @@ import {
   usePoetPoems, createPoetPoem,
   useEvents, createEvent, updateEvent, deleteEvent,
   importStaticSessions,
-  useLppSubmissions,
+  useLppSubmissions, useFeedback, markFeedbackRead, deleteFeedback,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
-  type FireHeroImage, type FirePoet, type FireEvent, type FireLppSubmission,
+  type FireHeroImage, type FirePoet, type FireEvent, type FireLppSubmission, type FireFeedback,
 } from "@/lib/firestore";
 import loudthotzIcon from "@assets/loudthouz-small-screen-logo_1781609118102.png";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781511989631.jpeg";
 
 /* ──────────────────────────── types ──────────────────────────── */
-type Tab = "dashboard" | "submissions" | "poems" | "livestream" | "books" | "poets" | "events" | "hero" | "settings";
+type Tab = "dashboard" | "submissions" | "poems" | "livestream" | "books" | "poets" | "events" | "hero" | "settings" | "feedback";
 
 /* ──────────────────────────── helpers ──────────────────────────── */
 function Toast({ message, type, onClose }: { message: string; type: "success" | "error"; onClose: () => void }) {
@@ -2226,6 +2226,85 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   );
 }
 
+/* ──────────────────────────── Feedback Manager ──────────────────────────── */
+function FeedbackManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
+  const { data: items, loading } = useFeedback();
+  const unread = items.filter(f => !f.read).length;
+
+  async function handleToggleRead(item: FireFeedback) {
+    await markFeedbackRead(item.id, !item.read);
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm("Delete this feedback?")) return;
+    try {
+      await deleteFeedback(id);
+      show("Feedback deleted");
+    } catch {
+      show("Failed to delete", "error");
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-display text-xl font-bold text-white">Feedback</h2>
+          <p className="text-sm text-gray-500 mt-1">Messages submitted via the site footer</p>
+        </div>
+        {unread > 0 && (
+          <span className="bg-primary/20 text-primary text-xs font-bold px-3 py-1 rounded-full">
+            {unread} unread
+          </span>
+        )}
+      </div>
+
+      {loading ? (
+        <div className="text-gray-500 text-sm">Loading…</div>
+      ) : items.length === 0 ? (
+        <div className="text-center py-16 text-gray-600">
+          <MessageSquare className="h-10 w-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">No feedback yet</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {items.map(item => (
+            <div key={item.id} className={`rounded-xl border p-5 transition-all ${item.read ? "bg-white/[0.02] border-white/5" : "bg-primary/5 border-primary/15"}`}>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    {!item.read && <span className="h-2 w-2 rounded-full bg-primary shrink-0" />}
+                    <span className="font-semibold text-sm text-white">{item.name}</span>
+                    <span className="text-xs text-gray-600">
+                      {new Date(item.submittedAt).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">{item.message}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => handleToggleRead(item)}
+                    title={item.read ? "Mark as unread" : "Mark as read"}
+                    className="p-2 rounded-lg text-gray-500 hover:text-primary hover:bg-primary/10 transition-colors"
+                  >
+                    <MailOpen className="h-4 w-4" />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="p-2 rounded-lg text-gray-600 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ──────────────────────────── Main Admin ──────────────────────────── */
 export default function AdminPanel() {
   const { user, logout, loading } = useAuth();
@@ -2254,6 +2333,7 @@ export default function AdminPanel() {
     { id: "events", label: "Events", icon: Calendar },
     { id: "hero", label: "Hero Carousel", icon: Image },
     { id: "settings", label: "Settings", icon: Settings },
+    { id: "feedback", label: "Feedback", icon: MessageSquare },
   ];
 
   return (
@@ -2320,6 +2400,7 @@ export default function AdminPanel() {
               {activeTab === "events" && <EventsManager show={show} />}
               {activeTab === "hero" && <HeroImagesManager show={show} />}
               {activeTab === "settings" && <SiteSettingsPanel show={show} />}
+              {activeTab === "feedback" && <FeedbackManager show={show} />}
             </motion.div>
           </AnimatePresence>
         </div>

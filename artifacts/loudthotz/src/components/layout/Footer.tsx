@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781939651416.jpeg";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
-import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info, Twitter, Youtube, Facebook, Instagram } from "lucide-react";
-import { useSiteSettings } from "@/lib/firestore";
+import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info, Twitter, Youtube, Facebook, Instagram, MessageCircle, Send, CheckCircle } from "lucide-react";
+import { useSiteSettings, addFeedback } from "@/lib/firestore";
+
+const WHATSAPP_NUMBER = "2347064384235";
 
 const DEFAULT_SOCIALS = {
   x: "https://x.com/intent/follow?original_referer=https%3A%2F%2Floudthotzpoetry.blogspot.com%2F&ref_src=twsrc%5Etfw%7Ctwcamp%5Ebuttonembed%7Ctwterm%5Efollow%7Ctwgr%5ELoudthotz&screen_name=Loudthotz",
@@ -24,6 +27,72 @@ function TikTokIcon({ className }: { className?: string }) {
     <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
       <path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.87a8.18 8.18 0 004.78 1.53V6.95a4.85 4.85 0 01-1.01-.26z" />
     </svg>
+  );
+}
+
+function FeedbackForm() {
+  const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!name.trim() || !message.trim()) return;
+    setSubmitting(true);
+    setError("");
+    try {
+      await addFeedback(name.trim(), message.trim());
+      setSubmitted(true);
+      setName("");
+      setMessage("");
+      setTimeout(() => setSubmitted(false), 5000);
+    } catch {
+      setError("Failed to send feedback. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (submitted) {
+    return (
+      <div className="flex flex-col items-start gap-2 py-4">
+        <CheckCircle className="h-6 w-6 text-primary" />
+        <p className="text-sm text-gray-300 font-medium">Thank you for your feedback!</p>
+        <p className="text-xs text-gray-500">We read every message and appreciate you taking the time.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-3">
+      <input
+        type="text"
+        placeholder="Your name"
+        value={name}
+        onChange={e => setName(e.target.value)}
+        required
+        className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+      />
+      <textarea
+        placeholder="Your message…"
+        value={message}
+        onChange={e => setMessage(e.target.value)}
+        required
+        rows={3}
+        className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors resize-none"
+      />
+      {error && <p className="text-xs text-red-400">{error}</p>}
+      <button
+        type="submit"
+        disabled={submitting}
+        className="inline-flex items-center gap-2 bg-primary/10 border border-primary/20 text-primary hover:bg-primary/20 px-4 py-2 rounded-lg text-sm font-semibold transition-all disabled:opacity-50"
+      >
+        <Send className="h-3.5 w-3.5" />
+        {submitting ? "Sending…" : "Send Feedback"}
+      </button>
+    </form>
   );
 }
 
@@ -132,6 +201,37 @@ export function Footer() {
                 </li>
               ))}
             </ul>
+          </div>
+        </div>
+
+        {/* Contact & Feedback row */}
+        <div className="border-t border-white/5 pt-10 mb-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+
+          {/* Contact */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500">Contact Us</h4>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              Have a question or want to reach us directly? Chat with us on WhatsApp — we're available for enquiries, collaborations, and event info.
+            </p>
+            <a
+              href={`https://wa.me/${WHATSAPP_NUMBER}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2.5 bg-[#25D366]/10 border border-[#25D366]/25 text-[#25D366] hover:bg-[#25D366]/20 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Chat on WhatsApp
+            </a>
+            <p className="text-[11px] text-gray-600">WhatsApp chat only — no calls.</p>
+          </div>
+
+          {/* Feedback */}
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-gray-500">Share Feedback</h4>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              Ideas, suggestions, or something we could do better? Let us know — all feedback goes straight to our team.
+            </p>
+            <FeedbackForm />
           </div>
         </div>
 

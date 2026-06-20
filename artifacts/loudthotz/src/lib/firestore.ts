@@ -386,6 +386,55 @@ export function useLppSubmissions(): { data: FireLppSubmission[]; loading: boole
   return { data, loading };
 }
 
+/* ── Feedback ── */
+export interface FireFeedback {
+  id: string;
+  name: string;
+  message: string;
+  submittedAt: string;
+  read: boolean;
+}
+
+export function useFeedback(): { data: FireFeedback[]; loading: boolean } {
+  const [data, setData] = useState<FireFeedback[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const q = query(collection(db, "feedback"), orderBy("submittedAt", "desc"));
+    const unsub = onSnapshot(q, (snap) => {
+      setData(snap.docs.map((d) => {
+        const raw = d.data();
+        return {
+          id: d.id,
+          name: raw.name ?? "",
+          message: raw.message ?? "",
+          submittedAt: tsToIso(raw.submittedAt),
+          read: raw.read ?? false,
+        };
+      }));
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+  return { data, loading };
+}
+
+export async function addFeedback(name: string, message: string): Promise<void> {
+  await addDoc(collection(db, "feedback"), {
+    name,
+    message,
+    read: false,
+    submittedAt: serverTimestamp(),
+  });
+}
+
+export async function markFeedbackRead(id: string, read: boolean): Promise<void> {
+  await setDoc(doc(db, "feedback", id), { read }, { merge: true });
+}
+
+export async function deleteFeedback(id: string): Promise<void> {
+  await deleteDoc(doc(db, "feedback", id));
+}
+
 export async function addLppSubmission(
   data: { name: string; email: string; phone: string; poemTitle: string; bio: string; month: string },
   file: File
