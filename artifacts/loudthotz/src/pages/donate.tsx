@@ -13,7 +13,7 @@ export default function Donate() {
 
   const headline = s?.donationHeadline ?? "Keep the Mic On.";
   const message = s?.donationMessage ?? "Loudthotz Poetry is powered by the Naija Art Initiative. Your contributions directly fund our server costs, live session setups, and compensation for featured African poets.";
-  const paystackLink = s?.donationPaystackLink ?? "https://paystack.shop/pay/loudthotzdonate";
+  const paystackLink = s?.donationPaystackLink || "https://paystack.shop/pay/loudthotzdonate";
 
   return (
     <div className="min-h-screen">
