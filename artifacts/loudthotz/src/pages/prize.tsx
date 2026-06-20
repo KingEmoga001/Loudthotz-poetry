@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
+import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { Trophy, Calendar, FileText, DollarSign, Mail, AlertCircle, CheckCircle, Star, ExternalLink, Settings, Clock } from "lucide-react";
+import { Trophy, Calendar, FileText, DollarSign, Mail, AlertCircle, CheckCircle, Star, ExternalLink, Settings, Clock, ArrowRight } from "lucide-react";
 import { useSiteSettings } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
@@ -185,14 +186,16 @@ export default function Prize() {
 
           <motion.div {...fadeUp(0.22)} className="flex flex-col sm:flex-row gap-3 justify-center">
             <PaystackButton href={paystackLink} label={`Pay Entry Fee — ${entryFee}`} entryFee={entryFee} primary />
-            <a
-              href={`mailto:${email}?subject=LPP Poem Submission`}
-              className="inline-flex items-center gap-2 border border-white/10 text-gray-300 hover:text-white hover:bg-white/5 font-medium px-6 py-3 rounded-xl transition-all text-sm"
-            >
-              <Mail className="h-4 w-4" />
-              Submit via Email
-            </a>
+            <Link href="/lpp-submit">
+              <button className="inline-flex items-center gap-2 border border-primary/30 text-primary hover:bg-primary/10 font-semibold px-6 py-3 rounded-xl transition-all text-sm">
+                <ArrowRight className="h-4 w-4" />
+                Already Paid? Submit Here
+              </button>
+            </Link>
           </motion.div>
+          <motion.p {...fadeUp(0.28)} className="text-xs text-gray-600 mt-4">
+            Pay the entry fee first, then use our online portal to submit your poem and Word document.
+          </motion.p>
         </div>
       </section>
 
@@ -269,15 +272,15 @@ export default function Prize() {
               },
               {
                 step: "02",
-                title: "Prepare Your Submission",
-                desc: "Write your poem (max 14 lines, 6 words per line). Attach a 3-line bio, photo, and payment receipt in a Word document.",
+                title: "Prepare Your Entry",
+                desc: "Write your poem (max 14 lines, 6 words per line). Include a 3-line bio, your photo, phone, email, address, and payment receipt — all in one Word document (.doc / .docx).",
                 action: null,
               },
               {
                 step: "03",
-                title: "Send to Us",
-                desc: `Email everything to ${email} with subject: "Month Year LPP Poem" e.g "January 2025 LPP Poem".`,
-                action: { label: "Send Email", href: `mailto:${email}?subject=LPP Poem Submission` },
+                title: "Submit Online",
+                desc: "Use our online submission portal to upload your Word document. No email needed — we receive it directly.",
+                action: { label: "Submit Your Entry →", href: "/lpp-submit", internal: true },
               },
             ].map((s) => (
               <div key={s.step} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col gap-4">
@@ -287,15 +290,22 @@ export default function Prize() {
                   <p className="text-sm text-gray-400 leading-relaxed">{s.desc}</p>
                 </div>
                 {s.action && (
-                  <a
-                    href={s.action.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:text-primary/80 transition-colors mt-auto"
-                  >
-                    <CheckCircle className="h-4 w-4" />
-                    {s.action.label}
-                  </a>
+                  "internal" in s.action && s.action.internal ? (
+                    <Link href={s.action.href} className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:text-primary/80 transition-colors mt-auto">
+                      <CheckCircle className="h-4 w-4" />
+                      {s.action.label}
+                    </Link>
+                  ) : (
+                    <a
+                      href={s.action.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:text-primary/80 transition-colors mt-auto"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      {s.action.label}
+                    </a>
+                  )
                 )}
               </div>
             ))}
@@ -310,15 +320,24 @@ export default function Prize() {
             <Trophy className="h-10 w-10 text-primary mx-auto mb-4" />
             <h3 className="font-display text-2xl font-bold mb-3">Ready to compete?</h3>
             <p className="text-gray-400 text-sm mb-6">
-              Winners are announced on the last day of every month across all Loudthotz platforms.
+              Pay the entry fee, prepare your Word document, then submit using our online portal. Winners are announced the last day of every month.
             </p>
-            <PaystackButton
-              href={paystackLink}
-              label="Enter This Month's Competition"
-              entryFee={entryFee}
-              primary
-              large
-            />
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <PaystackButton
+                href={paystackLink}
+                label={`Pay Entry Fee — ${entryFee}`}
+                entryFee={entryFee}
+                primary
+                large
+              />
+              <Link href="/lpp-submit">
+                <button className="inline-flex items-center gap-2 border border-primary/30 text-primary hover:bg-primary/10 font-semibold px-8 py-3 rounded-xl transition-all text-sm">
+                  <ArrowRight className="h-4 w-4" />
+                  Submit Your Entry
+                </button>
+              </Link>
+            </div>
+            <p className="text-xs text-gray-600 mt-4">Step 1: Pay → Step 2: Prepare Word doc → Step 3: Submit online</p>
           </div>
         </div>
       </section>
