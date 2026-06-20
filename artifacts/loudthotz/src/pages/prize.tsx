@@ -145,7 +145,7 @@ function PaystackButton({
 export default function Prize() {
   const { data: s } = useSiteSettings();
 
-  const cashAmount = s?.prizeCashAmount ?? "₦10,000";
+  const cashAmount = s?.prizeCashAmount ?? "₦20,000";
   const entryFee = s?.prizeEntryFee ?? "₦2,000";
   const paystackLink = s?.prizePaystackLink ?? "";
   const email = s?.prizeEmail ?? "loudthotz@gmail.com";

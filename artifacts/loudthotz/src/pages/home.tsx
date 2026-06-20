@@ -212,7 +212,7 @@ export default function Home() {
             <div className="flex-1">
               <h3 className="font-display text-2xl font-bold text-white mb-2">LPP Prize</h3>
               <p className="text-gray-400 text-sm font-serif leading-relaxed mb-4">
-                Monthly poetry competition. Win the cash prize of <span className="text-primary font-semibold">{settings?.prizeCashAmount || "₦10,000"}</span> every month.
+                Monthly poetry competition. Win the cash prize of <span className="text-primary font-semibold">{settings?.prizeCashAmount || "₦20,000"}</span> every month.
               </p>
               {deadline && countdown && !countdown.expired && (
                 <div className="flex items-center gap-1 mb-2">

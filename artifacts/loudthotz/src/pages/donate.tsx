@@ -101,7 +101,7 @@ export default function Donate() {
               { value: "14+", label: "Seasons" },
               { value: "100+", label: "Poets" },
               { value: "30+", label: "Sessions" },
-              { value: "₦10K", label: "Monthly Prize" },
+              { value: s?.prizeCashAmount ?? "₦20,000", label: "Monthly Prize" },
             ].map((stat) => (
               <div key={stat.label} className="bg-[#090b06] p-6 text-center">
                 <div className="font-display text-2xl font-bold text-primary mb-1">{stat.value}</div>

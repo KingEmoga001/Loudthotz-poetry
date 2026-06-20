@@ -2043,7 +2043,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
       {activeSection === "prize" && (
         <div className="space-y-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-            <SettingsField label="Monthly Cash Prize" hint="e.g. ₦10,000" placeholder={ph(settings?.prizeCashAmount, "₦10,000")} value={prize.prizeCashAmount} onChange={v => setPrize({ ...prize, prizeCashAmount: v })} />
+            <SettingsField label="Monthly Cash Prize" hint="e.g. ₦20,000" placeholder={ph(settings?.prizeCashAmount, "₦20,000")} value={prize.prizeCashAmount} onChange={v => setPrize({ ...prize, prizeCashAmount: v })} />
             <SettingsField label="Entry Fee" hint="e.g. ₦1,000" placeholder={ph(settings?.prizeEntryFee, "₦1,000")} value={prize.prizeEntryFee} onChange={v => setPrize({ ...prize, prizeEntryFee: v })} />
             <SettingsField label="Paystack Payment Link" hint="Link for the ₦1,000 entry fee" placeholder={ph(settings?.prizePaystackLink, "https://paystack.com/pay/lpp")} value={prize.prizePaystackLink} onChange={v => setPrize({ ...prize, prizePaystackLink: v })} />
             <SettingsField label="Submission Email" hint="Email address for poem submissions" placeholder={ph(settings?.prizeEmail, "loudthotz@gmail.com")} value={prize.prizeEmail} onChange={v => setPrize({ ...prize, prizeEmail: v })} />
