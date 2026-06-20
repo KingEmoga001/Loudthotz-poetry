@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import loudthotzLogo from "@assets/correct_1781632949414.png";
+import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781939651416.jpeg";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
 import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info, Twitter, Youtube, Facebook, Instagram } from "lucide-react";
 import { useSiteSettings } from "@/lib/firestore";
@@ -58,7 +58,7 @@ export function Footer() {
           {/* Brand column */}
           <div className="lg:col-span-2 space-y-5">
             <div>
-              <img src={loudthotzLogo} alt="Loudthotz Poetry Open Reading" className="h-14 w-auto object-contain" />
+              <img src={loudthotzLogo} alt="Loudthotz Poetry Open Reading" className="h-24 w-auto object-contain" />
             </div>
             <p className="text-gray-400 font-serif text-base leading-relaxed max-w-sm">
               A living literary space for African and global spoken-word poets — raw and electric,

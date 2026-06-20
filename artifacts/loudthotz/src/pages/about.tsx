@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Link } from "wouter";
 import { Mic2, BookOpen, Users, Globe2, Heart, ArrowRight, Calendar, Star, Feather, PenTool } from "lucide-react";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
-import loudthotzLogo from "@assets/correct_1781632949414.png";
+import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781939651416.jpeg";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -19,7 +19,7 @@ export default function About() {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(181,230,29,0.07),transparent)]" />
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 text-center">
           <motion.div {...fadeUp(0)}>
-            <img src={loudthotzLogo} alt="Loudthotz" className="h-16 w-auto object-contain mx-auto mb-8" />
+            <img src={loudthotzLogo} alt="Loudthotz" className="h-28 w-auto object-contain mx-auto mb-8" />
           </motion.div>
           <motion.h1 {...fadeUp(0.08)} className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
             Where African Poetry<br />
