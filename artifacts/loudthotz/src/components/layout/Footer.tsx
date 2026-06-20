@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "wouter";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781939651416.jpeg";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
-import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info, Twitter, Youtube, Facebook, Instagram, MessageCircle, Send, CheckCircle } from "lucide-react";
+import { BookOpen, Mic2, Library, PenTool, Heart, Shield, Info, Youtube, Facebook, Instagram, MessageCircle, Send, CheckCircle } from "lucide-react";
 import { useSiteSettings, addFeedback } from "@/lib/firestore";
 
 const DEFAULT_WHATSAPP = "2347064384235";
@@ -13,6 +13,14 @@ const DEFAULT_SOCIALS = {
   facebook: "https://web.facebook.com/loudthotz.poetry/",
   spotify: "https://creators.spotify.com/pod/profile/loudthotzpoetry/episodes/LOUDTHOTZ-POETRY-OPEN-READING-SEASON-14-EPISODE-09-BROTHERS-e29gml8",
 };
+
+function XIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.73-8.835L1.254 2.25H8.08l4.259 5.63 5.905-5.63zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
 
 function SpotifyIcon({ className }: { className?: string }) {
   return (
@@ -109,7 +117,7 @@ export function Footer() {
   };
 
   const socialLinks = [
-    { key: "x", href: socials.x, label: "Follow on X", Icon: Twitter },
+    { key: "x", href: socials.x, label: "Follow on X", Icon: XIcon },
     { key: "youtube", href: socials.youtube, label: "YouTube Channel", Icon: Youtube },
     { key: "facebook", href: socials.facebook, label: "Facebook Page", Icon: Facebook },
     { key: "spotify", href: socials.spotify, label: "Spotify Podcast", IconCustom: SpotifyIcon },
