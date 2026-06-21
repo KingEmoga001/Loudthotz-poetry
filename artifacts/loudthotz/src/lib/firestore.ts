@@ -5,7 +5,8 @@ import {
   serverTimestamp, type Timestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "./firebase";
+import { signInAnonymously } from "firebase/auth";
+import { db, storage, auth } from "./firebase";
 
 /* ───────────────────────────── Types ───────────────────────────── */
 export interface FirePoem {
@@ -458,12 +459,27 @@ export async function addLppSubmission(
   data: { name: string; email: string; phone: string; poemTitle: string; bio: string; month: string },
   file: File
 ): Promise<void> {
-  const storageRef = ref(storage, `lpp_submissions/${Date.now()}_${file.name}`);
-  await uploadBytes(storageRef, file);
-  const fileUrl = await getDownloadURL(storageRef);
+  // Ensure the user is authenticated (anonymous) so Firebase Storage rules are satisfied
+  if (!auth.currentUser) {
+    await signInAnonymously(auth);
+  }
+
+  let fileUrl = "";
+  let fileName = file.name;
+  try {
+    const storageRef = ref(storage, `lpp_submissions/${Date.now()}_${file.name}`);
+    await uploadBytes(storageRef, file);
+    fileUrl = await getDownloadURL(storageRef);
+  } catch (uploadErr) {
+    // If Storage upload fails, still save the form data with a note — admin can follow up by email
+    console.error("LPP file upload failed:", uploadErr);
+    fileUrl = "";
+    fileName = `[Upload failed] ${file.name}`;
+  }
+
   await addDoc(collection(db, "lpp_submissions"), {
     ...data,
-    fileName: file.name,
+    fileName,
     fileUrl,
     submittedAt: serverTimestamp(),
   });

@@ -25,8 +25,9 @@ export default function LppSubmit() {
     try {
       await addLppSubmission(form, file);
       setSubmitted(true);
-    } catch {
-      setError("Submission failed. Please check your connection and try again.");
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setError(`Submission failed: ${msg}. Please check your connection and try again.`);
     } finally {
       setLoading(false);
     }
