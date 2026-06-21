@@ -20,7 +20,7 @@ import {
   useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage, uploadHeroImage,
   usePoets, createPoet, updatePoet, deletePoet, seedStaticPoets,
   usePoetPoems, createPoetPoem,
-  useEvents, createEvent, updateEvent, deleteEvent,
+  useEvents, createEvent, updateEvent, deleteEvent, suppressArchiveEntry,
   importStaticSessions,
   useLppSubmissions, useFeedback, markFeedbackRead, deleteFeedback,
   type FireSubmission, type FirePoem, type FireBook, type FireLivestreamSession,
@@ -1272,7 +1272,7 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
       </div>
       <div className="flex gap-1.5 shrink-0">
         <button onClick={() => setEditingEvent(ev)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
-        <button onClick={async () => { if (!confirm(`Delete "${ev.title}"?`)) return; try { await deleteEvent(ev.id); show("Deleted."); } catch { show("Delete failed.", "error"); } }} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+        <button onClick={async () => { if (!confirm(`Delete "${ev.title}"?`)) return; try { await deleteEvent(ev.id); await suppressArchiveEntry(ev.date, ev.title); show("Deleted."); } catch { show("Delete failed.", "error"); } }} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
       </div>
     </div>
   );
@@ -1312,6 +1312,7 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
             try {
               if (item.kind === "event") await deleteEvent(item.id);
               else await deleteLivestreamSession(item.id);
+              await suppressArchiveEntry(item.date, item.title);
               show("Deleted.");
             } catch { show("Delete failed.", "error"); }
           }}

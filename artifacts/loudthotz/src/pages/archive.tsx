@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Archive, Calendar, Mic2, ExternalLink, Play, Image } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
-import { useLivestreamSessions, useEvents } from "@/lib/firestore";
+import { useLivestreamSessions, useEvents, useSiteSettings } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -108,7 +108,10 @@ type DisplaySession = {
 export default function ArchivePage() {
   const { data: firestoreSessions, loading: sessionsLoading } = useLivestreamSessions();
   const { data: allEvents, loading: eventsLoading } = useEvents();
+  const { data: siteSettings } = useSiteSettings();
   const [selectedSeason, setSelectedSeason] = useState("All");
+
+  const excludedKeys = new Set<string>(siteSettings?.excludedArchiveKeys ?? []);
 
   const loading = sessionsLoading || eventsLoading;
   const now = new Date();
@@ -162,6 +165,7 @@ export default function ArchivePage() {
       if (!hasFirestoreData && s.source !== "static") return false;
       const key = `${s.date.slice(0, 10)}-${s.title.toLowerCase().trim()}`;
       if (seen.has(key)) return false;
+      if (s.source === "static" && excludedKeys.has(key)) return false;
       seen.add(key);
       return true;
     })

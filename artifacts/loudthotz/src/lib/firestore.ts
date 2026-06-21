@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import {
   collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, where, orderBy, limit, setDoc, increment,
-  serverTimestamp, type Timestamp,
+  serverTimestamp, arrayUnion, type Timestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { signInAnonymously } from "firebase/auth";
@@ -136,6 +136,9 @@ export interface FireSiteSettings {
   prizeEmail: string;
   prizeRules: string;
   prizeDeadline: string; // ISO datetime string for the countdown
+
+  // Archive suppression — keys of static sessions hidden by admin delete
+  excludedArchiveKeys: string[];
 
   // Homepage hero & cards
   homeHeadline: string;
@@ -682,6 +685,16 @@ export function useSiteSettings(): { data: FireSiteSettings | null; loading: boo
 
 export async function updateSiteSettings(data: Partial<FireSiteSettings>) {
   await setDoc(doc(db, "settings", "main"), data, { merge: true });
+}
+
+export function archiveKey(date: string, title: string): string {
+  return `${date.slice(0, 10)}-${title.toLowerCase().trim()}`;
+}
+
+export async function suppressArchiveEntry(date: string, title: string): Promise<void> {
+  await updateDoc(doc(db, "settings", "main"), {
+    excludedArchiveKeys: arrayUnion(archiveKey(date, title)),
+  });
 }
 
 /* ─────────────────── Stats ─────────────────── */
