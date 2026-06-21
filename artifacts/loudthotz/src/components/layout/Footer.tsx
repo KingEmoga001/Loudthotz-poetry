@@ -138,8 +138,7 @@ export function Footer() {
               <img src={loudthotzLogo} alt="Loudthotz Poetry Open Reading" className="h-24 w-auto object-contain" />
             </div>
             <p className="text-gray-400 font-serif text-base leading-relaxed max-w-sm">
-              A living literary space for African and global spoken-word poets — raw and electric,
-              like an open mic in a dimly lit Lagos art house.
+              {settings?.aboutText || "A living literary space for African and global spoken-word poets — raw and electric, like an open mic in a dimly lit Lagos art house."}
             </p>
             <div className="flex items-center gap-3 p-3.5 rounded-xl bg-white/[0.03] border border-white/5 w-fit">
               <div className="h-9 w-9 rounded-lg overflow-hidden border border-white/10">
