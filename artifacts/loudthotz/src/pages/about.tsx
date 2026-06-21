@@ -3,6 +3,7 @@ import { Link } from "wouter";
 import { Mic2, BookOpen, Users, Globe2, Heart, ArrowRight, Calendar, Star, Feather, PenTool } from "lucide-react";
 import naijaArtLogo from "@assets/7adc06f9-f8e6-4cd2-ab1c-2c2f7af5ba34_1781511989632.jpeg";
 import loudthotzLogo from "@assets/aa4655fb-acd7-4083-90e7-7a0329b9b315_1781939651416.jpeg";
+import { useSiteSettings, useSiteStats } from "@/lib/firestore";
 
 const fadeUp = (delay = 0) => ({
   initial: { opacity: 0, y: 24 },
@@ -11,6 +12,12 @@ const fadeUp = (delay = 0) => ({
 });
 
 export default function About() {
+  const { data: s } = useSiteSettings();
+  const stats = useSiteStats();
+
+  const pageHeadline = s?.aboutPageHeadline || "Where African Poetry Finds Its Voice";
+  const pageSubtext = s?.aboutPageSubtext || "Loudthotz Poetry Open Reading is a living literary stage — a monthly gathering where poets from across Africa and beyond share raw, electric spoken word.";
+
   return (
     <div className="min-h-screen">
 
@@ -22,14 +29,22 @@ export default function About() {
             <img src={loudthotzLogo} alt="Loudthotz" className="h-28 w-auto object-contain mx-auto mb-8" />
           </motion.div>
           <motion.h1 {...fadeUp(0.08)} className="font-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6">
-            Where African Poetry<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#d2ff34]">
-              Finds Its Voice
-            </span>
+            {pageHeadline.includes("Voice") ? (
+              <>
+                {pageHeadline.split("Voice")[0]}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#d2ff34]">
+                  Voice
+                </span>
+                {pageHeadline.split("Voice")[1] ?? ""}
+              </>
+            ) : (
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-[#d2ff34]">
+                {pageHeadline}
+              </span>
+            )}
           </motion.h1>
           <motion.p {...fadeUp(0.16)} className="font-serif text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">
-            Loudthotz Poetry Open Reading is a living literary stage — a monthly gathering where
-            poets from across Africa and beyond share raw, electric spoken word.
+            {pageSubtext}
           </motion.p>
         </div>
       </section>
@@ -57,10 +72,10 @@ export default function About() {
 
           <motion.div {...fadeUp(0.1)} className="grid grid-cols-2 gap-4">
             {[
-              { icon: Mic2, label: "Open Mic Sessions", value: "100+", color: "primary" },
-              { icon: Users, label: "Poets Featured", value: "300+", color: "secondary" },
-              { icon: Globe2, label: "Countries Represented", value: "15+", color: "primary" },
-              { icon: Star, label: "Seasons Completed", value: "14+", color: "secondary" },
+              { icon: Mic2, label: "Live Sessions", value: stats.displaySessions, color: "primary" },
+              { icon: Users, label: "Poets Featured", value: stats.displayPoets, color: "secondary" },
+              { icon: Globe2, label: "Countries", value: stats.displayCountries, color: "primary" },
+              { icon: Star, label: "Poems Published", value: stats.displayPoems, color: "secondary" },
             ].map(({ icon: Icon, label, value, color }) => (
               <div key={label} className={`p-5 rounded-2xl border ${color === "primary" ? "border-primary/20 bg-primary/5" : "border-secondary/20 bg-secondary/5"}`}>
                 <Icon className={`h-5 w-5 mb-3 ${color === "primary" ? "text-primary" : "text-secondary"}`} />
@@ -172,8 +187,10 @@ export default function About() {
               </h2>
               <p className="text-gray-400 font-serif leading-relaxed">
                 The <span className="text-primary font-semibold">Loudthotz Poetry Prize (LPP)</span> is
-                our flagship award — an annual competition open to all African poets writing in English.
-                The Prize celebrates craft, originality, and the authentic African voice.
+                our flagship award — a monthly competition open to all poets writing in English.
+                Win a cash prize of{" "}
+                <span className="text-primary font-semibold">{s?.prizeCashAmount || "₦20,000"}</span> and
+                have your poem featured in our annual anthology.
               </p>
               <p className="text-gray-400 font-serif leading-relaxed">
                 Past editions have uncovered remarkable talents who have gone on to publish anthologies,
@@ -188,10 +205,10 @@ export default function About() {
             </motion.div>
             <motion.div {...fadeUp(0.1)} className="space-y-4">
               {[
-                { label: "Open to", value: "All African poets writing in English" },
-                { label: "Format", value: "Original unpublished poem, any form" },
-                { label: "Prize", value: "Cash award + publication + mentorship" },
-                { label: "Frequency", value: "Annual" },
+                { label: "Open to", value: "All poets writing in English" },
+                { label: "Format", value: "Original poem — max 14 lines, 6 words per line" },
+                { label: "Prize", value: `${s?.prizeCashAmount || "₦20,000"} cash + anthology publication` },
+                { label: "Frequency", value: "Monthly" },
               ].map(({ label, value }) => (
                 <div key={label} className="flex items-start gap-4 p-4 rounded-xl border border-white/5 bg-white/[0.02]">
                   <div className="h-1.5 w-1.5 rounded-full bg-primary mt-2 shrink-0" />

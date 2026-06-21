@@ -248,7 +248,7 @@ export function Footer() {
             © {new Date().getFullYear()} Naija Art Initiative. All rights reserved.
           </p>
           <div className="flex gap-6 text-xs text-gray-500">
-            <span>Terms of Service</span>
+            <Link href="/privacy" className="hover:text-gray-300 transition-colors">Terms of Service</Link>
             <Link href="/privacy" className="hover:text-gray-300 transition-colors">Privacy Policy</Link>
           </div>
         </div>

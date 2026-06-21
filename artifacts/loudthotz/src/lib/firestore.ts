@@ -163,6 +163,10 @@ export interface FireSiteSettings {
   poetPageDescription: string;
   poetPageBlogUrl: string;
 
+  // About page
+  aboutPageHeadline: string;
+  aboutPageSubtext: string;
+
   // Privacy policy
   privacyPolicyText: string;
   privacyPolicyUpdatedAt: string;

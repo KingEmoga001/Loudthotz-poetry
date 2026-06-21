@@ -1804,7 +1804,7 @@ const DEFAULT_PRIZE_RULES = [
   'All submissions should be sent to loudthotz@gmail.com with the subject e.g "January 2025 LPP Poem".',
 ];
 
-type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets" | "privacy";
+type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets" | "privacy" | "about";
 
 function SettingsField({
   label, hint, value, onChange, multiline, placeholder, rows,
@@ -1842,6 +1842,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "", contactWhatsapp: "" });
   const [poets, setPoets] = useState({ poetPageDescription: "", poetPageBlogUrl: "" });
   const [privacy, setPrivacy] = useState({ privacyPolicyText: "", privacyPolicyUpdatedAt: "" });
+  const [about, setAbout] = useState({ aboutPageHeadline: "", aboutPageSubtext: "" });
   const [prizeRulesList, setPrizeRulesList] = useState<string[]>([...DEFAULT_PRIZE_RULES]);
   const [newRule, setNewRule] = useState("");
 
@@ -1882,6 +1883,9 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
       if (privacy.privacyPolicyText) upd.privacyPolicyText = privacy.privacyPolicyText;
       if (privacy.privacyPolicyUpdatedAt) upd.privacyPolicyUpdatedAt = privacy.privacyPolicyUpdatedAt;
     }
+    if (activeSection === "about") {
+      add(about, "aboutPageHeadline"); add(about, "aboutPageSubtext");
+    }
 
     try { await updateSiteSettings(upd as never); show("Settings saved!"); }
     catch { show("Failed to save settings.", "error"); }
@@ -1904,6 +1908,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     { id: "footer", label: "Footer & Contact" },
     { id: "poets", label: "Poets Page" },
     { id: "privacy", label: "Privacy Policy" },
+    { id: "about", label: "About Page" },
   ];
 
   return (
@@ -2182,6 +2187,31 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
             onChange={v => setPrivacy({ ...privacy, privacyPolicyText: v })}
             multiline
             rows={22}
+          />
+        </div>
+      )}
+
+      {/* About Page */}
+      {activeSection === "about" && (
+        <div className="space-y-5">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Edit the hero headline and intro text on the About page. The stats grid on the About page uses the same numbers set in <strong>Home Page → Site-wide Stats Bar</strong>.
+          </p>
+          <SettingsField
+            label="Page Headline"
+            hint='Large heading on the About page, e.g. "Where African Poetry Finds Its Voice"'
+            placeholder={ph(settings?.aboutPageHeadline, "Where African Poetry Finds Its Voice")}
+            value={about.aboutPageHeadline}
+            onChange={v => setAbout({ ...about, aboutPageHeadline: v })}
+          />
+          <SettingsField
+            label="Hero Subtext"
+            hint="Short intro paragraph below the headline"
+            placeholder={ph(settings?.aboutPageSubtext, "Loudthotz Poetry Open Reading is a living literary stage…")}
+            value={about.aboutPageSubtext}
+            onChange={v => setAbout({ ...about, aboutPageSubtext: v })}
+            multiline
+            rows={4}
           />
         </div>
       )}
