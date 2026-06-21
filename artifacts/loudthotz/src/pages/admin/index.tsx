@@ -1835,7 +1835,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
   const ph = (v: string | number | undefined, fallback: string) => (v ? String(v) : fallback);
 
-  const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "", homeHeadline: "", homeSubtext: "", potmReadingTitle: "", potmReadingSubtext: "", potmReadingCtaLabel: "" });
+  const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "", homeHeadline: "", homeSubtext: "", potmReadingTitle: "", potmReadingSubtext: "", potmReadingCtaLabel: "", statsPoems: "", statsPoets: "", statsSessions: "", statsCountries: "" });
   const [membership, setMembership] = useState({ membershipFreeLink: "", membershipFreeDescription: "", membershipFreeBenefits: "", membershipBasicPrice: "", membershipBasicLink: "", membershipBasicDescription: "", membershipBasicBenefits: "", membershipFullPrice: "", membershipFullLink: "", membershipFullDescription: "", membershipFullBenefits: "", membershipGoldenPrice: "", membershipGoldenLink: "", membershipGoldenDescription: "", membershipGoldenBenefits: "" });
   const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeDeadline: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
@@ -1859,6 +1859,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     if (activeSection === "home") {
       add(home, "heroHeadline"); add(home, "heroSubtext"); add(home, "upcomingEventTitle"); add(home, "upcomingEventDate"); add(home, "aboutText"); add(home, "featuredVideoUrl");
       add(home, "homeHeadline"); add(home, "homeSubtext"); add(home, "potmReadingTitle"); add(home, "potmReadingSubtext"); add(home, "potmReadingCtaLabel");
+      add(home, "statsPoems"); add(home, "statsPoets"); add(home, "statsSessions"); add(home, "statsCountries");
       if (home.totalCommunityVoices) upd.totalCommunityVoices = parseInt(home.totalCommunityVoices);
     }
     if (activeSection === "membership") {
@@ -1929,11 +1930,23 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
             <SettingsField label="Hero Headline" placeholder={ph(settings?.heroHeadline, "Where Words Ignite Loud Thoughts")} value={home.heroHeadline} onChange={v => setHome({ ...home, heroHeadline: v })} />
             <SettingsField label="Upcoming Event Title" placeholder={ph(settings?.upcomingEventTitle, "Season 15 Episode 01")} value={home.upcomingEventTitle} onChange={v => setHome({ ...home, upcomingEventTitle: v })} />
             <SettingsField label="Community Voices Count" placeholder={ph(settings?.totalCommunityVoices, "5000")} hint="Number shown in the stats badge" value={home.totalCommunityVoices} onChange={v => setHome({ ...home, totalCommunityVoices: v })} />
-            <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Upcoming Event Date &amp; Time</label>
-              <input type="datetime-local" value={home.upcomingEventDate} onChange={e => setHome({ ...home, upcomingEventDate: e.target.value })}
-                className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors" />
+          </div>
+
+          <div className="border-t border-white/5 pt-5 space-y-3">
+            <p className="text-xs font-bold uppercase tracking-widest text-gray-400">Site-wide Stats Bar</p>
+            <p className="text-[10px] text-gray-600">These numbers appear on the Home and Donate pages. Use any format e.g. <strong>3000+</strong>, <strong>85+</strong>, <strong>204</strong>.</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SettingsField label="Poems Published" placeholder={ph(settings?.statsPoems, "3000+")} value={home.statsPoems} onChange={v => setHome({ ...home, statsPoems: v })} />
+              <SettingsField label="Featured Poets" placeholder={ph(settings?.statsPoets, "85+")} value={home.statsPoets} onChange={v => setHome({ ...home, statsPoets: v })} />
+              <SettingsField label="Live Sessions" placeholder={ph(settings?.statsSessions, "204")} value={home.statsSessions} onChange={v => setHome({ ...home, statsSessions: v })} />
+              <SettingsField label="Countries" placeholder={ph(settings?.statsCountries, "5+")} value={home.statsCountries} onChange={v => setHome({ ...home, statsCountries: v })} />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Upcoming Event Date &amp; Time</label>
+            <input type="datetime-local" value={home.upcomingEventDate} onChange={e => setHome({ ...home, upcomingEventDate: e.target.value })}
+              className="w-full px-4 py-2.5 bg-white/[0.03] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors" />
           </div>
           <SettingsField label="Hero Subtext" hint="Paragraph below the hero headline" placeholder={ph(settings?.heroSubtext, "Formerly managed under…")} value={home.heroSubtext} onChange={v => setHome({ ...home, heroSubtext: v })} multiline rows={3} />
           <SettingsField label="About Text" hint="Shown on the Home page About/Mission section" placeholder={ph(settings?.aboutText, "A living literary space…")} value={home.aboutText} onChange={v => setHome({ ...home, aboutText: v })} multiline rows={4} />

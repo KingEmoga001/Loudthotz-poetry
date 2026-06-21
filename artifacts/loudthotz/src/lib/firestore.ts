@@ -105,6 +105,12 @@ export interface FireSiteSettings {
   donationMessage: string;
   totalCommunityVoices: number;
 
+  // Site-wide display stats
+  statsPoems: string;
+  statsPoets: string;
+  statsSessions: string;
+  statsCountries: string;
+
   // Membership page
   membershipFreeLink: string;
   membershipFreeDescription: string;
@@ -668,6 +674,10 @@ export function useSiteStats() {
 
   return {
     totalPoems, totalPoets, totalCountries, totalSessions,
+    displayPoems: settings?.statsPoems || "3000+",
+    displayPoets: settings?.statsPoets || "85+",
+    displaySessions: settings?.statsSessions || "204",
+    displayCountries: settings?.statsCountries || "5+",
     upcomingEventTitle: settings?.upcomingEventTitle ?? "Brothers — Spotlights on Kinship",
     upcomingEventDate: settings?.upcomingEventDate ?? null,
     totalCommunityVoices: settings?.totalCommunityVoices ?? totalPoets,

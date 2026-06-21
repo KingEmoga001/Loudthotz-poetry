@@ -167,10 +167,10 @@ export default function Home() {
           {/* Stats row */}
           <motion.div {...fadeUp(0.2)} className="grid grid-cols-2 md:grid-cols-4 gap-px mt-12 bg-white/5 rounded-2xl overflow-hidden border border-white/5">
             {[
-              { label: "Poems Published", value: stats?.totalPoems ?? 0 },
-              { label: "Featured Poets", value: stats?.totalPoets ?? 0 },
-              { label: "Countries", value: stats?.totalCountries ?? 0 },
-              { label: "Live Sessions", value: stats?.totalSessions ?? 0 },
+              { label: "Poems Published", value: stats?.displayPoems ?? "3000+" },
+              { label: "Featured Poets", value: stats?.displayPoets ?? "85+" },
+              { label: "Countries", value: stats?.displayCountries ?? "5+" },
+              { label: "Live Sessions", value: stats?.displaySessions ?? "204" },
             ].map(({ label, value }) => (
               <div key={label} className="bg-[#090b06] px-6 py-5 text-center">
                 <p className="font-display text-2xl md:text-3xl font-bold text-foreground">{value}</p>
