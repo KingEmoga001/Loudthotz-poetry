@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trophy, Upload, CheckCircle2, FileText, AlertCircle } from "lucide-react";
+import { Trophy, Upload, CheckCircle2, FileText, AlertCircle, Mail } from "lucide-react";
 import { addLppSubmission } from "@/lib/firestore";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
@@ -17,13 +17,14 @@ export default function LppSubmit() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) { setError("Please attach your Word document."); return; }
-    const ext = file.name.split(".").pop()?.toLowerCase();
-    if (!["doc", "docx"].includes(ext ?? "")) { setError("Only .doc and .docx files are accepted."); return; }
+    if (file) {
+      const ext = file.name.split(".").pop()?.toLowerCase();
+      if (!["doc", "docx"].includes(ext ?? "")) { setError("Only .doc and .docx files are accepted."); return; }
+    }
     setLoading(true);
     setError("");
     try {
-      await addLppSubmission(form, file);
+      await addLppSubmission(form, file?.name ?? "");
       setSubmitted(true);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);
@@ -36,16 +37,33 @@ export default function LppSubmit() {
   if (submitted) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-24 bg-[#060805]">
-        <div className="max-w-md w-full bg-white/[0.02] border border-white/5 rounded-2xl p-12 text-center">
+        <div className="max-w-lg w-full bg-white/[0.02] border border-white/5 rounded-2xl p-12 text-center">
           <div className="h-20 w-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-8">
             <CheckCircle2 className="h-10 w-10 text-primary" />
           </div>
           <h1 className="font-display text-3xl font-bold text-white mb-4">Submission Received!</h1>
-          <p className="text-gray-400 font-serif text-base leading-relaxed">
-            Your poem has been submitted for the{" "}
-            <span className="text-primary font-semibold">{form.month}</span> Loudthotz Poetry Prize.
+          <p className="text-gray-400 font-serif text-base leading-relaxed mb-8">
+            Your entry for the{" "}
+            <span className="text-primary font-semibold">{form.month}</span> Loudthotz Poetry Prize has been recorded.
             Winners are announced on the last day of every month.
           </p>
+          {file && (
+            <div className="bg-amber-500/8 border border-amber-500/25 rounded-xl p-5 text-left">
+              <div className="flex items-start gap-3">
+                <Mail className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-amber-300 mb-1">One more step — email your document</p>
+                  <p className="text-xs text-amber-200/70 leading-relaxed">
+                    Please email your Word document (<span className="font-mono text-amber-300">{file.name}</span>) directly to{" "}
+                    <a href="mailto:lppprize@loudthotz.com" className="text-amber-400 underline underline-offset-2">
+                      lppprize@loudthotz.com
+                    </a>{" "}
+                    with the subject: <span className="italic">LPP – {form.month} – {form.name}</span>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -62,7 +80,7 @@ export default function LppSubmit() {
           </div>
           <h1 className="font-display text-4xl font-bold text-white mb-3">LPP Prize Submission</h1>
           <p className="text-gray-400 font-serif text-lg max-w-lg mx-auto">
-            Submit your entry for the Loudthotz Poetry Prize. Attach your poem and bio as a Word document.
+            Fill in your details below. You will be prompted to email your Word document after submitting.
           </p>
         </div>
 
@@ -100,8 +118,8 @@ export default function LppSubmit() {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Word Document (.doc / .docx) *</label>
-              <p className="text-[10px] text-gray-600 mb-3">Your poem and bio must be in a Microsoft Word document. Include your payment receipt proof inside the document.</p>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Word Document <span className="text-gray-600 normal-case font-normal">(optional — you can also email it after)</span></label>
+              <p className="text-[10px] text-gray-600 mb-3">Your poem and bio in a Microsoft Word document. Include your payment receipt proof inside the document.</p>
               <label className={`flex items-center gap-4 px-5 py-4 rounded-xl border-2 border-dashed cursor-pointer transition-all ${
                 file ? "border-primary/40 bg-primary/5" : "border-white/10 hover:border-white/20 bg-white/[0.02]"
               }`}>
@@ -112,7 +130,7 @@ export default function LppSubmit() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-white">{file ? file.name : "Click to attach Word document"}</p>
-                  <p className="text-xs text-gray-500 mt-0.5">{file ? `${(file.size / 1024).toFixed(0)} KB` : ".doc or .docx only"}</p>
+                  <p className="text-xs text-gray-500 mt-0.5">{file ? `${(file.size / 1024).toFixed(0)} KB` : ".doc or .docx, optional"}</p>
                 </div>
               </label>
             </div>
@@ -126,7 +144,7 @@ export default function LppSubmit() {
 
             <button type="submit" disabled={loading}
               className="w-full py-4 rounded-xl bg-primary text-black font-bold text-base hover:bg-primary/90 transition-all disabled:opacity-50">
-              {loading ? "Uploading & Submitting…" : "Submit My Entry"}
+              {loading ? "Submitting…" : "Submit My Entry"}
             </button>
 
             <p className="text-[11px] text-gray-600 text-center">
