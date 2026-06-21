@@ -5,7 +5,8 @@ import {
   serverTimestamp, type Timestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "./firebase";
+import { signInAnonymously } from "firebase/auth";
+import { db, storage, auth } from "./firebase";
 
 /* ───────────────────────────── Types ───────────────────────────── */
 export interface FirePoem {
@@ -454,14 +455,35 @@ export async function deleteFeedback(id: string): Promise<void> {
   await deleteDoc(doc(db, "feedback", id));
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`${label} timed out after ${ms / 1000}s`)), ms)
+    ),
+  ]);
+}
+
 export async function addLppSubmission(
   data: { name: string; email: string; phone: string; poemTitle: string; bio: string; month: string },
-  fileName: string
+  file: File
 ): Promise<void> {
+  if (!auth.currentUser) {
+    await withTimeout(
+      signInAnonymously(auth),
+      15000,
+      "Anonymous sign-in"
+    );
+  }
+
+  const storageRef = ref(storage, `lpp_submissions/${Date.now()}_${file.name}`);
+  await withTimeout(uploadBytes(storageRef, file), 30000, "File upload");
+  const fileUrl = await withTimeout(getDownloadURL(storageRef), 10000, "Get download URL");
+
   await addDoc(collection(db, "lpp_submissions"), {
     ...data,
-    fileName,
-    fileUrl: "",
+    fileName: file.name,
+    fileUrl,
     submittedAt: serverTimestamp(),
   });
 }
