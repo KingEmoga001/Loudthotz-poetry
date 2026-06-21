@@ -208,7 +208,7 @@ export default function ArchivePage() {
               {loading ? "…" : allSessions.length} Sessions
             </div>
             <div className="inline-flex items-center gap-2 bg-white/5 border border-white/10 text-gray-300 px-4 py-2 rounded-xl text-sm font-semibold">
-              Since 2021
+              Since 2011
             </div>
           </motion.div>
         </div>
