@@ -127,8 +127,6 @@ function PaystackButton({
   return (
     <a
       href={href}
-      target="_blank"
-      rel="noopener noreferrer"
       className={`inline-flex items-center gap-2 ${px} rounded-xl text-sm font-semibold transition-all ${
         primary
           ? "bg-primary text-black hover:bg-primary/90 shadow-lg shadow-primary/10"
