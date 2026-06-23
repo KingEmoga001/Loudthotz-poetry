@@ -137,8 +137,9 @@ export interface FireSiteSettings {
   prizeRules: string;
   prizeDeadline: string; // ISO datetime string for the countdown
 
-  // Archive suppression — keys of static sessions hidden by admin delete
+  // Archive suppression — entries hidden by admin delete
   excludedArchiveKeys: string[];
+  excludedArchiveTitles: string[];
 
   // Homepage hero & cards
   homeHeadline: string;
@@ -694,6 +695,7 @@ export function archiveKey(date: string, title: string): string {
 export async function suppressArchiveEntry(date: string, title: string): Promise<void> {
   await updateDoc(doc(db, "settings", "main"), {
     excludedArchiveKeys: arrayUnion(archiveKey(date, title)),
+    excludedArchiveTitles: arrayUnion(title.toLowerCase().trim()),
   });
 }
 

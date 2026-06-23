@@ -112,6 +112,7 @@ export default function ArchivePage() {
   const [selectedSeason, setSelectedSeason] = useState("All");
 
   const excludedKeys = new Set<string>(siteSettings?.excludedArchiveKeys ?? []);
+  const excludedTitles = new Set<string>(siteSettings?.excludedArchiveTitles ?? []);
 
   const loading = sessionsLoading || eventsLoading;
   const now = new Date();
@@ -155,6 +156,13 @@ export default function ArchivePage() {
 
   const hasFirestoreData = firestoreSessions.length > 0 || pastEvents.length > 0;
 
+  // Titles currently in Firestore — used to hide static entries that have a live Firestore counterpart
+  // (even when the dates differ by a day or two)
+  const firestoreTitleKeys = new Set([
+    ...eventDisplayed,
+    ...sessionDisplayed,
+  ].map((s) => s.title.toLowerCase().trim()));
+
   const seen = new Set<string>();
   const allSessions: DisplaySession[] = [
     ...eventDisplayed,
@@ -163,9 +171,16 @@ export default function ArchivePage() {
   ]
     .filter((s) => {
       if (!hasFirestoreData && s.source !== "static") return false;
+      if (s.source === "static") {
+        const titleKey = s.title.toLowerCase().trim();
+        // Hide if a live Firestore entry covers the same title
+        if (firestoreTitleKeys.has(titleKey)) return false;
+        // Hide if the admin explicitly deleted it
+        if (excludedTitles.has(titleKey)) return false;
+        if (excludedKeys.has(`${s.date.slice(0, 10)}-${titleKey}`)) return false;
+      }
       const key = `${s.date.slice(0, 10)}-${s.title.toLowerCase().trim()}`;
       if (seen.has(key)) return false;
-      if (s.source === "static" && excludedKeys.has(key)) return false;
       seen.add(key);
       return true;
     })
