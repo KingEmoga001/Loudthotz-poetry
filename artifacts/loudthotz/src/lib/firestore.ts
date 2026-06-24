@@ -5,8 +5,7 @@ import {
   serverTimestamp, arrayUnion, type Timestamp,
 } from "firebase/firestore";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { signInAnonymously } from "firebase/auth";
-import { db, storage, auth } from "./firebase";
+import { db, storage } from "./firebase";
 
 /* ───────────────────────────── Types ───────────────────────────── */
 export interface FirePoem {
@@ -496,17 +495,9 @@ export async function addLppSubmission(
   data: { name: string; email: string; phone: string; poemTitle: string; bio: string; month: string },
   file: File
 ): Promise<void> {
-  if (!auth.currentUser) {
-    await withTimeout(
-      signInAnonymously(auth),
-      15000,
-      "Anonymous sign-in"
-    );
-  }
-
   const storageRef = ref(storage, `lpp_submissions/${Date.now()}_${file.name}`);
-  await withTimeout(uploadBytes(storageRef, file), 30000, "File upload");
-  const fileUrl = await withTimeout(getDownloadURL(storageRef), 10000, "Get download URL");
+  await withTimeout(uploadBytes(storageRef, file), 60000, "File upload");
+  const fileUrl = await withTimeout(getDownloadURL(storageRef), 15000, "Get download URL");
 
   await addDoc(collection(db, "lpp_submissions"), {
     ...data,
