@@ -171,6 +171,30 @@ export interface FireSiteSettings {
   // About page
   aboutPageHeadline: string;
   aboutPageSubtext: string;
+  aboutOurStoryHeading: string;
+  aboutOurStoryP1: string;
+  aboutOurStoryP2: string;
+  aboutWhatWeDoHeading: string;
+  aboutInstitutionalHeading: string;
+  aboutInstitutionalP1: string;
+  aboutInstitutionalP2: string;
+  aboutInstitutionalP3: string;
+  aboutGetInvolvedHeading: string;
+  aboutGetInvolvedSubtext: string;
+
+  // Books page
+  booksHeroSubtext: string;
+  booksSubmitSubtext: string;
+
+  // Submit page
+  submitPageHeading: string;
+  submitPageSubtext: string;
+
+  // Live/Stage page
+  liveArchiveSubtext: string;
+
+  // Membership page extra
+  membershipHeroSubtext: string;
 
   // Privacy policy
   privacyPolicyText: string;
@@ -1025,7 +1049,7 @@ export async function seedDatabase() {
     heroSubtext: "Formerly managed under the Independent Poets Concerns, Loudthotz Poetry is now proudly hosted as an official event and literary vehicle under the Naija Art Initiative.",
     upcomingEventTitle: "Next Open Reading",
     upcomingEventDate: new Date(Date.now() + 14 * 86400000).toISOString(),
-    aboutText: "A living literary space for African and global spoken-word poets — raw and electric, like an open mic in a dimly lit Lagos art house.",
+    aboutText: "A living literary space for African and global poets — raw and electric, like an open mic in a dimly lit Lagos art house.",
     donationMessage: "Loudthotz operates on community-led volunteering under the Naija Art Initiative.",
     donationPaystackLink: "https://paystack.shop/pay/loudthotzdonate",
     totalCommunityVoices: 5000,

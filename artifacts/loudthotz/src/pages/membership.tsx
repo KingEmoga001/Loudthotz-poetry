@@ -162,7 +162,7 @@ export default function Membership() {
           </motion.h1>
 
           <motion.p {...fadeUp(0.16)} className="font-serif text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">
-            We have <span className="text-white font-semibold">4 membership levels</span> for poets who write in English or translate works to English. Join the Loudthotz family and help us elevate literary culture across the continent.
+            {s?.membershipHeroSubtext || "We have 4 membership levels for poets who write in English or translate works to English. Join the Loudthotz family and help us elevate literary culture across the continent."}
           </motion.p>
         </div>
       </section>

@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useBooks } from "@/lib/firestore";
+import { useBooks, useSiteSettings } from "@/lib/firestore";
 import { ShoppingCart, BookOpen, ExternalLink } from "lucide-react";
 import { Link } from "wouter";
 
@@ -11,6 +11,9 @@ const fadeUp = (delay = 0) => ({
 
 export default function Books() {
   const { data: books, loading } = useBooks();
+  const { data: s } = useSiteSettings();
+  const heroSubtext = s?.booksHeroSubtext || "The finest voices from our open mics and curated submissions — immortalized in print. Support the Naija Art Initiative by grabbing a copy.";
+  const submitSubtext = s?.booksSubmitSubtext || "We are currently accepting submissions for our upcoming anthology. Poems selected for publication are automatically considered.";
 
   return (
     <div className="min-h-screen">
@@ -34,7 +37,7 @@ export default function Books() {
           </motion.h1>
 
           <motion.p {...fadeUp(0.16)} className="font-serif text-lg md:text-xl text-gray-400 leading-relaxed max-w-2xl mx-auto">
-            The finest voices from our open mics and curated submissions — immortalized in print. Support the Naija Art Initiative by grabbing a copy.
+            {heroSubtext}
           </motion.p>
         </div>
       </section>
@@ -144,7 +147,7 @@ export default function Books() {
             <BookOpen className="h-9 w-9 text-primary mx-auto mb-4" />
             <h2 className="font-display text-3xl font-bold mb-3">Submit to the Next Edition</h2>
             <p className="font-serif text-lg text-gray-400 mb-8 max-w-xl mx-auto">
-              We are currently accepting submissions for our upcoming anthology. Poems selected for publication are automatically considered.
+              {submitSubtext}
             </p>
             <Link
               href="/submit"

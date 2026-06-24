@@ -493,7 +493,7 @@ export default function Home() {
               <div>
                 <p className="font-display text-xl font-bold text-white">Your voice belongs here.</p>
                 <p className="font-serif text-gray-400 text-sm mt-1 max-w-md">
-                  Submit your poetry for review and join the growing community of African and global spoken-word artists.
+                  Submit your poetry for review and join the growing community of African and global poets.
                 </p>
               </div>
             </div>

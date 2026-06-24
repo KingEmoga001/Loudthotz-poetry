@@ -16,7 +16,17 @@ export default function About() {
   const stats = useSiteStats();
 
   const pageHeadline = s?.aboutPageHeadline || "Where African Poetry Finds Its Voice";
-  const pageSubtext = s?.aboutPageSubtext || "Loudthotz Poetry Open Reading is a living literary stage — a monthly gathering where poets from across Africa and beyond share raw, electric spoken word.";
+  const pageSubtext = s?.aboutPageSubtext || "Loudthotz Poetry Open Reading is a living literary stage — a monthly gathering where poets from across Africa and beyond share raw, electric performances.";
+  const ourStoryHeading = s?.aboutOurStoryHeading || "A Stage Built on the Power of the Word";
+  const ourStoryP1 = s?.aboutOurStoryP1 || "Loudthotz was born from a simple conviction: that poetry — spoken aloud, raw and unfiltered — is one of the most powerful forces for community, identity, and truth. What started as an intimate open mic has grown into a celebrated monthly event drawing voices from Nigeria, Uganda, Kenya, Ghana, the diaspora, and beyond.";
+  const ourStoryP2 = s?.aboutOurStoryP2 || "Every session carries a theme — brotherhood, womanhood, memory, grief, joy — and poets respond with performances that linger long after the mic goes quiet. We are not just a stage. We are an archive of African literary life in motion.";
+  const whatWeDoHeading = s?.aboutWhatWeDoHeading || "More Than a Poetry Night";
+  const institutionalHeading = s?.aboutInstitutionalHeading || "Now Under Naija Art Initiative";
+  const institutionalP1 = s?.aboutInstitutionalP1 || "Loudthotz Poetry was originally conceived and managed under the Independent Poets Concerns — a grassroots collective committed to the development of literary culture across Nigeria. Under that umbrella, the event grew from a local gathering into a nationally recognised platform.";
+  const institutionalP2 = s?.aboutInstitutionalP2 || "In a milestone institutional move, Loudthotz is now proudly hosted as an official event and literary vehicle under the Naija Art Initiative — a broader creative organisation dedicated to amplifying Nigerian and African art in all its forms. This alignment strengthens our infrastructure, expands our reach, and deepens our commitment to literary excellence.";
+  const institutionalP3 = s?.aboutInstitutionalP3 || "Our mission remains unchanged: to provide a platform where words ignite loud thoughts, and where every poet — emerging or established — finds a home.";
+  const getInvolvedHeading = s?.aboutGetInvolvedHeading || "Get Involved";
+  const getInvolvedSubtext = s?.aboutGetInvolvedSubtext || "There are many ways to be part of the Loudthotz community.";
 
   return (
     <div className="min-h-screen">
@@ -55,19 +65,10 @@ export default function About() {
           <motion.div {...fadeUp(0)} className="space-y-5">
             <p className="text-xs font-bold uppercase tracking-widest text-primary">Our Story</p>
             <h2 className="font-display text-3xl font-bold text-white leading-snug">
-              A Stage Built on the Power of the Word
+              {ourStoryHeading}
             </h2>
-            <p className="text-gray-400 font-serif leading-relaxed">
-              Loudthotz was born from a simple conviction: that poetry — spoken aloud, raw and
-              unfiltered — is one of the most powerful forces for community, identity, and truth.
-              What started as an intimate open mic has grown into a celebrated monthly event drawing
-              voices from Nigeria, Uganda, Kenya, Ghana, the diaspora, and beyond.
-            </p>
-            <p className="text-gray-400 font-serif leading-relaxed">
-              Every session carries a theme — brotherhood, womanhood, memory, grief, joy — and
-              poets respond with performances that linger long after the mic goes quiet. We are not
-              just a stage. We are an archive of African literary life in motion.
-            </p>
+            <p className="text-gray-400 font-serif leading-relaxed">{ourStoryP1}</p>
+            <p className="text-gray-400 font-serif leading-relaxed">{ourStoryP2}</p>
           </motion.div>
 
           <motion.div {...fadeUp(0.1)} className="grid grid-cols-2 gap-4">
@@ -92,7 +93,7 @@ export default function About() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div {...fadeUp(0)} className="text-center mb-12">
             <p className="text-xs font-bold uppercase tracking-widest text-primary mb-3">What We Do</p>
-            <h2 className="font-display text-3xl font-bold text-white">More Than a Poetry Night</h2>
+            <h2 className="font-display text-3xl font-bold text-white">{whatWeDoHeading}</h2>
           </motion.div>
           <div className="grid sm:grid-cols-3 gap-6">
             {[
@@ -151,26 +152,11 @@ export default function About() {
             <div className="space-y-4">
               <div>
                 <p className="text-xs font-bold uppercase tracking-widest text-secondary mb-1">Institutional Alignment</p>
-                <h2 className="font-display text-2xl font-bold text-white">Now Under Naija Art Initiative</h2>
+                <h2 className="font-display text-2xl font-bold text-white">{institutionalHeading}</h2>
               </div>
-              <p className="text-gray-400 font-serif leading-relaxed">
-                Loudthotz Poetry was originally conceived and managed under the{" "}
-                <span className="text-gray-200 font-semibold">Independent Poets Concerns</span> — a grassroots
-                collective committed to the development of spoken word culture across Nigeria. Under that
-                umbrella, the event grew from a local gathering into a nationally recognised platform.
-              </p>
-              <p className="text-gray-400 font-serif leading-relaxed">
-                In a milestone institutional move, Loudthotz is now proudly hosted as an official event
-                and literary vehicle under the{" "}
-                <span className="text-secondary font-semibold">Naija Art Initiative</span> — a broader
-                creative organisation dedicated to amplifying Nigerian and African art in all its forms.
-                This alignment strengthens our infrastructure, expands our reach, and deepens our
-                commitment to literary excellence.
-              </p>
-              <p className="text-gray-400 font-serif leading-relaxed">
-                Our mission remains unchanged: to provide a platform where words ignite loud thoughts,
-                and where every poet — emerging or established — finds a home.
-              </p>
+              <p className="text-gray-400 font-serif leading-relaxed">{institutionalP1}</p>
+              <p className="text-gray-400 font-serif leading-relaxed">{institutionalP2}</p>
+              <p className="text-gray-400 font-serif leading-relaxed">{institutionalP3}</p>
             </div>
           </div>
         </motion.div>
@@ -226,8 +212,8 @@ export default function About() {
       {/* ── Get Involved ── */}
       <section className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         <motion.div {...fadeUp(0)} className="text-center mb-10">
-          <h2 className="font-display text-3xl font-bold text-white mb-3">Get Involved</h2>
-          <p className="text-gray-400 text-base">There are many ways to be part of the Loudthotz community.</p>
+          <h2 className="font-display text-3xl font-bold text-white mb-3">{getInvolvedHeading}</h2>
+          <p className="text-gray-400 text-base">{getInvolvedSubtext}</p>
         </motion.div>
         <div className="grid sm:grid-cols-2 gap-4">
           {[

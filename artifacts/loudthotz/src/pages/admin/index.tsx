@@ -1805,7 +1805,7 @@ const DEFAULT_PRIZE_RULES = [
   'All submissions should be sent to loudthotz@gmail.com with the subject e.g "January 2025 LPP Poem".',
 ];
 
-type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets" | "privacy" | "about";
+type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets" | "privacy" | "about" | "books" | "submit" | "live";
 
 function SettingsField({
   label, hint, value, onChange, multiline, placeholder, rows,
@@ -1837,13 +1837,16 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const ph = (v: string | number | undefined, fallback: string) => (v ? String(v) : fallback);
 
   const [home, setHome] = useState({ heroHeadline: "", heroSubtext: "", upcomingEventTitle: "", upcomingEventDate: "", aboutText: "", totalCommunityVoices: "", featuredVideoUrl: "", homeHeadline: "", homeSubtext: "", potmReadingTitle: "", potmReadingSubtext: "", potmReadingCtaLabel: "", statsPoems: "", statsPoets: "", statsSessions: "", statsCountries: "" });
-  const [membership, setMembership] = useState({ membershipFreeLink: "", membershipFreeDescription: "", membershipFreeBenefits: "", membershipBasicPrice: "", membershipBasicLink: "", membershipBasicDescription: "", membershipBasicBenefits: "", membershipFullPrice: "", membershipFullLink: "", membershipFullDescription: "", membershipFullBenefits: "", membershipGoldenPrice: "", membershipGoldenLink: "", membershipGoldenDescription: "", membershipGoldenBenefits: "" });
+  const [membership, setMembership] = useState({ membershipHeroSubtext: "", membershipFreeLink: "", membershipFreeDescription: "", membershipFreeBenefits: "", membershipBasicPrice: "", membershipBasicLink: "", membershipBasicDescription: "", membershipBasicBenefits: "", membershipFullPrice: "", membershipFullLink: "", membershipFullDescription: "", membershipFullBenefits: "", membershipGoldenPrice: "", membershipGoldenLink: "", membershipGoldenDescription: "", membershipGoldenBenefits: "" });
   const [prize, setPrize] = useState({ prizeCashAmount: "", prizeEntryFee: "", prizePaystackLink: "", prizeEmail: "", prizeDeadline: "" });
   const [donate, setDonate] = useState({ donationHeadline: "", donationMessage: "", donationPaystackLink: "" });
   const [footer, setFooter] = useState({ socialX: "", socialYoutube: "", socialFacebook: "", socialSpotify: "", socialInstagram: "", socialTiktok: "", contactWhatsapp: "" });
   const [poets, setPoets] = useState({ poetPageDescription: "", poetPageBlogUrl: "" });
   const [privacy, setPrivacy] = useState({ privacyPolicyText: "", privacyPolicyUpdatedAt: "" });
-  const [about, setAbout] = useState({ aboutPageHeadline: "", aboutPageSubtext: "" });
+  const [about, setAbout] = useState({ aboutPageHeadline: "", aboutPageSubtext: "", aboutOurStoryHeading: "", aboutOurStoryP1: "", aboutOurStoryP2: "", aboutWhatWeDoHeading: "", aboutInstitutionalHeading: "", aboutInstitutionalP1: "", aboutInstitutionalP2: "", aboutInstitutionalP3: "", aboutGetInvolvedHeading: "", aboutGetInvolvedSubtext: "" });
+  const [books, setBooks] = useState({ booksHeroSubtext: "", booksSubmitSubtext: "" });
+  const [submitPage, setSubmitPage] = useState({ submitPageHeading: "", submitPageSubtext: "" });
+  const [livePage, setLivePage] = useState({ liveArchiveSubtext: "" });
   const [prizeRulesList, setPrizeRulesList] = useState<string[]>([...DEFAULT_PRIZE_RULES]);
   const [newRule, setNewRule] = useState("");
 
@@ -1885,7 +1888,16 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
       if (privacy.privacyPolicyUpdatedAt) upd.privacyPolicyUpdatedAt = privacy.privacyPolicyUpdatedAt;
     }
     if (activeSection === "about") {
-      add(about, "aboutPageHeadline"); add(about, "aboutPageSubtext");
+      Object.keys(about).forEach(k => add(about as Record<string, string>, k));
+    }
+    if (activeSection === "books") {
+      Object.keys(books).forEach(k => add(books as Record<string, string>, k));
+    }
+    if (activeSection === "submit") {
+      Object.keys(submitPage).forEach(k => add(submitPage as Record<string, string>, k));
+    }
+    if (activeSection === "live") {
+      Object.keys(livePage).forEach(k => add(livePage as Record<string, string>, k));
     }
 
     try { await updateSiteSettings(upd as never); show("Settings saved!"); }
@@ -1903,13 +1915,16 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
   const sections: { id: SettingsSection; label: string }[] = [
     { id: "home", label: "Home Page" },
+    { id: "about", label: "About Page" },
     { id: "membership", label: "Membership" },
     { id: "prize", label: "Poetry Prize" },
     { id: "donate", label: "Donate Page" },
-    { id: "footer", label: "Footer & Contact" },
+    { id: "books", label: "Books / Anthologies" },
+    { id: "submit", label: "Submit Page" },
+    { id: "live", label: "Live Stage" },
     { id: "poets", label: "Poets Page" },
+    { id: "footer", label: "Footer & Contact" },
     { id: "privacy", label: "Privacy Policy" },
-    { id: "about", label: "About Page" },
   ];
 
   return (
@@ -2016,6 +2031,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
           <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
             Edit prices, payment links, descriptions, and benefits for each membership tier. For benefits, put each item on its own line.
           </p>
+          <SettingsField label="Hero Intro Text" hint="Paragraph shown below the 'Loudthotz Membership' heading" multiline rows={3} placeholder={ph(settings?.membershipHeroSubtext, "We have 4 membership levels for poets who write in English…")} value={membership.membershipHeroSubtext} onChange={v => setMembership({ ...membership, membershipHeroSubtext: v })} />
           <div className="space-y-5">
             {/* Free tier */}
             <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
@@ -2194,26 +2210,79 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
       {/* About Page */}
       {activeSection === "about" && (
+        <div className="space-y-6">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Edit every section of the About page. The stats grid uses the same numbers set in <strong>Home Page → Site-wide Stats Bar</strong>.
+          </p>
+
+          {/* Hero */}
+          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">Hero Section</p>
+            <SettingsField label="Page Headline" hint='Large heading, e.g. "Where African Poetry Finds Its Voice"' placeholder={ph(settings?.aboutPageHeadline, "Where African Poetry Finds Its Voice")} value={about.aboutPageHeadline} onChange={v => setAbout({ ...about, aboutPageHeadline: v })} />
+            <SettingsField label="Hero Subtext" hint="Short intro paragraph below the headline" placeholder={ph(settings?.aboutPageSubtext, "Loudthotz Poetry Open Reading is a living literary stage…")} value={about.aboutPageSubtext} onChange={v => setAbout({ ...about, aboutPageSubtext: v })} multiline rows={3} />
+          </div>
+
+          {/* Our Story */}
+          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">Our Story Section</p>
+            <SettingsField label="Section Heading" placeholder={ph(settings?.aboutOurStoryHeading, "A Stage Built on the Power of the Word")} value={about.aboutOurStoryHeading} onChange={v => setAbout({ ...about, aboutOurStoryHeading: v })} />
+            <SettingsField label="Paragraph 1" multiline rows={4} placeholder={ph(settings?.aboutOurStoryP1, "Loudthotz was born from a simple conviction…")} value={about.aboutOurStoryP1} onChange={v => setAbout({ ...about, aboutOurStoryP1: v })} />
+            <SettingsField label="Paragraph 2" multiline rows={4} placeholder={ph(settings?.aboutOurStoryP2, "Every session carries a theme…")} value={about.aboutOurStoryP2} onChange={v => setAbout({ ...about, aboutOurStoryP2: v })} />
+          </div>
+
+          {/* What We Do */}
+          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">What We Do Section</p>
+            <SettingsField label="Section Heading" placeholder={ph(settings?.aboutWhatWeDoHeading, "More Than a Poetry Night")} value={about.aboutWhatWeDoHeading} onChange={v => setAbout({ ...about, aboutWhatWeDoHeading: v })} />
+          </div>
+
+          {/* Institutional Alignment */}
+          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">Institutional Alignment Section</p>
+            <SettingsField label="Section Heading" placeholder={ph(settings?.aboutInstitutionalHeading, "Now Under Naija Art Initiative")} value={about.aboutInstitutionalHeading} onChange={v => setAbout({ ...about, aboutInstitutionalHeading: v })} />
+            <SettingsField label="Paragraph 1" hint="Background / history paragraph" multiline rows={4} placeholder={ph(settings?.aboutInstitutionalP1, "Loudthotz Poetry was originally conceived…")} value={about.aboutInstitutionalP1} onChange={v => setAbout({ ...about, aboutInstitutionalP1: v })} />
+            <SettingsField label="Paragraph 2" hint="Current institutional home paragraph" multiline rows={4} placeholder={ph(settings?.aboutInstitutionalP2, "In a milestone institutional move…")} value={about.aboutInstitutionalP2} onChange={v => setAbout({ ...about, aboutInstitutionalP2: v })} />
+            <SettingsField label="Paragraph 3" hint="Mission statement paragraph" multiline rows={3} placeholder={ph(settings?.aboutInstitutionalP3, "Our mission remains unchanged…")} value={about.aboutInstitutionalP3} onChange={v => setAbout({ ...about, aboutInstitutionalP3: v })} />
+          </div>
+
+          {/* Get Involved */}
+          <div className="bg-white/[0.02] border border-white/5 rounded-xl p-5 space-y-4">
+            <p className="text-xs font-bold uppercase tracking-widest text-primary">Get Involved Section</p>
+            <SettingsField label="Section Heading" placeholder={ph(settings?.aboutGetInvolvedHeading, "Get Involved")} value={about.aboutGetInvolvedHeading} onChange={v => setAbout({ ...about, aboutGetInvolvedHeading: v })} />
+            <SettingsField label="Subtext" placeholder={ph(settings?.aboutGetInvolvedSubtext, "There are many ways to be part of the Loudthotz community.")} value={about.aboutGetInvolvedSubtext} onChange={v => setAbout({ ...about, aboutGetInvolvedSubtext: v })} />
+          </div>
+        </div>
+      )}
+
+      {/* Books / Anthologies Page */}
+      {activeSection === "books" && (
         <div className="space-y-5">
           <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
-            Edit the hero headline and intro text on the About page. The stats grid on the About page uses the same numbers set in <strong>Home Page → Site-wide Stats Bar</strong>.
+            Edit the intro text on the Books / Anthologies page. Individual book entries are managed in the <strong>Books</strong> tab above.
           </p>
-          <SettingsField
-            label="Page Headline"
-            hint='Large heading on the About page, e.g. "Where African Poetry Finds Its Voice"'
-            placeholder={ph(settings?.aboutPageHeadline, "Where African Poetry Finds Its Voice")}
-            value={about.aboutPageHeadline}
-            onChange={v => setAbout({ ...about, aboutPageHeadline: v })}
-          />
-          <SettingsField
-            label="Hero Subtext"
-            hint="Short intro paragraph below the headline"
-            placeholder={ph(settings?.aboutPageSubtext, "Loudthotz Poetry Open Reading is a living literary stage…")}
-            value={about.aboutPageSubtext}
-            onChange={v => setAbout({ ...about, aboutPageSubtext: v })}
-            multiline
-            rows={4}
-          />
+          <SettingsField label="Hero Subtext" hint="Paragraph shown below the Anthologies heading" multiline rows={3} placeholder={ph(settings?.booksHeroSubtext, "The finest voices from our open mics and curated submissions — immortalized in print…")} value={books.booksHeroSubtext} onChange={v => setBooks({ ...books, booksHeroSubtext: v })} />
+          <SettingsField label="Submit CTA Text" hint="Text inside the 'Submit to the Next Edition' call-to-action box" multiline rows={3} placeholder={ph(settings?.booksSubmitSubtext, "We are currently accepting submissions for our upcoming anthology…")} value={books.booksSubmitSubtext} onChange={v => setBooks({ ...books, booksSubmitSubtext: v })} />
+        </div>
+      )}
+
+      {/* Submit Page */}
+      {activeSection === "submit" && (
+        <div className="space-y-5">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Edit the heading and intro paragraph on the poem submission page.
+          </p>
+          <SettingsField label="Page Heading" hint='Large heading, e.g. "Submit Your Work"' placeholder={ph(settings?.submitPageHeading, "Submit Your Work")} value={submitPage.submitPageHeading} onChange={v => setSubmitPage({ ...submitPage, submitPageHeading: v })} />
+          <SettingsField label="Intro Paragraph" hint="Short description below the heading" multiline rows={3} placeholder={ph(settings?.submitPageSubtext, "We are looking for raw, electric voices…")} value={submitPage.submitPageSubtext} onChange={v => setSubmitPage({ ...submitPage, submitPageSubtext: v })} />
+        </div>
+      )}
+
+      {/* Live Stage Page */}
+      {activeSection === "live" && (
+        <div className="space-y-5">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Edit the text shown on the Live Stage page. The live stream URL and session info are managed in the <strong>Live Stream</strong> tab above.
+          </p>
+          <SettingsField label="Archive Section Subtext" hint='Text shown below "The Archives" heading' placeholder={ph(settings?.liveArchiveSubtext, "Past readings and performances.")} value={livePage.liveArchiveSubtext} onChange={v => setLivePage({ ...livePage, liveArchiveSubtext: v })} />
         </div>
       )}
 

@@ -1,10 +1,12 @@
-import { useLivestreamStatus, useLivestreamSessions } from "@/lib/firestore";
+import { useLivestreamStatus, useLivestreamSessions, useSiteSettings } from "@/lib/firestore";
 import { Mic2, Users, Calendar, PlayCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 export default function LiveReadings() {
   const { data: status, loading: statusLoading } = useLivestreamStatus();
   const { data: sessions, loading: sessionsLoading } = useLivestreamSessions();
+  const { data: s } = useSiteSettings();
+  const archiveSubtext = s?.liveArchiveSubtext || "Past readings and performances.";
 
   return (
     <div className="min-h-screen bg-background">
@@ -88,7 +90,7 @@ export default function LiveReadings() {
         <div className="container mx-auto px-4 max-w-7xl">
           <div className="mb-12">
             <h2 className="font-display text-3xl font-bold mb-2">The Archives</h2>
-            <p className="font-serif text-xl text-muted-foreground">Past readings and performances.</p>
+            <p className="font-serif text-xl text-muted-foreground">{archiveSubtext}</p>
           </div>
 
           {sessionsLoading ? (

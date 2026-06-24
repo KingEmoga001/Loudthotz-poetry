@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { submitPoem } from "@/lib/firestore";
+import { submitPoem, useSiteSettings } from "@/lib/firestore";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -23,6 +23,9 @@ export default function SubmitPoem() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { data: s } = useSiteSettings();
+  const pageHeading = s?.submitPageHeading || "Submit Your Work";
+  const pageSubtext = s?.submitPageSubtext || "We are looking for raw, electric voices. Send us your best poems, lyrical essays, or free verse.";
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -67,9 +70,9 @@ export default function SubmitPoem() {
         <div className="inline-flex items-center justify-center p-3 bg-white/5 rounded-full mb-4">
           <PenTool className="h-6 w-6 text-primary" />
         </div>
-        <h1 className="font-display text-4xl font-bold">Submit Your Work</h1>
+        <h1 className="font-display text-4xl font-bold">{pageHeading}</h1>
         <p className="font-serif text-xl text-muted-foreground max-w-2xl mx-auto">
-          We are looking for raw, electric voices. Send us your best spoken-word pieces, lyrical essays, or free verse.
+          {pageSubtext}
         </p>
       </div>
 
