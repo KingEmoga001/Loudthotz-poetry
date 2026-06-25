@@ -71,6 +71,7 @@ export interface FireLivestreamStatus {
   streamUrl?: string;
   embedUrl?: string;
   scheduledAt?: string;
+  scheduledImage?: string;
 }
 
 export interface FireLivestreamSession {

@@ -435,8 +435,24 @@ function LivestreamControl({ show }: { show: (m: string, t?: "success" | "error"
   const { data: status } = useLivestreamStatus();
   const { data: sessions } = useLivestreamSessions();
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState({ title: "", description: "", season: "", episode: "", embedUrl: "", streamUrl: "", scheduledAt: "" });
+  const [form, setForm] = useState({ title: "", description: "", season: "", episode: "", embedUrl: "", streamUrl: "", scheduledAt: "", scheduledImage: "" });
   const [addSessionForm, setAddSessionForm] = useState({ title: "", description: "", theme: "", season: "", episode: "", date: "", recordingUrl: "" });
+  const [imgMode, setImgMode] = useState<"url" | "upload">("url");
+  const [imgUploading, setImgUploading] = useState(false);
+
+  const handleImgFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { show("Please select an image file.", "error"); return; }
+    if (f.size > 10 * 1024 * 1024) { show("Image must be under 10 MB.", "error"); return; }
+    setImgUploading(true);
+    try {
+      const url = await uploadEventImage(f);
+      setForm(prev => ({ ...prev, scheduledImage: url }));
+      show("Image uploaded.");
+    } catch { show("Upload failed.", "error"); }
+    finally { setImgUploading(false); e.target.value = ""; }
+  };
 
   const handleToggleLive = async () => {
     const next = !status?.isLive;
@@ -457,9 +473,10 @@ function LivestreamControl({ show }: { show: (m: string, t?: "success" | "error"
       if (form.embedUrl) upd.embedUrl = form.embedUrl;
       if (form.streamUrl) upd.streamUrl = form.streamUrl;
       if (form.scheduledAt) upd.scheduledAt = form.scheduledAt;
+      if (form.scheduledImage !== "") upd.scheduledImage = form.scheduledImage;
       await updateLivestreamStatus(upd as never);
       show("Livestream settings saved.");
-      setForm({ title: "", description: "", season: "", episode: "", embedUrl: "", streamUrl: "", scheduledAt: "" });
+      setForm({ title: "", description: "", season: "", episode: "", embedUrl: "", streamUrl: "", scheduledAt: "", scheduledImage: "" });
     } catch { show("Save failed.", "error"); }
     finally { setSaving(false); }
   };
@@ -540,6 +557,50 @@ function LivestreamControl({ show }: { show: (m: string, t?: "success" | "error"
               className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-primary/40 transition-colors" />
           </div>
         </div>
+
+        {/* Upcoming Event Image */}
+        <div className="space-y-2">
+          <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500">Upcoming Event Image</label>
+          <p className="text-[10px] text-gray-600">Shown on the Live page when the stream is offline. Any size — displayed in full (no cropping).</p>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => setImgMode("url")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${imgMode === "url" ? "bg-primary text-black" : "bg-white/[0.04] border border-white/10 text-gray-400 hover:text-white"}`}>
+              🔗 Paste URL
+            </button>
+            <button type="button" onClick={() => setImgMode("upload")}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${imgMode === "upload" ? "bg-primary text-black" : "bg-white/[0.04] border border-white/10 text-gray-400 hover:text-white"}`}>
+              📁 Upload from Device
+            </button>
+          </div>
+          {imgMode === "url" ? (
+            <input
+              type="url"
+              value={form.scheduledImage}
+              onChange={e => setForm({ ...form, scheduledImage: e.target.value })}
+              placeholder={status?.scheduledImage ? "(image already set — paste new URL to replace)" : "https://example.com/event-poster.jpg"}
+              className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+            />
+          ) : (
+            <label className={`flex items-center gap-3 w-full px-4 py-3 bg-white/[0.04] border border-dashed border-white/20 rounded-xl cursor-pointer hover:border-primary/40 transition-colors ${imgUploading ? "opacity-60 pointer-events-none" : ""}`}>
+              <Image className="h-4 w-4 text-gray-500 shrink-0" />
+              <span className="text-sm text-gray-400">{imgUploading ? "Uploading…" : "Click to choose an image (JPG, PNG, WebP — max 10 MB)"}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleImgFile} disabled={imgUploading} />
+            </label>
+          )}
+          {(form.scheduledImage || status?.scheduledImage) && (
+            <div className="relative rounded-xl overflow-hidden border border-white/10 bg-black/40 mt-2" style={{ height: 200 }}>
+              <img src={form.scheduledImage || status?.scheduledImage} alt="Event preview" className="w-full h-full object-contain" />
+              {(form.scheduledImage || status?.scheduledImage) && (
+                <button type="button"
+                  onClick={() => { setForm(f => ({ ...f, scheduledImage: "" })); updateLivestreamStatus({ scheduledImage: "" } as never).catch(() => {}); }}
+                  className="absolute top-2 right-2 p-1 bg-black/70 rounded-full text-gray-400 hover:text-red-400 transition-colors">
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         <button onClick={handleSaveStatus} disabled={saving}
           className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-50">
           <Save className="h-4 w-4" /> {saving ? "Saving…" : "Save Settings"}

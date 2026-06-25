@@ -24,6 +24,12 @@ export default function LiveReadings() {
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen
                 />
+              ) : status?.scheduledImage ? (
+                <img
+                  src={status.scheduledImage}
+                  alt="Upcoming event"
+                  className="w-full h-full object-contain absolute inset-0"
+                />
               ) : (
                 <>
                   <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-primary/5 via-transparent to-transparent opacity-50" />
