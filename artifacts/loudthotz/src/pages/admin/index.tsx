@@ -1805,7 +1805,7 @@ const DEFAULT_PRIZE_RULES = [
   'All submissions should be sent to loudthotz@gmail.com with the subject e.g "January 2025 LPP Poem".',
 ];
 
-type SettingsSection = "home" | "membership" | "prize" | "donate" | "footer" | "poets" | "privacy" | "about" | "books" | "submit" | "live";
+type SettingsSection = "payments" | "home" | "membership" | "prize" | "donate" | "footer" | "poets" | "privacy" | "about" | "books" | "submit" | "live";
 
 function SettingsField({
   label, hint, value, onChange, multiline, placeholder, rows,
@@ -1890,6 +1890,10 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     if (activeSection === "about") {
       Object.keys(about).forEach(k => add(about as Record<string, string>, k));
     }
+    if (activeSection === "payments") {
+      Object.keys(books).forEach(k => add(books as Record<string, string>, k));
+      Object.keys(submitPage).forEach(k => add(submitPage as Record<string, string>, k));
+    }
     if (activeSection === "books") {
       Object.keys(books).forEach(k => add(books as Record<string, string>, k));
     }
@@ -1913,7 +1917,8 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     finally { setSeeding(false); }
   };
 
-  const sections: { id: SettingsSection; label: string }[] = [
+  const sections: { id: SettingsSection; label: string; highlight?: boolean }[] = [
+    { id: "payments", label: "💳 Payments & Pricing", highlight: true },
     { id: "home", label: "Home Page" },
     { id: "about", label: "About Page" },
     { id: "membership", label: "Membership" },
@@ -1938,7 +1943,13 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
       <div className="flex flex-wrap gap-2 border-b border-white/5 pb-4">
         {sections.map(s => (
           <button key={s.id} onClick={() => setActiveSection(s.id)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeSection === s.id ? "bg-primary text-black font-semibold" : "bg-white/5 border border-white/10 text-gray-400 hover:text-white"}`}>
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              activeSection === s.id
+                ? "bg-primary text-black font-semibold"
+                : s.highlight
+                  ? "bg-primary/10 border border-primary/30 text-primary hover:bg-primary/20"
+                  : "bg-white/5 border border-white/10 text-gray-400 hover:text-white"
+            }`}>
             {s.label}
           </button>
         ))}
@@ -2254,34 +2265,111 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
         </div>
       )}
 
+      {/* Payments & Pricing */}
+      {activeSection === "payments" && (
+        <div className="space-y-8">
+          <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
+            Set the fees and payment links for poem submissions and book listings. Amounts display live on the public pages. Payment buttons show <strong className="text-amber-400">Coming Soon</strong> until you paste a valid <code>https://…</code> URL — no code change needed.
+          </p>
+
+          {/* Poem Submission Fee */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">✍️</span>
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Poem Submission Fee</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Shown on the Submit page before the form. Required for all poem submissions.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <SettingsField
+                label="Fee — Nigeria (₦)"
+                hint='Amount shown to Nigerian submitters, e.g. "₦3,999.99"'
+                placeholder={ph(settings?.submitFeeNGN, "₦3,999.99")}
+                value={submitPage.submitFeeNGN}
+                onChange={v => setSubmitPage({ ...submitPage, submitFeeNGN: v })}
+              />
+              <SettingsField
+                label="Fee — International ($)"
+                hint='Amount for international submitters, e.g. "$6"'
+                placeholder={ph(settings?.submitFeeUSD, "$6")}
+                value={submitPage.submitFeeUSD}
+                onChange={v => setSubmitPage({ ...submitPage, submitFeeUSD: v })}
+              />
+            </div>
+            <div className="space-y-3">
+              <SettingsField
+                label="Paystack Link (Nigeria)"
+                hint="Paste your Paystack payment page URL. Leave blank until your account is ready — button shows 'Coming Soon'."
+                placeholder={ph(settings?.submitPaystackLink, "https://paystack.com/pay/…")}
+                value={submitPage.submitPaystackLink}
+                onChange={v => setSubmitPage({ ...submitPage, submitPaystackLink: v })}
+              />
+              <SettingsField
+                label="International Payment Link"
+                hint="Paste your foreign gateway URL (Stripe, Flutterwave, etc.). Leave blank until ready."
+                placeholder={ph(settings?.submitForeignPayLink, "https://…")}
+                value={submitPage.submitForeignPayLink}
+                onChange={v => setSubmitPage({ ...submitPage, submitForeignPayLink: v })}
+              />
+            </div>
+          </div>
+
+          <div className="border-t border-white/5" />
+
+          {/* Book Listing Fee */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">📚</span>
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">Book Listing Fee</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Shown on the Anthologies page for authors who want their book featured.</p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <SettingsField
+                label="Fee — Nigeria (₦)"
+                hint='Naira amount shown to Nigerian clients, e.g. "₦15,000"'
+                placeholder={ph(settings?.bookListingFeeNGN, "₦15,000")}
+                value={books.bookListingFeeNGN}
+                onChange={v => setBooks({ ...books, bookListingFeeNGN: v })}
+              />
+              <SettingsField
+                label="Fee — International ($)"
+                hint='Dollar amount for international clients, e.g. "$10"'
+                placeholder={ph(settings?.bookListingFeeUSD, "$10")}
+                value={books.bookListingFeeUSD}
+                onChange={v => setBooks({ ...books, bookListingFeeUSD: v })}
+              />
+            </div>
+            <div className="space-y-3">
+              <SettingsField
+                label="Paystack Link (Nigeria)"
+                hint="Paste your Paystack payment page URL. Leave blank until ready."
+                placeholder={ph(settings?.bookListingPaystackLink, "https://paystack.com/pay/…")}
+                value={books.bookListingPaystackLink}
+                onChange={v => setBooks({ ...books, bookListingPaystackLink: v })}
+              />
+              <SettingsField
+                label="International Payment Link"
+                hint="Paste your foreign gateway URL (Stripe, Flutterwave, etc.). Leave blank until ready."
+                placeholder={ph(settings?.bookListingForeignPayLink, "https://…")}
+                value={books.bookListingForeignPayLink}
+                onChange={v => setBooks({ ...books, bookListingForeignPayLink: v })}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Books / Anthologies Page */}
       {activeSection === "books" && (
         <div className="space-y-5">
           <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
-            Edit the intro text on the Books / Anthologies page. Individual book entries are managed in the <strong>Books</strong> tab above.
+            Edit the intro text on the Books / Anthologies page. Individual book entries are managed in the <strong>Books</strong> tab above. To update listing fees and payment links, use the <strong className="text-primary">💳 Payments &amp; Pricing</strong> section.
           </p>
           <SettingsField label="Hero Subtext" hint="Paragraph shown below the Anthologies heading" multiline rows={3} placeholder={ph(settings?.booksHeroSubtext, "The finest voices from our open mics and curated submissions — immortalized in print…")} value={books.booksHeroSubtext} onChange={v => setBooks({ ...books, booksHeroSubtext: v })} />
           <SettingsField label="Submit CTA Text" hint="Text inside the 'Submit to the Next Edition' call-to-action box" multiline rows={3} placeholder={ph(settings?.booksSubmitSubtext, "We are currently accepting submissions for our upcoming anthology…")} value={books.booksSubmitSubtext} onChange={v => setBooks({ ...books, booksSubmitSubtext: v })} />
-
-          <div className="border-t border-white/5 pt-5 space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Book Listing Fee</h3>
-              <p className="text-xs text-gray-500 mt-1">Fees charged to authors who want their book listed on the Anthologies page. Amounts are shown on the public page and can be edited anytime.</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <SettingsField label="Fee — Nigeria (₦)" hint='Naira amount shown to Nigerian clients, e.g. "₦15,000"' placeholder={ph(settings?.bookListingFeeNGN, "₦15,000")} value={books.bookListingFeeNGN} onChange={v => setBooks({ ...books, bookListingFeeNGN: v })} />
-              <SettingsField label="Fee — International ($)" hint='Dollar amount for international clients, e.g. "$10"' placeholder={ph(settings?.bookListingFeeUSD, "$10")} value={books.bookListingFeeUSD} onChange={v => setBooks({ ...books, bookListingFeeUSD: v })} />
-            </div>
-          </div>
-
-          <div className="border-t border-white/5 pt-5 space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Payment Links</h3>
-              <p className="text-xs text-gray-500 mt-1">Paste the full payment URL once your account is ready. Buttons on the public page will show "Coming Soon" until a valid URL is saved here.</p>
-            </div>
-            <SettingsField label="Paystack Link (Nigeria)" hint="Paste your Paystack payment page URL. Leave blank until ready." placeholder={ph(settings?.bookListingPaystackLink, "https://paystack.com/pay/…")} value={books.bookListingPaystackLink} onChange={v => setBooks({ ...books, bookListingPaystackLink: v })} />
-            <SettingsField label="International Payment Link" hint="Paste the foreign gateway URL (Stripe, Flutterwave, etc.). Leave blank until ready." placeholder={ph(settings?.bookListingForeignPayLink, "https://…")} value={books.bookListingForeignPayLink} onChange={v => setBooks({ ...books, bookListingForeignPayLink: v })} />
-          </div>
         </div>
       )}
 
@@ -2289,30 +2377,10 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
       {activeSection === "submit" && (
         <div className="space-y-5">
           <p className="text-xs text-gray-500 bg-white/[0.02] border border-white/5 rounded-xl p-4">
-            Edit the heading, intro text, and submission fee shown on the poem submission page.
+            Edit the heading and intro text on the poem submission page. To update the submission fee and payment links, use the <strong className="text-primary">💳 Payments &amp; Pricing</strong> section.
           </p>
           <SettingsField label="Page Heading" hint='Large heading, e.g. "Submit Your Work"' placeholder={ph(settings?.submitPageHeading, "Submit Your Work")} value={submitPage.submitPageHeading} onChange={v => setSubmitPage({ ...submitPage, submitPageHeading: v })} />
           <SettingsField label="Intro Paragraph" hint="Short description below the heading" multiline rows={3} placeholder={ph(settings?.submitPageSubtext, "We are looking for raw, electric voices…")} value={submitPage.submitPageSubtext} onChange={v => setSubmitPage({ ...submitPage, submitPageSubtext: v })} />
-
-          <div className="border-t border-white/5 pt-5 space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Submission Fee</h3>
-              <p className="text-xs text-gray-500 mt-1">Fee charged per poem submission. Shown prominently on the page before the form. Amounts are editable anytime.</p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <SettingsField label="Fee — Nigeria (₦)" hint='Naira amount, e.g. "₦3,999.99"' placeholder={ph(settings?.submitFeeNGN, "₦3,999.99")} value={submitPage.submitFeeNGN} onChange={v => setSubmitPage({ ...submitPage, submitFeeNGN: v })} />
-              <SettingsField label="Fee — International ($)" hint='Dollar amount, e.g. "$6"' placeholder={ph(settings?.submitFeeUSD, "$6")} value={submitPage.submitFeeUSD} onChange={v => setSubmitPage({ ...submitPage, submitFeeUSD: v })} />
-            </div>
-          </div>
-
-          <div className="border-t border-white/5 pt-5 space-y-4">
-            <div>
-              <h3 className="text-sm font-bold text-white uppercase tracking-wider">Payment Links</h3>
-              <p className="text-xs text-gray-500 mt-1">Paste the full payment URL once your account is ready. Buttons on the submission page will show "Coming Soon" until a valid URL is saved here.</p>
-            </div>
-            <SettingsField label="Paystack Link (Nigeria)" hint="Paste your Paystack payment page URL. Leave blank until ready." placeholder={ph(settings?.submitPaystackLink, "https://paystack.com/pay/…")} value={submitPage.submitPaystackLink} onChange={v => setSubmitPage({ ...submitPage, submitPaystackLink: v })} />
-            <SettingsField label="International Payment Link" hint="Paste the foreign gateway URL (Stripe, Flutterwave, etc.). Leave blank until ready." placeholder={ph(settings?.submitForeignPayLink, "https://…")} value={submitPage.submitForeignPayLink} onChange={v => setSubmitPage({ ...submitPage, submitForeignPayLink: v })} />
-          </div>
         </div>
       )}
 
