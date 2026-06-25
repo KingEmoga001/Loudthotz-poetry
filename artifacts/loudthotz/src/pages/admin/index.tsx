@@ -1846,6 +1846,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const [about, setAbout] = useState({ aboutPageHeadline: "", aboutPageSubtext: "", aboutOurStoryHeading: "", aboutOurStoryP1: "", aboutOurStoryP2: "", aboutWhatWeDoHeading: "", aboutInstitutionalHeading: "", aboutInstitutionalP1: "", aboutInstitutionalP2: "", aboutInstitutionalP3: "", aboutGetInvolvedHeading: "", aboutGetInvolvedSubtext: "" });
   const [books, setBooks] = useState({ booksHeroSubtext: "", booksSubmitSubtext: "", bookListingFeeNGN: "", bookListingFeeUSD: "", bookListingPaystackLink: "", bookListingForeignPayLink: "" });
   const [submitPage, setSubmitPage] = useState({ submitPageHeading: "", submitPageSubtext: "", submitFeeNGN: "", submitFeeUSD: "", submitPaystackLink: "", submitForeignPayLink: "" });
+  const [lppPayments, setLppPayments] = useState({ lppForeignEntryFeeUSD: "", lppForeignPayLink: "" });
   const [livePage, setLivePage] = useState({ liveArchiveSubtext: "" });
   const [prizeRulesList, setPrizeRulesList] = useState<string[]>([...DEFAULT_PRIZE_RULES]);
   const [newRule, setNewRule] = useState("");
@@ -1893,6 +1894,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
     if (activeSection === "payments") {
       Object.keys(books).forEach(k => add(books as Record<string, string>, k));
       Object.keys(submitPage).forEach(k => add(submitPage as Record<string, string>, k));
+      Object.keys(lppPayments).forEach(k => add(lppPayments as Record<string, string>, k));
     }
     if (activeSection === "books") {
       Object.keys(books).forEach(k => add(books as Record<string, string>, k));
@@ -2313,6 +2315,33 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
                 onChange={v => setSubmitPage({ ...submitPage, submitForeignPayLink: v })}
               />
             </div>
+          </div>
+
+          <div className="border-t border-white/5" />
+
+          {/* LPP Foreign Entry Fee */}
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">🏆</span>
+              <div>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">LPP — International Entry Fee</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Foreign entry fee shown on the LPP Prize page alongside the Nigerian Paystack button.</p>
+              </div>
+            </div>
+            <SettingsField
+              label="Fee — International ($)"
+              hint='Dollar amount for foreign entrants, e.g. "$2"'
+              placeholder={ph(settings?.lppForeignEntryFeeUSD, "$2")}
+              value={lppPayments.lppForeignEntryFeeUSD}
+              onChange={v => setLppPayments({ ...lppPayments, lppForeignEntryFeeUSD: v })}
+            />
+            <SettingsField
+              label="International Payment Link"
+              hint="Paste your foreign gateway URL (Stripe, Flutterwave, etc.). Leave blank until ready — button shows 'Coming Soon'."
+              placeholder={ph(settings?.lppForeignPayLink, "https://…")}
+              value={lppPayments.lppForeignPayLink}
+              onChange={v => setLppPayments({ ...lppPayments, lppForeignPayLink: v })}
+            />
           </div>
 
           <div className="border-t border-white/5" />

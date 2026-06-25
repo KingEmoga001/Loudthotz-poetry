@@ -189,6 +189,10 @@ export interface FireSiteSettings {
   bookListingPaystackLink: string;
   bookListingForeignPayLink: string;
 
+  // LPP Prize — foreign entry
+  lppForeignEntryFeeUSD: string;
+  lppForeignPayLink: string;
+
   // Submit page
   submitPageHeading: string;
   submitPageSubtext: string;
