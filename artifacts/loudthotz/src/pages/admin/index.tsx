@@ -1846,7 +1846,7 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
   const [about, setAbout] = useState({ aboutPageHeadline: "", aboutPageSubtext: "", aboutOurStoryHeading: "", aboutOurStoryP1: "", aboutOurStoryP2: "", aboutWhatWeDoHeading: "", aboutInstitutionalHeading: "", aboutInstitutionalP1: "", aboutInstitutionalP2: "", aboutInstitutionalP3: "", aboutGetInvolvedHeading: "", aboutGetInvolvedSubtext: "" });
   const [books, setBooks] = useState({ booksHeroSubtext: "", booksSubmitSubtext: "", bookListingFeeNGN: "", bookListingFeeUSD: "", bookListingPaystackLink: "", bookListingForeignPayLink: "" });
   const [submitPage, setSubmitPage] = useState({ submitPageHeading: "", submitPageSubtext: "", submitFeeNGN: "", submitFeeUSD: "", submitPaystackLink: "", submitForeignPayLink: "" });
-  const [lppPayments, setLppPayments] = useState({ lppForeignEntryFeeUSD: "", lppForeignPayLink: "" });
+  const [lppPayments, setLppPayments] = useState({ prizeEntryFee: "", prizePaystackLink: "", lppForeignEntryFeeUSD: "", lppForeignPayLink: "" });
   const [livePage, setLivePage] = useState({ liveArchiveSubtext: "" });
   const [prizeRulesList, setPrizeRulesList] = useState<string[]>([...DEFAULT_PRIZE_RULES]);
   const [newRule, setNewRule] = useState("");
@@ -2319,21 +2319,37 @@ function SiteSettingsPanel({ show }: { show: (m: string, t?: "success" | "error"
 
           <div className="border-t border-white/5" />
 
-          {/* LPP Foreign Entry Fee */}
+          {/* LPP Prize Entry Fees */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <span className="text-lg">🏆</span>
               <div>
-                <h3 className="text-sm font-bold text-white uppercase tracking-wider">LPP — International Entry Fee</h3>
-                <p className="text-xs text-gray-500 mt-0.5">Foreign entry fee shown on the LPP Prize page alongside the Nigerian Paystack button.</p>
+                <h3 className="text-sm font-bold text-white uppercase tracking-wider">LPP Prize — Entry Fees & Payment Links</h3>
+                <p className="text-xs text-gray-500 mt-0.5">Nigerian and international entry fees and payment links shown on the LPP Prize page.</p>
               </div>
             </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <SettingsField
+                label="Fee — Nigeria (₦)"
+                hint='Naira entry fee shown to Nigerian entrants, e.g. "₦2,000"'
+                placeholder={ph(settings?.prizeEntryFee, "₦2,000")}
+                value={lppPayments.prizeEntryFee}
+                onChange={v => setLppPayments({ ...lppPayments, prizeEntryFee: v })}
+              />
+              <SettingsField
+                label="Fee — International ($)"
+                hint='Dollar entry fee shown to foreign entrants, e.g. "$2"'
+                placeholder={ph(settings?.lppForeignEntryFeeUSD, "$2")}
+                value={lppPayments.lppForeignEntryFeeUSD}
+                onChange={v => setLppPayments({ ...lppPayments, lppForeignEntryFeeUSD: v })}
+              />
+            </div>
             <SettingsField
-              label="Fee — International ($)"
-              hint='Dollar amount for foreign entrants, e.g. "$2"'
-              placeholder={ph(settings?.lppForeignEntryFeeUSD, "$2")}
-              value={lppPayments.lppForeignEntryFeeUSD}
-              onChange={v => setLppPayments({ ...lppPayments, lppForeignEntryFeeUSD: v })}
+              label="Nigeria Payment Link (Paystack)"
+              hint="Paste your Paystack URL for Nigerian entries. Leave blank until ready — button shows 'Coming Soon'."
+              placeholder={ph(settings?.prizePaystackLink, "https://paystack.com/pay/…")}
+              value={lppPayments.prizePaystackLink}
+              onChange={v => setLppPayments({ ...lppPayments, prizePaystackLink: v })}
             />
             <SettingsField
               label="International Payment Link"
