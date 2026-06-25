@@ -643,6 +643,7 @@ export function useLivestreamStatus(): { data: FireLivestreamStatus | null; load
           season: raw.season ?? "Season 14", episode: raw.episode ?? 1,
           streamUrl: raw.streamUrl, embedUrl: raw.embedUrl,
           scheduledAt: raw.scheduledAt ? tsToIso(raw.scheduledAt) : undefined,
+          scheduledImage: raw.scheduledImage,
         });
       }
       setLoading(false);
