@@ -184,10 +184,18 @@ export interface FireSiteSettings {
   // Books page
   booksHeroSubtext: string;
   booksSubmitSubtext: string;
+  bookListingFeeNGN: string;
+  bookListingFeeUSD: string;
+  bookListingPaystackLink: string;
+  bookListingForeignPayLink: string;
 
   // Submit page
   submitPageHeading: string;
   submitPageSubtext: string;
+  submitFeeNGN: string;
+  submitFeeUSD: string;
+  submitPaystackLink: string;
+  submitForeignPayLink: string;
 
   // Live/Stage page
   liveArchiveSubtext: string;
@@ -564,7 +572,7 @@ export async function createPoetPoem(
   });
 }
 
-export async function submitPoem(data: { title: string; author: string; country: string; content: string }) {
+export async function submitPoem(data: { title: string; author: string; country: string; content: string; paymentRef: string }) {
   await addDoc(collection(db, "submissions"), { ...data, submittedAt: serverTimestamp(), status: "pending" });
 }
 

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { useBooks, useSiteSettings } from "@/lib/firestore";
-import { ShoppingCart, BookOpen, ExternalLink } from "lucide-react";
+import { ShoppingCart, BookOpen, ExternalLink, CreditCard, Globe } from "lucide-react";
 import { Link } from "wouter";
 
 const fadeUp = (delay = 0) => ({
@@ -157,8 +157,67 @@ export default function Books() {
               <ExternalLink className="h-4 w-4" />
             </Link>
           </motion.div>
+
+          {/* Book Listing CTA */}
+          <BookListingSection s={s} />
         </div>
       </section>
     </div>
+  );
+}
+
+function BookListingSection({ s }: { s: ReturnType<typeof useSiteSettings>["data"] }) {
+  const feeNGN = s?.bookListingFeeNGN || "₦15,000";
+  const feeUSD = s?.bookListingFeeUSD || "$10";
+  const paystackLink = s?.bookListingPaystackLink || "";
+  const foreignPayLink = s?.bookListingForeignPayLink || "";
+
+  function PayBtn({ href, label, fee, icon: Icon }: { href: string; label: string; fee: string; icon: typeof CreditCard }) {
+    const configured = href && href.startsWith("http");
+    if (!configured) {
+      return (
+        <div className="flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border border-white/5 bg-white/[0.02] opacity-60 cursor-not-allowed">
+          <Icon className="h-5 w-5 text-gray-500" />
+          <span className="text-xs font-bold text-gray-400">{fee}</span>
+          <span className="text-[10px] text-gray-600 text-center">{label}</span>
+          <span className="text-[10px] text-amber-500/80 font-semibold">Coming Soon</span>
+        </div>
+      );
+    }
+    return (
+      <a href={href} target="_blank" rel="noopener noreferrer"
+        className="flex-1 flex flex-col items-center gap-2 p-4 rounded-xl border border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 transition-all group">
+        <Icon className="h-5 w-5 text-primary" />
+        <span className="text-xs font-bold text-white">{fee}</span>
+        <span className="text-[10px] text-gray-400 text-center">{label}</span>
+        <ExternalLink className="h-3 w-3 text-primary opacity-0 group-hover:opacity-100 transition-opacity" />
+      </a>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.38 }}
+      className="mt-10 rounded-2xl border border-white/10 bg-white/[0.015] p-8 md:p-12 max-w-3xl mx-auto"
+    >
+      <div className="flex flex-col sm:flex-row sm:items-start gap-5 mb-6">
+        <div className="flex-1">
+          <p className="text-xs font-bold uppercase tracking-widest text-primary mb-1">Paid Listing</p>
+          <h2 className="font-display text-2xl md:text-3xl font-bold mb-2">Feature Your Book with Us</h2>
+          <p className="font-serif text-gray-400 text-sm leading-relaxed">
+            Have a book or anthology you want listed on our platform? We feature titles that align with the Naija Art Initiative's voice. Pay the listing fee, then reach out with your book details.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-3 mb-5">
+        <PayBtn href={paystackLink} label="Nigeria — Paystack" fee={feeNGN} icon={CreditCard} />
+        <PayBtn href={foreignPayLink} label="International — Card / Gateway" fee={feeUSD} icon={Globe} />
+      </div>
+
+      <p className="text-[11px] text-gray-600 text-center">
+        After payment, send your book title, cover image, description, and purchase link to us via the WhatsApp button in the footer.
+      </p>
+    </motion.div>
   );
 }
