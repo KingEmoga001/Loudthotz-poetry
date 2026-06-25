@@ -287,21 +287,16 @@ export default function Prize() {
                 step: "01",
                 title: "Pay Entry Fee",
                 desc: `Nigerians: pay ${entryFee} via Paystack. International entrants: pay ${foreignEntryFee} via our foreign gateway. Keep your payment receipt.`,
-                action: paystackLink ? { label: "🇳🇬 Pay on Paystack", href: paystackLink, external: true } : null,
-                action2: foreignPayLink ? { label: "🌍 International Gateway", href: foreignPayLink, external: true } : null,
               },
               {
                 step: "02",
                 title: "Prepare Your Entry",
                 desc: "Write your poem (max 14 lines, 6 words per line). Include a 3-line bio, your photo, phone, email, address, and payment receipt — all in one Word document (.doc / .docx).",
-                action: null,
               },
               {
                 step: "03",
                 title: "Submit Your Entry",
                 desc: "After payment you'll be automatically redirected to the submission portal. Fill in your details and upload your Word document (poem + bio + photo + receipt).",
-                action: null,
-                action2: null,
               },
             ].map((s) => (
               <div key={s.step} className="bg-white/[0.02] border border-white/5 rounded-2xl p-6 flex flex-col gap-4">
@@ -310,23 +305,31 @@ export default function Prize() {
                   <h3 className="font-semibold text-white mb-2">{s.title}</h3>
                   <p className="text-sm text-gray-400 leading-relaxed">{s.desc}</p>
                 </div>
-                {(s.action || s.action2) && (
+                {s.step === "01" && (
                   <div className="flex flex-col gap-2 mt-auto">
-                    {s.action && (
-                      <a href={s.action.href}
-                        {...(s.action.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    {paystackLink ? (
+                      <a href={paystackLink} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:text-primary/80 transition-colors">
                         <CheckCircle className="h-4 w-4" />
-                        {s.action.label}
+                        🇳🇬 Pay on Paystack
                       </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-gray-600 text-sm cursor-not-allowed">
+                        <CheckCircle className="h-4 w-4" />
+                        🇳🇬 Paystack — Coming Soon
+                      </span>
                     )}
-                    {s.action2 && (
-                      <a href={s.action2.href}
-                        {...(s.action2.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+                    {foreignPayLink ? (
+                      <a href={foreignPayLink} target="_blank" rel="noopener noreferrer"
                         className="inline-flex items-center gap-1.5 text-gray-400 text-sm font-medium hover:text-white transition-colors">
                         <Globe className="h-4 w-4" />
-                        {s.action2.label}
+                        🌍 International Gateway
                       </a>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 text-gray-600 text-sm cursor-not-allowed">
+                        <Globe className="h-4 w-4" />
+                        🌍 International — Coming Soon
+                      </span>
                     )}
                   </div>
                 )}
