@@ -17,7 +17,7 @@ import {
   createBook, updateBook, deleteBook, updateLivestreamStatus,
   addLivestreamSession, updateLivestreamSession, deleteLivestreamSession,
   updateSiteSettings, seedDatabase,
-  useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage, uploadHeroImage,
+  useAllHeroImages, addHeroImage, updateHeroImage, deleteHeroImage, uploadHeroImage, uploadEventImage,
   usePoets, createPoet, updatePoet, deletePoet, seedStaticPoets,
   usePoetPoems, createPoetPoem,
   useEvents, createEvent, updateEvent, deleteEvent, suppressArchiveEntry,
@@ -1165,6 +1165,70 @@ function ImportStaticPoets({ show, compact }: { show: (m: string, t?: "success" 
   );
 }
 
+/* ──────────────────────────── Event Image Field ──────────────────────────── */
+function EventImageField({ value, onChange, show }: {
+  value: string;
+  onChange: (url: string) => void;
+  show: (m: string, t?: "success" | "error") => void;
+}) {
+  const [mode, setMode] = useState<"url" | "upload">("url");
+  const [uploading, setUploading] = useState(false);
+
+  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+    if (!f.type.startsWith("image/")) { show("Please select an image file (JPG, PNG, WebP).", "error"); return; }
+    if (f.size > 10 * 1024 * 1024) { show("Image must be under 10 MB.", "error"); return; }
+    setUploading(true);
+    try {
+      const url = await uploadEventImage(f);
+      onChange(url);
+      show("Image uploaded.");
+    } catch { show("Upload failed.", "error"); }
+    finally { setUploading(false); e.target.value = ""; }
+  };
+
+  return (
+    <div className="sm:col-span-2 space-y-2">
+      <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-1">Event Image</label>
+      <div className="flex gap-2 mb-2">
+        <button type="button" onClick={() => setMode("url")}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${mode === "url" ? "bg-primary text-black" : "bg-white/[0.04] border border-white/10 text-gray-400 hover:text-white"}`}>
+          🔗 Paste URL
+        </button>
+        <button type="button" onClick={() => setMode("upload")}
+          className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${mode === "upload" ? "bg-primary text-black" : "bg-white/[0.04] border border-white/10 text-gray-400 hover:text-white"}`}>
+          📁 Upload from Device
+        </button>
+      </div>
+      {mode === "url" ? (
+        <input
+          type="url"
+          value={value}
+          onChange={e => onChange(e.target.value)}
+          placeholder="https://example.com/event-image.jpg"
+          className="w-full px-3 py-2.5 bg-white/[0.04] border border-white/10 rounded-xl text-sm text-white placeholder-gray-600 focus:outline-none focus:border-primary/40 transition-colors"
+        />
+      ) : (
+        <label className={`flex items-center gap-3 w-full px-4 py-3 bg-white/[0.04] border border-dashed border-white/20 rounded-xl cursor-pointer hover:border-primary/40 transition-colors ${uploading ? "opacity-60 pointer-events-none" : ""}`}>
+          <Image className="h-4 w-4 text-gray-500 shrink-0" />
+          <span className="text-sm text-gray-400">{uploading ? "Uploading…" : "Click to choose an image (JPG, PNG, WebP — max 10 MB)"}</span>
+          <input type="file" accept="image/*" className="hidden" onChange={handleFile} disabled={uploading} />
+        </label>
+      )}
+      {value && (
+        <div className="relative mt-2 rounded-xl overflow-hidden border border-white/10 bg-black/40" style={{ height: 180 }}>
+          <img src={value} alt="Event preview" className="w-full h-full object-contain" />
+          <button type="button" onClick={() => onChange("")}
+            className="absolute top-2 right-2 p-1 bg-black/70 rounded-full text-gray-400 hover:text-red-400 transition-colors">
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
 /* ──────────────────────────── Events ──────────────────────────── */
 function EventsManager({ show }: { show: (m: string, t?: "success" | "error") => void }) {
   const { data: events, loading: eventsLoading } = useEvents();
@@ -1236,7 +1300,6 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
     { key: "venue", label: "Venue / Platform", placeholder: "e.g. Zoom / The Hub Lagos" },
     { key: "youtubeUrl", label: "YouTube / Recording URL", placeholder: "https://youtube.com/..." },
     { key: "blogUrl", label: "Blog Post URL", placeholder: "https://loudthotzpoetry.blogspot.com/..." },
-    { key: "imageUrl", label: "Cover Image URL", placeholder: "https://..." },
     { key: "description", label: "Description", placeholder: "Brief description of this event", span: true },
   ];
 
@@ -1253,26 +1316,35 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
   ];
 
   const UpcomingCard = ({ ev }: { ev: FireEvent }) => (
-    <div className="flex items-start gap-4 p-4 rounded-xl border border-primary/20 bg-primary/5 transition-all">
-      <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-        <Calendar className="h-4 w-4 text-primary" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2 flex-wrap mb-0.5">
-          <p className="text-sm font-semibold text-white truncate">{ev.title}</p>
-          <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-primary/10 text-primary border-primary/20">Upcoming</span>
+    <div className="rounded-xl border border-primary/20 bg-primary/5 overflow-hidden transition-all">
+      {ev.imageUrl && (
+        <div className="w-full bg-black/40" style={{ height: 180 }}>
+          <img src={ev.imageUrl} alt={ev.title} className="w-full h-full object-contain" />
         </div>
-        <p className="text-xs text-gray-500">
-          {new Date(ev.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-          {ev.season && ` · ${ev.season}`}
-          {ev.theme && ` · ${ev.theme}`}
-        </p>
-        {ev.venue && <p className="text-[10px] text-gray-600 mt-0.5">{ev.venue}</p>}
-        {ev.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{ev.description}</p>}
-      </div>
-      <div className="flex gap-1.5 shrink-0">
-        <button onClick={() => setEditingEvent(ev)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
-        <button onClick={async () => { if (!confirm(`Delete "${ev.title}"?`)) return; try { await deleteEvent(ev.id); await suppressArchiveEntry(ev.date, ev.title); show("Deleted."); } catch { show("Delete failed.", "error"); } }} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+      )}
+      <div className="flex items-start gap-4 p-4">
+        {!ev.imageUrl && (
+          <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <Calendar className="h-4 w-4 text-primary" />
+          </div>
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+            <p className="text-sm font-semibold text-white truncate">{ev.title}</p>
+            <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border bg-primary/10 text-primary border-primary/20">Upcoming</span>
+          </div>
+          <p className="text-xs text-gray-500">
+            {new Date(ev.date).toLocaleDateString("en-GB", { weekday: "short", day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+            {ev.season && ` · ${ev.season}`}
+            {ev.theme && ` · ${ev.theme}`}
+          </p>
+          {ev.venue && <p className="text-[10px] text-gray-600 mt-0.5">{ev.venue}</p>}
+          {ev.description && <p className="text-xs text-gray-500 mt-1 line-clamp-2">{ev.description}</p>}
+        </div>
+        <div className="flex gap-1.5 shrink-0">
+          <button onClick={() => setEditingEvent(ev)} className="p-1.5 text-gray-500 hover:text-primary transition-colors"><Edit3 className="h-3.5 w-3.5" /></button>
+          <button onClick={async () => { if (!confirm(`Delete "${ev.title}"?`)) return; try { await deleteEvent(ev.id); await suppressArchiveEntry(ev.date, ev.title); show("Deleted."); } catch { show("Delete failed.", "error"); } }} className="p-1.5 text-gray-500 hover:text-red-400 transition-colors"><Trash2 className="h-3.5 w-3.5" /></button>
+        </div>
       </div>
     </div>
   );
@@ -1402,6 +1474,7 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
                       {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
                     </div>
                   ))}
+                  <EventImageField value={editingEvent.imageUrl ?? ""} onChange={url => setEditingEvent({ ...editingEvent, imageUrl: url })} show={show} />
                 </div>
                 <div className="flex gap-3 pt-1">
                   <button onClick={() => setEditingEvent(null)} className="flex-1 py-2.5 rounded-xl border border-white/10 text-gray-400 text-sm hover:bg-white/5 transition-colors">Cancel</button>
@@ -1507,6 +1580,7 @@ function EventsManager({ show }: { show: (m: string, t?: "success" | "error") =>
               {hint && <p className="text-[10px] text-gray-600 mt-0.5">{hint}</p>}
             </div>
           ))}
+          <EventImageField value={form.imageUrl ?? ""} onChange={url => setForm({ ...form, imageUrl: url })} show={show} />
         </div>
         <button onClick={handleCreate} disabled={saving}
           className="flex items-center gap-2 bg-primary text-black font-bold px-5 py-2.5 rounded-xl text-sm hover:bg-primary/90 transition-all disabled:opacity-60">

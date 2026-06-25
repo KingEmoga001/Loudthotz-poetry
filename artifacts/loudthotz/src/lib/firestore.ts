@@ -954,6 +954,13 @@ export async function uploadHeroImage(file: File): Promise<string> {
   return await getDownloadURL(storageRef);
 }
 
+export async function uploadEventImage(file: File): Promise<string> {
+  const safeFilename = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const storageRef = ref(storage, `event_images/${Date.now()}_${safeFilename}`);
+  await uploadBytes(storageRef, file, { contentType: file.type });
+  return await getDownloadURL(storageRef);
+}
+
 /* ─────────────────── Import Historical Sessions ─────────────────── */
 const HISTORICAL_SESSIONS = [
   { date: "2023-09-19", title: "Poems Read at Our Last Poetry Reading — September 14, 2023", season: "Season 14", theme: "" },
