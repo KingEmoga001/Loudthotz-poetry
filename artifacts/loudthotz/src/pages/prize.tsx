@@ -299,8 +299,8 @@ export default function Prize() {
               {
                 step: "03",
                 title: "Submit Your Entry",
-                desc: "After payment, you'll be routed to the submission portal. Fill in your details, upload your Word document (poem + bio + photo + receipt), and you're done.",
-                action: { label: "Go to Submission Portal", href: "/lpp-submit", external: false },
+                desc: "After payment you'll be automatically redirected to the submission portal. Fill in your details and upload your Word document (poem + bio + photo + receipt).",
+                action: null,
                 action2: null,
               },
             ].map((s) => (
