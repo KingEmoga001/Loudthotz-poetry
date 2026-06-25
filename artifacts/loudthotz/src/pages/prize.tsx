@@ -287,8 +287,8 @@ export default function Prize() {
                 step: "01",
                 title: "Pay Entry Fee",
                 desc: `Nigerians: pay ${entryFee} via Paystack. International entrants: pay ${foreignEntryFee} via our foreign gateway. Keep your payment receipt.`,
-                action: paystackLink ? { label: "🇳🇬 Pay on Paystack", href: paystackLink } : null,
-                action2: foreignPayLink ? { label: "🌍 International Gateway", href: foreignPayLink } : null,
+                action: paystackLink ? { label: "🇳🇬 Pay on Paystack", href: paystackLink, external: true } : null,
+                action2: foreignPayLink ? { label: "🌍 International Gateway", href: foreignPayLink, external: true } : null,
               },
               {
                 step: "02",
@@ -299,8 +299,8 @@ export default function Prize() {
               {
                 step: "03",
                 title: "Submit Your Entry",
-                desc: "After payment, email your Word document to loudthotz@gmail.com with subject e.g. \"January 2025 LPP Poem\". Include your bio, photo, phone, email, address and payment receipt.",
-                action: null,
+                desc: "After payment, you'll be routed to the submission portal. Fill in your details, upload your Word document (poem + bio + photo + receipt), and you're done.",
+                action: { label: "Go to Submission Portal", href: "/lpp-submit", external: false },
                 action2: null,
               },
             ].map((s) => (
@@ -313,14 +313,16 @@ export default function Prize() {
                 {(s.action || s.action2) && (
                   <div className="flex flex-col gap-2 mt-auto">
                     {s.action && (
-                      <a href={s.action.href} target="_blank" rel="noopener noreferrer"
+                      <a href={s.action.href}
+                        {...(s.action.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                         className="inline-flex items-center gap-1.5 text-primary text-sm font-medium hover:text-primary/80 transition-colors">
                         <CheckCircle className="h-4 w-4" />
                         {s.action.label}
                       </a>
                     )}
                     {s.action2 && (
-                      <a href={s.action2.href} target="_blank" rel="noopener noreferrer"
+                      <a href={s.action2.href}
+                        {...(s.action2.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
                         className="inline-flex items-center gap-1.5 text-gray-400 text-sm font-medium hover:text-white transition-colors">
                         <Globe className="h-4 w-4" />
                         {s.action2.label}
@@ -341,7 +343,7 @@ export default function Prize() {
             <Trophy className="h-10 w-10 text-primary mx-auto mb-4" />
             <h3 className="font-display text-2xl font-bold mb-3">Ready to compete?</h3>
             <p className="text-gray-400 text-sm mb-6">
-              Pay the entry fee for your region, then email your Word document to <span className="text-primary">{email}</span>. Winners are announced the last day of every month.
+              Pay the entry fee for your region — you'll be routed to the submission portal to upload your poem. Winners are announced the last day of every month.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <div className="flex flex-col items-center gap-1.5">
@@ -353,7 +355,7 @@ export default function Prize() {
                 <ForeignEntryButton href={foreignPayLink} fee={foreignEntryFee} large />
               </div>
             </div>
-            <p className="text-xs text-gray-600 mt-5">After payment, send your poem and receipt to the email above.</p>
+            <p className="text-xs text-gray-600 mt-5">After payment, you'll be directed to the submission portal to upload your poem and details.</p>
           </div>
         </div>
       </section>
