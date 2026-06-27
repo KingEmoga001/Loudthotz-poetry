@@ -4,6 +4,15 @@ packages:
   - lib/integrations/*
   - scripts
 
+
+allowBuilds:
+  "@firebase/util": true
+  "@swc/core": true
+  "esbuild": true
+  "msw": true
+  "protobufjs": true
+  "unrs-resolver": true
+
 autoInstallPeers: false
 
 catalog:
