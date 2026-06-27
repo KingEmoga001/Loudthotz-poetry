@@ -30,10 +30,13 @@ catalog:
   wouter: ^3.3.5
   zod: ^3.25.76
 
-neverBuiltDependencies:
+onlyBuiltDependencies:
   - '@firebase/util'
+  - '@swc/core'
   - esbuild
+  - msw
   - protobufjs
+  - unrs-resolver
 
 minimumReleaseAge: 1440
 
