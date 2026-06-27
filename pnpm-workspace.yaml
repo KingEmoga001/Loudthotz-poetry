@@ -30,7 +30,10 @@ catalog:
   wouter: ^3.3.5
   zod: ^3.25.76
 
-ignoredBuiltDependencies: []
+neverBuiltDependencies:
+  - '@firebase/util'
+  - esbuild
+  - protobufjs
 
 minimumReleaseAge: 1440
 
@@ -38,13 +41,6 @@ minimumReleaseAgeExclude:
   - '@replit/*'
   - stripe-replit-sync
 
-onlyBuiltDependencies:
-  - '@firebase/util'
-  - '@swc/core'
-  - esbuild
-  - msw
-  - protobufjs
-  - unrs-resolver
 
 overrides:
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
