@@ -70,6 +70,11 @@ overrides:
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-arm64-msvc': '-'
   '@tailwindcss/oxide>@tailwindcss/oxide-win32-x64-msvc': '-'
   esbuild: 0.28.1
+  uuid: ^11.1.1
+  "markdown-it": ^14.2.0
+  "js-yaml": ^4.2.0
+  "qs": ^6.15.2
+  "@babel/core": ^7.29.6
   esbuild>@esbuild/aix-ppc64: '-'
   esbuild>@esbuild/android-arm: '-'
   esbuild>@esbuild/android-arm64: '-'
