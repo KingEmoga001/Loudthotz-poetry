@@ -10,8 +10,7 @@ module.exports = {
         'lightningcss',
         'sharp'
       ].includes(pkg.name)) {
-        pkg.pnpm = pkg.pnpm || {};
-        pkg.pnpm.allowBuild = true;
+        pkg.scripts = pkg.scripts || {};
       }
       return pkg;
     }
