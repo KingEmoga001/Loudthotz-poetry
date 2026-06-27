@@ -1,0 +1,14 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "RtAKiZlnKNShQoY1dOmWF"
+uri = "file://loudthotz-hostinger.zip"
+type = "unspecified"
+title = "Loudthotz — Hostinger Build"
+
+[[outputs]]
+id = "jwX9HHB9ng3aPzhglKJoo"
+uri = "file://loudthotz-hostinger.tar.gz"
+type = "unspecified"
+title = "Loudthotz — Hostinger Build (tar.gz)"
