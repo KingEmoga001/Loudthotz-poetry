@@ -2,6 +2,7 @@
 
 # compiled output
 dist
+!artifacts/loudthotz/dist
 tmp
 out-tsc
 *.tsbuildinfo
